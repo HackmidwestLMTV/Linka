@@ -8,7 +8,7 @@ let isExecuted = false;
 let chart = null;
 
 const EXECUTE_BTN_DEFAULT = {
-    className: 'vision-btn-emerald px-7 py-3.5 text-[14px] flex items-center gap-2 shrink-0',
+    className: 'vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0',
     html: '<i class="fa-solid fa-shield-halved"></i> Protect capital'
 };
 
@@ -40,7 +40,8 @@ function switchStep(step) {
 }
 
 function initChart() {
-    const muted = '#8e8e93';
+    const muted = '#c7c7cc';
+    const chartFont = { family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif', size: 14 };
     chart = new Chart($('cashFlowChart').getContext('2d'), {
         type: 'line',
         data: {
@@ -73,18 +74,20 @@ function initChart() {
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { labels: { color: muted, usePointStyle: true, boxWidth: 6, font: { family: 'SF Pro Display', size: 12 } } },
+                legend: { labels: { color: muted, usePointStyle: true, boxWidth: 8, padding: 16, font: chartFont } },
                 tooltip: {
                     backgroundColor: 'rgba(28, 28, 30, 0.9)',
                     borderColor: 'rgba(255,255,255,0.1)',
                     borderWidth: 1,
-                    padding: 10,
+                    padding: 12,
+                    titleFont: chartFont,
+                    bodyFont: chartFont,
                     callbacks: { label: (c) => ` ${c.dataset.label}: $${c.parsed.y.toLocaleString()}` }
                 }
             },
             scales: {
-                x: { grid: { display: false }, ticks: { color: muted } },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: muted, callback: (v) => `$${v / 1000}k` } }
+                x: { grid: { display: false }, ticks: { color: muted, font: chartFont } },
+                y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: muted, font: chartFont, callback: (v) => `$${v / 1000}k` } }
             }
         }
     });
@@ -95,16 +98,16 @@ function executeProtectionNow() {
     isExecuted = true;
 
     $('saved-amount-display').textContent = '$2,520';
-    $('saved-amount-display').className = 'num text-[34px] font-semibold text-emerald-400 mt-1';
+    $('saved-amount-display').className = 'num text-[38px] font-semibold text-emerald-400 mt-1';
     $('aws-burn-display').textContent = '$0/day';
     $('aws-burn-display').className = 'num font-medium text-emerald-400';
     $('aws-cluster-status').textContent = 'Hibernated';
     $('aws-cluster-status').className = 'font-medium text-sky-400';
     $('chart-status-badge').textContent = 'Protected · $2,520 saved';
-    $('chart-status-badge').className = 'text-[12px] text-emerald-400';
+    $('chart-status-badge').className = 'text-[14px] text-emerald-400';
 
     const btn = $('execute-now-btn');
-    btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[14px] flex items-center gap-2 shrink-0 cursor-default';
+    btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[16px] flex items-center gap-2 shrink-0 cursor-default';
     btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Protected';
 
     chart.data.datasets[1].hidden = false;
@@ -118,13 +121,13 @@ function resetWholeDemo() {
     isExecuted = false;
 
     $('saved-amount-display').textContent = '$0';
-    $('saved-amount-display').className = 'num text-[34px] font-semibold text-neutral-500 mt-1';
+    $('saved-amount-display').className = 'num text-[38px] font-semibold text-neutral-400 mt-1';
     $('aws-burn-display').textContent = '$180/day';
     $('aws-burn-display').className = 'num font-medium text-red-400';
     $('aws-cluster-status').textContent = 'Running';
     $('aws-cluster-status').className = 'font-medium text-emerald-400';
     $('chart-status-badge').textContent = 'Unprotected';
-    $('chart-status-badge').className = 'text-[12px] text-red-400';
+    $('chart-status-badge').className = 'text-[14px] text-red-400';
 
     const btn = $('execute-now-btn');
     btn.className = EXECUTE_BTN_DEFAULT.className;
