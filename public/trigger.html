@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linka Mobile Trigger</title>
+    <title>Linka // Remote Event Trigger</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-        body { background-color: #0f172a; color: white; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
-    <div class="bg-slate-800 p-8 rounded-2xl max-w-sm w-full border border-slate-700 shadow-2xl text-center">
-        <div class="w-16 h-16 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl">
+<body class="min-h-screen flex items-center justify-center p-6 vision-bg">
+    <div class="vision-glass p-8 max-w-sm w-full text-center relative overflow-hidden">
+        <!-- Ambient orb behind icon -->
+        <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-red-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-400 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(239,68,68,0.2)]">
             <i class="fa-solid fa-ship"></i>
         </div>
-        <h2 class="text-2xl font-bold mb-2">Simulate Disruption</h2>
-        <p class="text-slate-400 text-sm mb-8">Trigger a customs hold on Freight Batch #104 to demonstrate Linka's agentic FinOps bridge.</p>
+        <h2 class="text-2xl font-bold mb-2 apple-heading">Simulate Disruption</h2>
+        <p class="text-neutral-400 text-xs mb-8">Trigger a live tariff customs hold on Freight Batch #104 over WebSocket to engage Linka's FinOps shield.</p>
         
-        <button id="trigger-btn" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-6 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] transition-all active:scale-95 flex items-center justify-center gap-3">
-            <i class="fa-solid fa-triangle-exclamation"></i> Trigger Tariff Hold
+        <button id="trigger-btn" class="w-full py-4 px-6 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs uppercase tracking-wider shadow-[0_10px_25px_rgba(220,38,38,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-white/20">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Trigger Tariff Hold</span>
         </button>
         
-        <div id="status" class="mt-6 text-sm font-medium text-emerald-400 hidden">
+        <div id="status" class="mt-6 text-xs font-mono font-medium text-emerald-400 hidden">
             <i class="fa-solid fa-check-circle mr-1"></i> Disruption event broadcasted
         </div>
     </div>
