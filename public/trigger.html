@@ -15,12 +15,21 @@
         input[type="range"] {
             accent-color: #38bdf8;
         }
+        /* Custom styled number input without arrows */
+        input[type="number"]::-webkit-inner-spin-button, 
+        input[type="number"]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 vision-bg text-white selection:bg-white/20 pb-12">
 
     <!-- Top Connection Bar -->
-    <header class="w-full max-w-md flex items-center justify-between pt-1 mb-4">
+    <header class="w-full max-w-md flex items-center justify-between pt-1 mb-3">
         <div class="flex items-center gap-2.5">
             <div class="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 border border-white/20 flex items-center justify-center text-white font-bold text-xs shadow-md">L</div>
             <div>
@@ -35,7 +44,46 @@
     </header>
 
     <!-- Main Controller Stack -->
-    <main class="w-full max-w-md space-y-4">
+    <main class="w-full max-w-md space-y-3.5">
+
+        <!-- CLIENT FINANCIAL PROFILE & AUTO-SYNC BRIDGE -->
+        <section class="vision-glass p-4 rounded-3xl border border-white/10 shadow-xl space-y-2.5 bg-black/40">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">Client Expense Profile</span>
+                </div>
+                <span id="client-ratio-pill" class="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                    38.0% Expense Ratio
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-neutral-300 pt-0.5">
+                <span class="text-neutral-400">Flex Banking Monthly Burn:</span>
+                <span class="font-mono text-white font-semibold">$14,200/mo</span>
+            </div>
+
+            <!-- Auto-Sync Toggle Switch -->
+            <div class="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate text-sky-400 text-xs"></i>
+                    <div class="text-left">
+                        <span class="text-xs font-semibold text-white block">Auto-Sync Budget & Efficiency</span>
+                        <span id="sync-mode-desc" class="text-[10px] text-neutral-400 block">Synchronize budget with client ratio in real time</span>
+                    </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="auto-sync-toggle" checked onchange="toggleAutoSync(this.checked)" class="sr-only peer">
+                    <div class="w-9 h-5 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-sky-500"></div>
+                </label>
+            </div>
+
+            <!-- Direct Read & Apply Button -->
+            <button type="button" onclick="applyClientProfileRatio()" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600/30 to-emerald-600/30 hover:from-sky-600/40 hover:to-emerald-600/40 active:scale-98 border border-sky-400/30 text-sky-200 text-xs font-semibold flex items-center justify-center gap-2 transition">
+                <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
+                <span>Read & Apply Flex Ratio Directly (38.0% · $5,400)</span>
+            </button>
+        </section>
 
         <!-- 1. DOWNTIME DURATION CUSTOMIZER -->
         <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
@@ -74,14 +122,28 @@
             </div>
         </section>
 
-        <!-- 2. COMPUTE BUDGET & ESTIMATION CUSTOMIZER -->
+        <!-- 2. COMPUTE BUDGET ALLOCATION & MANUAL ADJUSTMENT -->
         <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl space-y-3.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-sky-400"></span>
-                    <span class="text-xs uppercase tracking-wider font-semibold text-sky-300 font-mono">2. Compute Budget Allocation</span>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-sky-300 font-mono">2. Budget Allocation</span>
                 </div>
-                <span id="budget-readout" class="num font-bold text-sm text-sky-300 px-2 py-0.5 rounded-lg bg-sky-500/10 border border-sky-500/20">$5,400</span>
+                <span id="budget-ratio-badge" class="font-mono text-xs px-2.5 py-0.5 rounded-lg bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                    38.0% of Flex
+                </span>
+            </div>
+
+            <!-- Manual Numeric Entry & Readout -->
+            <div class="space-y-1">
+                <label class="text-[11px] text-neutral-400 uppercase tracking-wider font-mono block">Direct Manual Input ($ USD):</label>
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-mono text-sm font-semibold">$</span>
+                        <input type="number" id="budget-input" min="300" max="25000" step="50" value="5400" oninput="onBudgetInputChange(this.value)" class="w-full bg-black/60 border border-white/20 focus:border-sky-400 rounded-xl pl-7 pr-3 py-2 text-white font-mono font-bold text-base outline-none transition shadow-inner">
+                    </div>
+                    <span id="budget-readout" class="num font-bold text-sm text-sky-300 px-3 py-2 rounded-xl bg-sky-500/10 border border-sky-500/20 whitespace-nowrap">$5,400</span>
+                </div>
             </div>
 
             <!-- Budget Cycle Period Selector -->
@@ -92,13 +154,22 @@
                 <button type="button" onclick="setBudgetPeriod('years')" id="bperiod-years" class="py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white">Years</button>
             </div>
 
-            <!-- Budget Slider -->
+            <!-- Budget Range Slider -->
             <div class="space-y-1.5">
                 <div class="flex items-center justify-between text-xs text-neutral-300">
-                    <span>Base Cycle Budget:</span>
+                    <span>Fine Slider Control:</span>
                     <span id="budget-sub-rate" class="font-mono text-neutral-400">$180/day baseline</span>
                 </div>
-                <input type="range" id="budget-slider" min="500" max="25000" value="5400" step="100" oninput="onBudgetSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+                <input type="range" id="budget-slider" min="500" max="25000" value="5400" step="50" oninput="onBudgetSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Quick Budget Presets with Client Expense Ratio -->
+            <div class="flex items-center justify-between gap-1 text-[11px] font-mono">
+                <button type="button" onclick="applyBudgetPreset(3600)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300" title="25.4% expense ratio">$3.6k</button>
+                <button type="button" onclick="applyBudgetPreset(5400)" class="px-2 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/30 text-sky-300 font-semibold" title="38.0% baseline">$5.4k ★</button>
+                <button type="button" onclick="applyBudgetPreset(7500)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300" title="52.8% expense ratio">$7.5k</button>
+                <button type="button" onclick="applyBudgetPreset(10000)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300" title="70.4% expense ratio">$10k</button>
+                <button type="button" onclick="applyBudgetPreset(14200)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300" title="100% full burn">$14.2k</button>
             </div>
 
             <!-- Detailed Breakdown Grid -->
@@ -114,22 +185,36 @@
             </div>
         </section>
 
-        <!-- 3. PREDICTIVE RECOMMENDATION & PERCENTAGE MODEL -->
+        <!-- 3. PREDICTIVE EFFICIENCY MODEL (AUTO-SYNCHRONIZED) -->
         <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl space-y-3.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                    <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">3. Predictive Efficiency Model</span>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">3. Efficiency Rate Sync</span>
                 </div>
                 <span id="usage-readout" class="num font-bold text-sm text-emerald-300 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">72% Active</span>
             </div>
 
             <div class="space-y-1.5">
                 <div class="flex items-center justify-between text-xs text-neutral-300">
-                    <span>Previous Cycle Efficiency:</span>
+                    <span>Usage Efficiency Rate:</span>
                     <span id="idle-risk-readout" class="font-mono text-amber-300">28% idle risk</span>
                 </div>
                 <input type="range" id="usage-slider" min="30" max="95" value="72" step="1" oninput="onUsageSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+                <div class="flex items-center justify-between text-[10px] text-neutral-400 font-mono pt-0.5">
+                    <span>30% Low Efficiency</span>
+                    <span id="sync-sub-indicator" class="text-sky-300">⚡ Auto-adjusts budget</span>
+                    <span>95% High Efficiency</span>
+                </div>
+            </div>
+
+            <!-- Quick Efficiency Presets -->
+            <div class="flex items-center justify-between gap-1 text-[11px] font-mono">
+                <button type="button" onclick="applyEfficiencyPreset(50)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-amber-300">50%</button>
+                <button type="button" onclick="applyEfficiencyPreset(65)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">65%</button>
+                <button type="button" onclick="applyEfficiencyPreset(72)" class="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 font-semibold">72% ★</button>
+                <button type="button" onclick="applyEfficiencyPreset(85)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">85%</button>
+                <button type="button" onclick="applyEfficiencyPreset(95)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-sky-300">95%</button>
             </div>
 
             <!-- Predictive Recommendation Output Card -->
@@ -193,6 +278,10 @@
         const $ = (id) => document.getElementById(id);
         const socket = typeof io === 'function' ? io({ transports: ['websocket', 'polling'], timeout: 5000 }) : null;
 
+        // FinOps Client Baseline Constants
+        const CLIENT_BURN_MONTHLY = 14200; // Flex Banking monthly operating burn
+        const BASE_ACTIVE_WORK_DEMAND = 3888; // 5400 * 0.72 active productive compute output baseline
+
         // State Machine
         let state = {
             durationValue: 14,
@@ -200,7 +289,8 @@
             budgetAmount: 5400,
             budgetPeriod: 'months',
             usageRate: 72,
-            dailyCost: 180
+            dailyCost: 180,
+            autoSync: true
         };
 
         const UNIT_LIMITS = {
@@ -236,23 +326,42 @@
             }
         }
 
+        function getExpenseRatio(budget = state.budgetAmount) {
+            return ((budget / CLIENT_BURN_MONTHLY) * 100).toFixed(1);
+        }
+
         function updateCalculations() {
             const days = calculateNormalizedDays();
             const idleWaste = Math.round(state.dailyCost * days);
+            const expenseRatio = getExpenseRatio();
 
-            // Unit readout
+            // 1. Duration readout
             $('duration-readout').textContent = `${state.durationValue} ${state.durationUnit.charAt(0).toUpperCase() + state.durationUnit.slice(1)}`;
             
-            // Budget readout & breakdown
+            // 2. Budget elements
             $('budget-readout').textContent = `$${Number(state.budgetAmount).toLocaleString()}`;
+            if ($('budget-input') && document.activeElement !== $('budget-input')) {
+                $('budget-input').value = Math.round(state.budgetAmount);
+            }
+            if ($('budget-slider') && document.activeElement !== $('budget-slider')) {
+                $('budget-slider').value = Math.min(25000, Math.max(500, Math.round(state.budgetAmount)));
+            }
+
+            // Client ratio badges
+            $('client-ratio-pill').textContent = `${expenseRatio}% Expense Ratio`;
+            $('budget-ratio-badge').textContent = `${expenseRatio}% of Flex`;
+
             const hourlyRate = (state.dailyCost / 24).toFixed(2);
             $('stat-hourly-rate').textContent = `$${hourlyRate}/hr`;
             $('stat-annual-rate').textContent = `$${(state.dailyCost * 365).toLocaleString()}/yr`;
 
-            // Percentage predictive model
+            // 3. Efficiency & predictive model
             const idleRisk = 100 - state.usageRate;
             $('usage-readout').textContent = `${state.usageRate}% Active`;
             $('idle-risk-readout').textContent = `${idleRisk}% idle risk`;
+            if ($('usage-slider') && document.activeElement !== $('usage-slider')) {
+                $('usage-slider').value = state.usageRate;
+            }
 
             const reservePct = Math.min(50, Math.max(10, Math.round(idleRisk * 1.15)));
             const reserveAmt = Math.round((state.budgetAmount * reservePct) / 100);
@@ -265,6 +374,101 @@
             // Update main trigger button label
             let unitShort = state.durationUnit === 'hours' ? 'h' : state.durationUnit === 'days' ? 'd' : state.durationUnit === 'weeks' ? 'w' : 'mo';
             $('btn-text').textContent = `Broadcast Hold (+${state.durationValue}${unitShort} • $${idleWaste.toLocaleString()} at risk)`;
+        }
+
+        // Auto-Sync Toggle Control
+        function toggleAutoSync(enabled) {
+            state.autoSync = Boolean(enabled);
+            const desc = $('sync-mode-desc');
+            const sub = $('sync-sub-indicator');
+            if (state.autoSync) {
+                desc.textContent = "Synchronize budget with client ratio in real time";
+                sub.textContent = "⚡ Auto-adjusts budget";
+                sub.className = "text-sky-300";
+                // Immediate re-sync
+                syncBudgetFromEfficiency();
+                showStatus("Auto-Sync enabled: Efficiency & Budget locked in sync", true);
+            } else {
+                desc.textContent = "Manual mode: Parameters adjusted independently";
+                sub.textContent = "Manual decoupled mode";
+                sub.className = "text-amber-400";
+                showStatus("Auto-Sync disabled: Independent manual control active", true);
+            }
+        }
+
+        // Direct reading from client's expenses ratio
+        function applyClientProfileRatio() {
+            if (navigator.vibrate) { try { navigator.vibrate([20, 30]); } catch (e) {} }
+            state.budgetAmount = 5400; // 38.0% of $14,200
+            state.usageRate = 72;      // Calibrated baseline
+            $('budget-input').value = 5400;
+            $('budget-slider').value = 5400;
+            $('usage-slider').value = 72;
+            updateCalculations();
+            showStatus("Applied directly from client expense profile (38.0% / $5,400 Flex burn)", true);
+        }
+
+        // Bi-directional Synchronization Mathematics
+        function syncBudgetFromEfficiency() {
+            if (!state.autoSync) return;
+            // Formula: Required Budget = Base Output Demand / (Efficiency / 100)
+            const calculatedBudget = Math.round(BASE_ACTIVE_WORK_DEMAND / (state.usageRate / 100));
+            state.budgetAmount = Math.max(500, Math.min(25000, calculatedBudget));
+        }
+
+        function syncEfficiencyFromBudget() {
+            if (!state.autoSync) return;
+            // Implied Efficiency = Base Output Demand / Budget
+            const impliedEfficiency = Math.round((BASE_ACTIVE_WORK_DEMAND / state.budgetAmount) * 100);
+            state.usageRate = Math.max(30, Math.min(95, impliedEfficiency));
+        }
+
+        // Efficiency Slider Handlers
+        function onUsageSliderChange(val) {
+            state.usageRate = parseInt(val, 10);
+            if (state.autoSync) {
+                syncBudgetFromEfficiency();
+            }
+            updateCalculations();
+        }
+
+        function applyEfficiencyPreset(rate) {
+            state.usageRate = parseInt(rate, 10);
+            $('usage-slider').value = state.usageRate;
+            if (state.autoSync) {
+                syncBudgetFromEfficiency();
+            }
+            updateCalculations();
+        }
+
+        // Manual Budget Input Handlers
+        function onBudgetInputChange(val) {
+            const parsed = parseFloat(val);
+            if (!isNaN(parsed) && parsed > 0) {
+                state.budgetAmount = parsed;
+                if (state.autoSync) {
+                    syncEfficiencyFromBudget();
+                }
+                updateCalculations();
+            }
+        }
+
+        function onBudgetSliderChange(val) {
+            state.budgetAmount = parseFloat(val);
+            if (state.autoSync) {
+                syncEfficiencyFromBudget();
+            }
+            updateCalculations();
+        }
+
+        function applyBudgetPreset(amount) {
+            state.budgetAmount = amount;
+            $('budget-input').value = amount;
+            $('budget-slider').value = amount;
+            if (state.autoSync) {
+                syncEfficiencyFromBudget();
+            }
+            updateCalculations();
         }
 
         function setDurationUnit(unit) {
@@ -317,16 +521,6 @@
                     btn.className = "py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white";
                 }
             });
-            updateCalculations();
-        }
-
-        function onBudgetSliderChange(val) {
-            state.budgetAmount = parseFloat(val);
-            updateCalculations();
-        }
-
-        function onUsageSliderChange(val) {
-            state.usageRate = parseInt(val, 10);
             updateCalculations();
         }
 
@@ -388,7 +582,8 @@
                 console.warn('HTTP fallback note:', err);
             }
 
-            showStatus(`Broadcast live! Screen updated to +${state.durationValue} ${state.durationUnit}.`, true);
+            const expRatio = getExpenseRatio();
+            showStatus(`Broadcast live! Screen updated: +${state.durationValue} ${state.durationUnit} · $${Number(state.budgetAmount).toLocaleString()} budget (${expRatio}% Flex ratio).`, true);
 
             setTimeout(() => {
                 btn.disabled = false;

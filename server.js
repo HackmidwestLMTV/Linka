@@ -207,6 +207,9 @@ function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDay
       break;
   }
 
+  const clientMonthlyBurn = 14200; // Flex Banking monthly operating burn baseline
+  const clientExpenseRatio = Math.round((monthlyBudget / clientMonthlyBurn) * 1000) / 10;
+
   // Cost breakdowns
   const hourlyBurn = Math.round((dailyBurn / 24) * 100) / 100;
   const annualBurn = dailyBurn * 365;
@@ -232,6 +235,8 @@ function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDay
     rawBudget,
     budgetPeriod: p,
     monthlyBudget: Math.round(monthlyBudget),
+    clientMonthlyBurn,
+    clientExpenseRatio,
     hourlyBurn,
     dailyBurn,
     annualBurn,

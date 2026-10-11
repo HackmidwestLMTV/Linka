@@ -131,10 +131,11 @@ To appeal to non-technical financial executives, supply chain directors, and tec
 ### 🕹️ Cognitive Ergonomics & "Zero-Friction" Navigation
 * **VisionOS Capsule Stepper:** A streamlined, pill-shaped step switcher (`1 Baseline` ➔ `2 Disruption` ➔ `3 Agent` ➔ `4 Protect`) allows viewers to grasp the narrative progression within 10 seconds.
 * **Keyboard-First Pitching:** Presenters can step forward and backward through the entire presentation using the keyboard arrow keys (`←` and `→`), ensuring a smooth, seamless narrative delivery without awkward mouse hunting.
-* **Dual-Channel Mobile Synchronization:**
+* **Dual-Channel Mobile Synchronization & Expense Ratio Bridge:**
   - The presenter opens the dashboard on their laptop or projector screen (`/`).
   - The presenter opens the remote controller on their smartphone (`/trigger.html`).
-  - When the presenter taps **"Trigger Tariff Hold"** on their phone, the phone triggers haptic vibration feedback, dispatches dual WebSocket + HTTP REST payloads, and the laptop screen jumps to Step 2 live in front of the judges' eyes.
+  - **Dynamic FinOps Synchronization:** Presenters can manually key in any compute budget or adjust their usage efficiency rate (e.g. 72%). With the built-in **Auto-Sync Bridge**, the compute budget automatically scales in lockstep with the client's monthly operating expense ratio ($14,200 baseline Flex burn), keeping budget, efficiency rate, and idle waste risk in mutual harmony. A single tap on **"Read & Apply Flex Ratio"** immediately applies the 38.0% baseline profile with zero manual arithmetic.
+  - When the presenter taps **"Broadcast Hold"** on their phone, the phone triggers haptic vibration feedback, dispatches dual WebSocket + HTTP REST payloads, and the laptop screen jumps to Step 2 live in front of the judges' eyes.
 
 ---
 

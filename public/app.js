@@ -238,6 +238,25 @@ function resetWholeDemo(emitEvent = true) {
     const narrativeDaysEl = $('step2-narrative-days');
     if (narrativeDaysEl) narrativeDaysEl.textContent = '14 days';
 
+    const ratioDisp = $('model-ratio-display');
+    if (ratioDisp) ratioDisp.textContent = '38.0%';
+    const bDisp = $('model-budget-display');
+    if (bDisp) bDisp.textContent = '$5,400';
+    const uDisp = $('model-usage-display');
+    if (uDisp) uDisp.textContent = '72.0%';
+    const rSub = $('model-risk-sub');
+    if (rSub) rSub.textContent = '28.0% idle risk rate';
+    const pExp = $('model-predicted-expense');
+    if (pExp) pExp.textContent = '$2,880';
+    const sSub = $('model-savings-sub');
+    if (sSub) sSub.textContent = 'Saves 46.7% of budget';
+    const rBuf = $('model-reserve-buffer');
+    if (rBuf) rBuf.textContent = '$1,728';
+    const recSub = $('model-reserve-sub');
+    if (recSub) recSub.textContent = '32% capital shield';
+    const recChip = $('model-recommendation-chip');
+    if (recChip) recChip.textContent = 'Recommendation: Shield 32% Reserve ($1,728)';
+
     if (chart && chart.data.datasets[1]) {
         chart.data.datasets[1].hidden = true;
         updateChartCurves(2520, 14);
@@ -282,6 +301,14 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
             const bDisp = $('model-budget-display');
             if (bDisp) bDisp.textContent = `$${activeBudgetModel.monthlyBudget.toLocaleString()}`;
 
+            const ratioDisp = $('model-ratio-display');
+            if (ratioDisp) {
+                const ratioVal = activeBudgetModel.clientExpenseRatio !== undefined 
+                    ? activeBudgetModel.clientExpenseRatio 
+                    : ((activeBudgetModel.monthlyBudget / 14200) * 100);
+                ratioDisp.textContent = `${Number(ratioVal).toFixed(1)}%`;
+            }
+
             const uDisp = $('model-usage-display');
             if (uDisp) uDisp.textContent = `${activeBudgetModel.historicalUsageRate.toFixed(1)}%`;
 
@@ -315,6 +342,13 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
         if (activeBudgetModel) {
             const jBud = $('json-budget');
             if (jBud) jBud.textContent = `${activeBudgetModel.monthlyBudget.toFixed(2)}`;
+            const jRatio = $('json-ratio');
+            if (jRatio) {
+                const ratioVal = activeBudgetModel.clientExpenseRatio !== undefined 
+                    ? activeBudgetModel.clientExpenseRatio 
+                    : ((activeBudgetModel.monthlyBudget / 14200) * 100);
+                jRatio.textContent = `"${Number(ratioVal).toFixed(1)}%"`;
+            }
             const jUse = $('json-usage');
             if (jUse) jUse.textContent = `${activeBudgetModel.historicalUsageRate.toFixed(1)}`;
             const jExp = $('json-pred-expense');
