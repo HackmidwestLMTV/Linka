@@ -125,7 +125,7 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
     statusBadge.className = "px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/30 animate-pulse";
     statusBadge.innerText = "CUSTOMS HOLD";
     
-    document.getElementById('shipment-progress').classList.replace('bg-blue-500', 'bg-red-500');
+    document.getElementById('shipment-progress').classList.replace('bg-[#437E5B]', 'bg-red-500');
     document.getElementById('shipment-eta').innerText = "Delayed (+14 Days)";
     document.getElementById('disruption-alert').classList.remove('hidden');
 
