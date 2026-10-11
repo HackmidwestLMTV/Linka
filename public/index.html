@@ -198,8 +198,11 @@
                             <i class="fa-solid fa-calculator"></i>
                         </div>
                         <div>
-                            <h3 class="text-[18px] font-semibold text-white">Compute Budget & Expense Estimation Model</h3>
-                            <p class="text-[14px] text-neutral-400">Dynamic cycle prediction calibrated to previous usage efficiency</p>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-[18px] font-semibold text-white">Compute Budget & Expense Estimation Model</h3>
+                                <span id="model-business-badge" class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/[0.08] text-neutral-300 border border-white/15">Flex Logistics</span>
+                            </div>
+                            <p id="model-business-sub" class="text-[13px] text-neutral-400">Customized baseline: <span id="model-annual-expense" class="text-white font-mono font-medium">$170,400/yr</span> operating burn</p>
                         </div>
                     </div>
                     <span id="model-recommendation-chip" class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 w-fit">
@@ -207,14 +210,37 @@
                     </span>
                 </div>
 
+                <!-- Small AI Model Predictive Advisory Callout -->
+                <div id="ai-advisor-banner" class="p-3.5 rounded-2xl bg-gradient-to-r from-sky-950/60 via-indigo-950/40 to-black/60 border border-sky-400/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <div class="flex items-center gap-2.5">
+                        <div class="h-8 w-8 rounded-lg bg-sky-400/20 border border-sky-400/40 flex items-center justify-center text-sky-300 text-xs shrink-0">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <p id="ai-banner-headline" class="text-xs font-semibold text-white">
+                                Linka AI Model Advises: <span id="ai-banner-pct" class="text-sky-300 font-mono font-bold">68.0%</span> Compute Capacity (<span id="ai-banner-conf" class="text-emerald-400 font-mono">95.4%</span> confidence)
+                            </p>
+                            <p id="ai-banner-reasoning" class="text-[11px] text-neutral-300">
+                                AI calibrated against historical Linode compute and 14-day tariff quarantine hold.
+                            </p>
+                        </div>
+                    </div>
+                    <span id="ai-banner-tag" class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 font-mono text-[11px] font-semibold border border-sky-500/30 w-fit shrink-0">
+                        ELASTIC_FINOPS
+                    </span>
+                </div>
+
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="vision-card p-4">
                         <p class="label text-xs">Allocated Compute Budget</p>
                         <p id="model-budget-display" class="num text-[22px] font-semibold text-white mt-1">$5,400</p>
-                        <p id="model-period-sub" class="text-[12px] text-neutral-400 mt-0.5"><span id="model-ratio-display" class="font-mono text-sky-300 font-semibold">38.0%</span> of Flex burn</p>
+                        <p id="model-period-sub" class="text-[12px] text-neutral-400 mt-0.5"><span id="model-ratio-display" class="font-mono text-sky-300 font-semibold">38.0%</span> of burn · <span id="model-annual-proj" class="font-mono text-neutral-300">$64.8k/yr</span></p>
                     </div>
                     <div class="vision-card p-4">
-                        <p class="label text-xs">Previous Usage Efficiency</p>
+                        <div class="flex items-center justify-between">
+                            <p class="label text-xs">Operation Efficiency</p>
+                            <span id="high-op-flag" class="hidden px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚡ >95% PEAK</span>
+                        </div>
                         <p id="model-usage-display" class="num text-[22px] font-semibold text-sky-400 mt-1">72.0%</p>
                         <p id="model-risk-sub" class="text-[12px] text-neutral-400 mt-0.5">28.0% idle risk rate</p>
                     </div>
@@ -241,17 +267,23 @@
   <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
   <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"Batch-104"</span>,
   <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
+  <span class="text-emerald-400">"businessProfile"</span>: <span id="json-business" class="text-white">"Flex Logistics"</span>,
+  <span class="text-emerald-400">"annualOperatingBurn"</span>: <span id="json-annual-expense" class="text-sky-300">170400.00</span>,
   <span class="text-emerald-400">"delayDays"</span>: <span id="json-delay-days" class="text-amber-300">14</span>,
   <span class="text-emerald-400">"delayLabel"</span>: <span id="json-delay-label" class="text-amber-300">"14 days"</span>,
   <span class="text-emerald-400">"provider"</span>: <span class="text-sky-300">"Akamai Connected Cloud"</span>,
-  <span class="text-emerald-400">"taggedLinodes"</span>: [<span class="text-sky-300">"linode-9842104"</span>, <span class="text-sky-300">"linode-9842105"</span>],
   <span class="text-emerald-400">"projectedWaste"</span>: <span id="json-waste" class="text-red-400">2520.00</span>,
   <span class="text-emerald-400">"budgetModel"</span>: {
     <span class="text-emerald-400">"monthlyBudget"</span>: <span id="json-budget" class="text-sky-300">5400.00</span>,
+    <span class="text-emerald-400">"annualComputeProjection"</span>: <span id="json-annual-compute" class="text-sky-300">64800.00</span>,
     <span class="text-emerald-400">"clientExpenseRatio"</span>: <span id="json-ratio" class="text-sky-300">"38.0%"</span>,
-    <span class="text-emerald-400">"historicalUsageRate"</span>: <span id="json-usage" class="text-sky-300">72.0</span>,
-    <span class="text-emerald-400">"predictedCycleExpense"</span>: <span id="json-pred-expense" class="text-emerald-400">2880.00</span>,
-    <span class="text-emerald-400">"recommendedReservePct"</span>: <span id="json-rec-pct" class="text-amber-300">32</span>
+    <span class="text-emerald-400">"operationRate"</span>: <span id="json-usage" class="text-sky-300">72.0</span>,
+    <span class="text-emerald-400">"isHighOperationRate"</span>: <span id="json-high-op" class="text-amber-300">false</span>,
+    <span class="text-emerald-400">"aiAdvisor"</span>: {
+      <span class="text-emerald-400">"advisedUsagePct"</span>: <span id="json-ai-pct" class="text-sky-300">68.0</span>,
+      <span class="text-emerald-400">"confidence"</span>: <span id="json-ai-conf" class="text-emerald-400">"95.4%"</span>,
+      <span class="text-emerald-400">"mode"</span>: <span id="json-ai-mode" class="text-emerald-400">"ELASTIC_FINOPS"</span>
+    }
   }
 }</pre>
             </div>

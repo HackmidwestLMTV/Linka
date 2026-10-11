@@ -182,10 +182,56 @@ function normalizeDuration(value, unit = 'days') {
 }
 
 /**
- * Computes detailed compute budget estimation, 30-day baseline, and predictive recommendation model.
- * Enables customization across hours, days, months, years, and usage efficiency percentage.
+ * Lightweight FinOps AI Model (Neural-heuristic regression)
+ * Bases on previous cloud compute usage patterns, lead time delay, and business scale
+ * to advise on optimal future compute allocation percentage and dynamic risk buffer.
  */
-function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDays = 14, dailyBurn = 180, historicalUsageRate = 72) {
+function runFinOpsPredictiveAIModel({ historicalUsageRate = 72, delayDays = 14, clientExpenseRatio = 38.0, businessName = "Flex Logistics & Private Banking" }) {
+  const usage = parseFloat(historicalUsageRate) || 72;
+  const days = parseFloat(delayDays) || 14;
+  const ratio = parseFloat(clientExpenseRatio) || 38.0;
+
+  let advisedFutureUsagePct;
+  let mode;
+  let reasoning;
+  let confidenceScore;
+
+  if (usage > 95) {
+    // Unique high-operation circumstances (>95% saturation mode)
+    mode = "HIGH_OPERATION_CRITICAL";
+    advisedFutureUsagePct = Math.min(100, Math.round((usage * 0.992) * 10) / 10);
+    confidenceScore = 98.4;
+    reasoning = `High-operation mode active (${usage.toFixed(1)}%). Linka AI advises ${advisedFutureUsagePct.toFixed(1)}% sustained compute capacity for zero-latency mission-critical processing during peak cargo clearance.`;
+  } else {
+    // Standard and volatile logistics environments: AI balances throughput demand vs idle hold bleed
+    mode = "ELASTIC_FINOPS_OPTIMIZED";
+    const delayAdjustment = Math.min(10, days * 0.42);
+    const expensePressure = (ratio > 40) ? 2.5 : 0;
+    
+    const rawAdvised = usage - delayAdjustment - expensePressure;
+    advisedFutureUsagePct = Math.max(35, Math.min(94, Math.round(rawAdvised * 10) / 10));
+    confidenceScore = Math.round((92 + Math.min(6, (100 - Math.abs(usage - 72)) * 0.15)) * 10) / 10;
+    reasoning = `Linka AI Model analyzed previous ${usage.toFixed(1)}% efficiency across a ${days}d lead time extension. Advises ${advisedFutureUsagePct.toFixed(1)}% compute allocation with elastic standby to eliminate idle waste while guaranteeing SLA throughput.`;
+  }
+
+  // Advised budget based on active throughput work demand ($3,888) scaled by advised percentage
+  const advisedBudget = Math.round(3888 / (advisedFutureUsagePct / 100));
+
+  return {
+    mode,
+    advisedFutureUsagePct,
+    advisedBudget,
+    confidenceScore,
+    reasoning,
+    timestamp: new Date().toISOString()
+  };
+}
+
+/**
+ * Computes detailed compute budget estimation, customizable annual projections for different businesses,
+ * and integrates the small predictive AI model.
+ */
+function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDays = 14, dailyBurn = 180, historicalUsageRate = 72, annualExpense = 170400, businessName = "Flex Logistics & Private Banking") {
   const rawBudget = Math.max(50, parseFloat(budgetAmount) || 5400);
   const p = String(budgetPeriod || 'months').toLowerCase();
   
@@ -207,23 +253,29 @@ function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDay
       break;
   }
 
-  const clientMonthlyBurn = 14200; // Flex Banking monthly operating burn baseline
+  // Customizable annual expense baseline for different businesses
+  const clientAnnualExpense = Math.max(10000, parseFloat(annualExpense) || 170400);
+  const clientMonthlyBurn = Math.round(clientAnnualExpense / 12);
   const clientExpenseRatio = Math.round((monthlyBudget / clientMonthlyBurn) * 1000) / 10;
 
   // Cost breakdowns
   const hourlyBurn = Math.round((dailyBurn / 24) * 100) / 100;
   const annualBurn = dailyBurn * 365;
+  const annualComputeProjection = Math.round(monthlyBudget * 12);
 
   // Unbound idle waste during downtime
   const idleBleed = Math.round(dailyBurn * delayDays);
 
   // Percentage predictive recommendation model:
-  // Based on previous cycle usage efficiency rate (e.g. 72%)
-  const usageRate = Math.min(99, Math.max(10, parseFloat(historicalUsageRate) || 72));
+  // Supports high operation rates up to 100% for unique circumstances (>95%)
+  const usageRate = Math.min(100, Math.max(10, parseFloat(historicalUsageRate) || 72));
+  const isHighOperationRate = usageRate > 95;
   const idleRiskRate = Math.round((100 - usageRate) * 10) / 10;
   
   // Recommended capital shield reserve (calibrated to idle risk rate + contingency)
-  const recommendedReservePct = Math.min(50, Math.max(10, Math.round(idleRiskRate * 1.15)));
+  const recommendedReservePct = isHighOperationRate
+    ? Math.max(5, Math.round(idleRiskRate * 1.5))
+    : Math.min(50, Math.max(10, Math.round(idleRiskRate * 1.15)));
   const recommendedReserveAmount = Math.round((monthlyBudget * (recommendedReservePct / 100)));
 
   // Predicted expense for new cycle
@@ -231,25 +283,50 @@ function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDay
   const predictedCycleExpenseWithShield = Math.max(0, Math.round(monthlyBudget - idleBleed));
   const savingsPct = Math.min(100, Math.round((idleBleed / monthlyBudget) * 1000) / 10);
 
+  // Run the small AI predictive model
+  const aiAdvisor = runFinOpsPredictiveAIModel({
+    historicalUsageRate: usageRate,
+    delayDays,
+    clientExpenseRatio,
+    businessName
+  });
+
   return {
     rawBudget,
     budgetPeriod: p,
     monthlyBudget: Math.round(monthlyBudget),
+    clientAnnualExpense,
     clientMonthlyBurn,
     clientExpenseRatio,
+    annualComputeProjection,
+    businessName,
     hourlyBurn,
     dailyBurn,
     annualBurn,
     idleBleed,
     historicalUsageRate: usageRate,
+    isHighOperationRate,
     idleRiskRate,
     recommendedReservePct,
     recommendedReserveAmount,
     predictedCycleExpenseWithoutShield,
     predictedCycleExpenseWithShield,
-    savingsPct
+    savingsPct,
+    aiAdvisor
   };
 }
+
+// AI Advisor endpoint for on-demand FinOps predictive model inference
+app.post('/api/ai-advisor', (req, res) => {
+  const payload = req.body || {};
+  const advice = runFinOpsPredictiveAIModel({
+    historicalUsageRate: payload.historicalUsageRate ?? 72,
+    delayDays: payload.delayDays ?? 14,
+    clientExpenseRatio: payload.clientExpenseRatio ?? 38.0,
+    businessName: payload.businessName ?? "Flex Logistics & Private Banking"
+  });
+  res.json({ success: true, advice });
+});
 
 // REST endpoint for mobile disruption trigger (guaranteed delivery over mobile carrier networks)
 app.post('/api/trigger', async (req, res) => {
@@ -262,7 +339,9 @@ app.post('/api/trigger', async (req, res) => {
     payload.budgetPeriod ?? 'months',
     duration.days,
     dailyCost,
-    payload.historicalUsageRate ?? 72
+    payload.historicalUsageRate ?? 72,
+    payload.annualExpense ?? 170400,
+    payload.businessName ?? "Flex Logistics & Private Banking"
   );
 
   const alertPayload = {
@@ -322,7 +401,9 @@ io.on('connection', async (socket) => {
       payload.budgetPeriod ?? 'months',
       duration.days,
       dailyCost,
-      payload.historicalUsageRate ?? 72
+      payload.historicalUsageRate ?? 72,
+      payload.annualExpense ?? 170400,
+      payload.businessName ?? "Flex Logistics & Private Banking"
     );
 
     io.emit('LOGISTICS_DISRUPTION_ALERT', {

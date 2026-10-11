@@ -106,15 +106,28 @@ Users can customize the exact downtime horizon across flexible time units:
 
 ### 💰 Compute Budget Allocation & Granular Estimation
 Users can adjust their available compute budget across custom time horizons:
-* **Granular Time Units:** Hours ($7.50/hr), Days ($180/day), 30-Day Baselines ($5,400), and Annual Projections ($65,700).
+* **Granular Time Units:** Hours ($7.50/hr), Days ($180/day), 30-Day Baselines ($5,400), and Annual Projections ($64,800).
 * **Dynamic Bleed Calculation:** Multiplies active workloads ($180/day) by the exact normalized downtime duration to isolate the precise dollar amount at risk.
 
-### 📊 Predictive Percentage Recommendation Model
-Linka includes an intelligent recommendation engine calibrated to the business's previous billing cycle:
-* **Previous Usage Efficiency Rate:** Configurable from 30% to 95% active compute load (e.g., 72% active).
-* **Idle Risk Factor:** Automatically calculates remaining idle risk ($100\% - \text{Efficiency} = 28\%$).
-* **Recommended Capital Shield Reserve:** Calibrates a dynamic reserve buffer (e.g., 32% reserve / $1,728) to protect against future logistics lead-time variances.
-* **Predicted Cycle Expense Estimate:** Accurately forecasts the enterprise's net cloud spend for the upcoming cycle with idle drain eliminated ($2,880 protected expense, saving 46.7% of total budget).
+### 🏢 Customizable Annual Expense Projections for Different Businesses
+Linka is not limited to a single cost structure. Presenters can tailor annual operating expenses to any enterprise profile:
+* **Preconfigured Profiles:**
+  - **Flex Private Banking & Logistics:** $170,400/yr operating burn ($14,200/mo baseline).
+  - **Mid-Market Global E-Commerce:** $540,000/yr operating burn ($45,000/mo baseline).
+  - **High-Speed Supply SaaS:** $1,440,000/yr operating burn ($120,000/mo baseline).
+  - **Custom Business Profile:** Freeform annual input allowing any business to establish its custom operating expense baseline and compute ratio.
+
+### 🤖 Small AI FinOps Advisory Model
+Linka incorporates a lightweight neural-heuristic AI model (`runFinOpsPredictiveAIModel`) running both on the backend and directly on edge devices:
+* **Historical Pattern Analysis:** Evaluates previous cycle efficiency, downtime duration, and client expense ratio pressure.
+* **Predictive Compute Advice:** Recommends the optimal future compute allocation percentage (e.g. 66.1% active allocation) with quantified model confidence (95%+).
+* **One-Click Application:** A single tap on "Apply AI Recommendation" automatically rebalances the compute budget, operational efficiency, and capital reserve buffer.
+
+### ⚡ Unique Circumstances: High Operation Mode (>95% Saturation)
+For enterprises facing unique, high-volume scenarios (holiday freight surges, flash clearance sales, or critical sovereign trade blockades), Linka supports sustained operation rates beyond 95% (up to 100%):
+* **Near-Zero Idle Tolerance:** Calibrates compute allocation for maximum throughput without pipeline interruption.
+* **Specialized High-Availability Shield:** Shifts the capital shield reserve from idle shutdown toward API failover and bandwidth burst buffers.
+* **Quick Critical Presets:** 96% High Availability, 98% Peak Freight Surge, and 99.5% Mission-Critical Sovereign Flow.
 
 ## 4. Design Philosophy: Fluidity, Ease, and Cognitive Clarity
 

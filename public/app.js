@@ -242,6 +242,15 @@ function resetWholeDemo(emitEvent = true) {
     if (ratioDisp) ratioDisp.textContent = '38.0%';
     const bDisp = $('model-budget-display');
     if (bDisp) bDisp.textContent = '$5,400';
+    const annualProj = $('model-annual-proj');
+    if (annualProj) annualProj.textContent = '$64.8k/yr';
+    const bBadge = $('model-business-badge');
+    if (bBadge) bBadge.textContent = 'Flex Logistics';
+    const aExp = $('model-annual-expense');
+    if (aExp) aExp.textContent = '$170,400/yr';
+    const highOpFlag = $('high-op-flag');
+    if (highOpFlag) highOpFlag.classList.add('hidden');
+
     const uDisp = $('model-usage-display');
     if (uDisp) uDisp.textContent = '72.0%';
     const rSub = $('model-risk-sub');
@@ -256,6 +265,15 @@ function resetWholeDemo(emitEvent = true) {
     if (recSub) recSub.textContent = '32% capital shield';
     const recChip = $('model-recommendation-chip');
     if (recChip) recChip.textContent = 'Recommendation: Shield 32% Reserve ($1,728)';
+
+    const aiPct = $('ai-banner-pct');
+    if (aiPct) aiPct.textContent = '68.0%';
+    const aiConf = $('ai-banner-conf');
+    if (aiConf) aiConf.textContent = '95.4%';
+    const aiReason = $('ai-banner-reasoning');
+    if (aiReason) aiReason.textContent = 'AI calibrated against historical Linode compute and 14-day tariff quarantine hold.';
+    const aiTag = $('ai-banner-tag');
+    if (aiTag) aiTag.textContent = 'ELASTIC_FINOPS';
 
     if (chart && chart.data.datasets[1]) {
         chart.data.datasets[1].hidden = true;
@@ -305,12 +323,33 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
             if (ratioDisp) {
                 const ratioVal = activeBudgetModel.clientExpenseRatio !== undefined 
                     ? activeBudgetModel.clientExpenseRatio 
-                    : ((activeBudgetModel.monthlyBudget / 14200) * 100);
+                    : ((activeBudgetModel.monthlyBudget / (activeBudgetModel.clientMonthlyBurn || 14200)) * 100);
                 ratioDisp.textContent = `${Number(ratioVal).toFixed(1)}%`;
+            }
+
+            const annualProj = $('model-annual-proj');
+            if (annualProj) {
+                const aVal = activeBudgetModel.annualComputeProjection || (activeBudgetModel.monthlyBudget * 12);
+                annualProj.textContent = `$${(aVal / 1000).toFixed(1)}k/yr`;
+            }
+
+            const bBadge = $('model-business-badge');
+            if (bBadge && activeBudgetModel.businessName) {
+                bBadge.textContent = activeBudgetModel.businessName;
+            }
+
+            const aExp = $('model-annual-expense');
+            if (aExp && activeBudgetModel.clientAnnualExpense) {
+                aExp.textContent = `$${Number(activeBudgetModel.clientAnnualExpense).toLocaleString()}/yr`;
             }
 
             const uDisp = $('model-usage-display');
             if (uDisp) uDisp.textContent = `${activeBudgetModel.historicalUsageRate.toFixed(1)}%`;
+
+            const highOpFlag = $('high-op-flag');
+            if (highOpFlag) {
+                highOpFlag.classList.toggle('hidden', !activeBudgetModel.isHighOperationRate);
+            }
 
             const rSub = $('model-risk-sub');
             if (rSub) rSub.textContent = `${activeBudgetModel.idleRiskRate.toFixed(1)}% idle risk rate`;
@@ -329,6 +368,18 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
 
             const recChip = $('model-recommendation-chip');
             if (recChip) recChip.textContent = `Recommendation: Shield ${activeBudgetModel.recommendedReservePct}% Reserve ($${activeBudgetModel.recommendedReserveAmount.toLocaleString()})`;
+
+            // Update Small AI Model Advisory Banner
+            if (activeBudgetModel.aiAdvisor) {
+                const aiPct = $('ai-banner-pct');
+                if (aiPct) aiPct.textContent = `${activeBudgetModel.aiAdvisor.advisedFutureUsagePct.toFixed(1)}%`;
+                const aiConf = $('ai-banner-conf');
+                if (aiConf) aiConf.textContent = `${activeBudgetModel.aiAdvisor.confidenceScore.toFixed(1)}%`;
+                const aiReason = $('ai-banner-reasoning');
+                if (aiReason) aiReason.textContent = activeBudgetModel.aiAdvisor.reasoning;
+                const aiTag = $('ai-banner-tag');
+                if (aiTag) aiTag.textContent = activeBudgetModel.aiAdvisor.mode;
+            }
         }
 
         // Update JSON Preview
@@ -340,21 +391,34 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
         if (jsonWaste) jsonWaste.textContent = `${currentSavings.toFixed(2)}`;
 
         if (activeBudgetModel) {
+            const jBiz = $('json-business');
+            if (jBiz) jBiz.textContent = `"${activeBudgetModel.businessName || 'Flex Logistics'}"`;
+            const jAnnExp = $('json-annual-expense');
+            if (jAnnExp) jAnnExp.textContent = `${(activeBudgetModel.clientAnnualExpense || 170400).toFixed(2)}`;
             const jBud = $('json-budget');
             if (jBud) jBud.textContent = `${activeBudgetModel.monthlyBudget.toFixed(2)}`;
+            const jAnnComp = $('json-annual-compute');
+            if (jAnnComp) jAnnComp.textContent = `${(activeBudgetModel.annualComputeProjection || activeBudgetModel.monthlyBudget * 12).toFixed(2)}`;
             const jRatio = $('json-ratio');
             if (jRatio) {
                 const ratioVal = activeBudgetModel.clientExpenseRatio !== undefined 
                     ? activeBudgetModel.clientExpenseRatio 
-                    : ((activeBudgetModel.monthlyBudget / 14200) * 100);
+                    : ((activeBudgetModel.monthlyBudget / (activeBudgetModel.clientMonthlyBurn || 14200)) * 100);
                 jRatio.textContent = `"${Number(ratioVal).toFixed(1)}%"`;
             }
             const jUse = $('json-usage');
             if (jUse) jUse.textContent = `${activeBudgetModel.historicalUsageRate.toFixed(1)}`;
-            const jExp = $('json-pred-expense');
-            if (jExp) jExp.textContent = `${activeBudgetModel.predictedCycleExpenseWithShield.toFixed(2)}`;
-            const jRec = $('json-rec-pct');
-            if (jRec) jRec.textContent = `${activeBudgetModel.recommendedReservePct}`;
+            const jHighOp = $('json-high-op');
+            if (jHighOp) jHighOp.textContent = `${Boolean(activeBudgetModel.isHighOperationRate)}`;
+            
+            if (activeBudgetModel.aiAdvisor) {
+                const jAiPct = $('json-ai-pct');
+                if (jAiPct) jAiPct.textContent = `${activeBudgetModel.aiAdvisor.advisedFutureUsagePct.toFixed(1)}`;
+                const jAiConf = $('json-ai-conf');
+                if (jAiConf) jAiConf.textContent = `"${activeBudgetModel.aiAdvisor.confidenceScore.toFixed(1)}%"`;
+                const jAiMode = $('json-ai-mode');
+                if (jAiMode) jAiMode.textContent = `"${activeBudgetModel.aiAdvisor.mode}"`;
+            }
         }
 
         updateChartCurves(currentSavings, currentDelayDays);
