@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linka — Logistics-Aware FinOps for Flex + AWS</title>
-    <meta name="description" content="Linka connects Flex logistics disruptions to AWS infrastructure, hibernating idle cloud resources to protect working capital.">
+    <title>Linka — Logistics-Aware FinOps for Flex + Akamai Cloud</title>
+    <meta name="description" content="Linka connects Flex logistics disruptions to Akamai Connected Cloud infrastructure, hibernating idle compute resources to protect working capital.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { colors: { flex: '#437E5B', aws: '#FF9900' } } }
+            theme: { extend: { colors: { flex: '#437E5B', akamai: '#0099FF' } } }
         }
     </script>
     <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
@@ -27,7 +27,7 @@
                 <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-flex to-emerald-500 flex items-center justify-center text-white font-bold border border-white/20">L</div>
                 <div class="leading-tight">
                     <h1 class="text-[19px] font-semibold text-white">Linka</h1>
-                    <p class="text-[14px] text-neutral-300">Flex + AWS capital shield</p>
+                    <p class="text-[14px] text-neutral-300">Flex + Akamai Cloud capital shield</p>
                 </div>
             </div>
 
@@ -37,7 +37,7 @@
                     <span id="global-status-text" class="text-neutral-200">Operating normally</span>
                 </div>
                 <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
-                    <i class="fa-brands fa-aws text-aws"></i>
+                    <i class="fa-solid fa-cloud text-sky-400"></i>
                     <span id="header-aws-status" class="num font-medium text-emerald-400">Running · $180/day</span>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                 <div class="max-w-2xl">
                     <p class="eyebrow text-emerald-400">Step 1 · Baseline</p>
                     <h2 class="text-4xl font-semibold apple-heading mt-2">Everything in sync.</h2>
-                    <p class="text-[17px] text-neutral-300 mt-3">Flex tracks Freight Batch #104 while its AWS pipeline runs normally.</p>
+                    <p class="text-[17px] text-neutral-300 mt-3">Flex tracks Freight Batch #104 while its Akamai Cloud compute pipeline runs normally.</p>
                 </div>
                 <button onclick="switchStep(2)" class="vision-btn-primary px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
                     Simulate tariff hold <i class="fa-solid fa-arrow-right text-[14px]"></i>
@@ -70,7 +70,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Flex -->
+                <!-- Flex Banking -->
                 <article class="vision-glass p-7 space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -114,14 +114,14 @@
                     </div>
                 </article>
 
-                <!-- AWS -->
+                <!-- Akamai Connected Cloud -->
                 <article class="vision-glass p-7 space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="h-10 w-10 rounded-xl bg-aws/10 border border-aws/30 flex items-center justify-center text-aws"><i class="fa-brands fa-aws text-xl"></i></div>
+                            <div class="h-10 w-10 rounded-xl bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400"><i class="fa-solid fa-cloud text-xl"></i></div>
                             <div>
-                                <h3 class="text-[18px] font-semibold text-white">AWS Infrastructure</h3>
-                                <p class="label">Tag <code class="font-mono text-neutral-300">Project=Batch-104</code></p>
+                                <h3 class="text-[18px] font-semibold text-white">Akamai Connected Cloud</h3>
+                                <p class="label">Linodes tagged <code class="font-mono text-neutral-300">Batch-104</code></p>
                             </div>
                         </div>
                         <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Running</span>
@@ -130,20 +130,20 @@
                     <div class="space-y-3">
                         <div class="vision-card p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-aws"><i class="fa-solid fa-server text-sm"></i></div>
+                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-sky-400"><i class="fa-solid fa-server text-sm"></i></div>
                                 <div>
                                     <h4 class="text-[16px] font-medium text-white">Freight-Sync-Worker</h4>
-                                    <p class="text-[14px] text-neutral-400">EC2 t3.large · <span class="font-mono">i-0a123bc45</span></p>
+                                    <p class="text-[14px] text-neutral-400">Akamai Linode 8GB · <span class="font-mono">linode-9842104</span></p>
                                 </div>
                             </div>
                             <p class="num text-[16px] text-white">$45<span class="text-neutral-400">/day</span></p>
                         </div>
                         <div class="vision-card p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-sky-400"><i class="fa-solid fa-database text-sm"></i></div>
+                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-emerald-400"><i class="fa-solid fa-database text-sm"></i></div>
                                 <div>
                                     <h4 class="text-[16px] font-medium text-white">Staging-DB-Cluster</h4>
-                                    <p class="text-[14px] text-neutral-400">RDS r5.large · <span class="font-mono">i-0b678de90</span></p>
+                                    <p class="text-[14px] text-neutral-400">Dedicated 16GB · <span class="font-mono">linode-9842105</span></p>
                                 </div>
                             </div>
                             <p class="num text-[16px] text-white">$135<span class="text-neutral-400">/day</span></p>
@@ -152,7 +152,7 @@
 
                     <div class="hairline"></div>
                     <div class="flex justify-between text-[15px]">
-                        <span class="text-neutral-300">Total compute</span>
+                        <span class="text-neutral-300">Total Akamai compute</span>
                         <span class="num font-semibold text-white">$180/day</span>
                     </div>
                 </article>
@@ -165,7 +165,7 @@
                 <div class="max-w-2xl">
                     <p class="eyebrow text-red-400">Step 2 · Disruption detected</p>
                     <h2 class="text-4xl font-semibold text-white mt-2">Customs hold on Batch #104.</h2>
-                    <p class="text-[17px] text-red-100/90 mt-3">A Section 301 tariff review adds 14 days. The AWS pipeline will sit idle the whole time.</p>
+                    <p class="text-[17px] text-red-100/90 mt-3">A Section 301 tariff review adds 14 days. The Akamai pipeline will sit idle the whole time.</p>
                 </div>
                 <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-500 hover:bg-red-400 text-white text-[16px] font-semibold transition shrink-0 flex items-center gap-2">
                     See agent decision <i class="fa-solid fa-arrow-right text-[14px]"></i>
@@ -191,13 +191,14 @@
             </div>
 
             <div class="vision-glass p-7 space-y-4">
-                <h3 class="text-[17px] font-semibold text-white">Intercepted event</h3>
+                <h3 class="text-[17px] font-semibold text-white">Intercepted logistics event</h3>
                 <pre class="font-mono text-[14px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/50 border border-white/[0.06] overflow-x-auto">{
   <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
   <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"Batch-104"</span>,
   <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
   <span class="text-emerald-400">"delayDays"</span>: <span class="text-amber-300">14</span>,
-  <span class="text-emerald-400">"taggedResources"</span>: [<span class="text-sky-300">"i-0a123bc45"</span>, <span class="text-sky-300">"i-0b678de90"</span>],
+  <span class="text-emerald-400">"provider"</span>: <span class="text-sky-300">"Akamai Connected Cloud"</span>,
+  <span class="text-emerald-400">"taggedLinodes"</span>: [<span class="text-sky-300">"linode-9842104"</span>, <span class="text-sky-300">"linode-9842105"</span>],
   <span class="text-emerald-400">"projectedWaste"</span>: <span class="text-red-400">2520.00</span>
 }</pre>
             </div>
@@ -209,7 +210,7 @@
                 <div class="max-w-2xl">
                     <p class="eyebrow text-sky-400">Step 3 · Agent</p>
                     <h2 class="text-4xl font-semibold apple-heading mt-2">Linka connects the dots.</h2>
-                    <p class="text-[17px] text-neutral-300 mt-3">The shipment delay is matched to its tagged cloud resources, and a safe action is proposed.</p>
+                    <p class="text-[17px] text-neutral-300 mt-3">The shipment delay is matched to tagged Akamai Linode instances, and a safe action is proposed.</p>
                 </div>
                 <button onclick="switchStep(4)" class="vision-btn-emerald px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
                     Review action <i class="fa-solid fa-arrow-right text-[14px]"></i>
@@ -230,9 +231,9 @@
                 </div>
                 <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
                 <div class="vision-glass p-6 h-full">
-                    <div class="h-9 w-9 rounded-xl bg-aws/10 text-aws flex items-center justify-center mb-4"><i class="fa-solid fa-power-off text-sm"></i></div>
-                    <h4 class="text-[17px] font-semibold text-white">AWS action</h4>
-                    <p class="text-[15px] text-neutral-300 mt-1">Hibernate EC2 and RDS until customs clears.</p>
+                    <div class="h-9 w-9 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center mb-4"><i class="fa-solid fa-power-off text-sm"></i></div>
+                    <h4 class="text-[17px] font-semibold text-white">Akamai action</h4>
+                    <p class="text-[15px] text-neutral-300 mt-1">Hibernate Linode instances until customs clears.</p>
                 </div>
             </div>
 
@@ -255,7 +256,7 @@
                 <div class="max-w-2xl">
                     <p class="eyebrow text-emerald-400">Step 4 · Protect</p>
                     <h2 class="text-4xl font-semibold apple-heading mt-2">One click. $2,520 saved.</h2>
-                    <p class="text-[17px] text-neutral-300 mt-3">Hibernate the tagged resources and keep that cash in your Flex account.</p>
+                    <p class="text-[17px] text-neutral-300 mt-3">Hibernate the tagged Akamai Linodes and keep that cash in your Flex account.</p>
                 </div>
                 <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-shield-halved"></i> Protect capital
@@ -279,11 +280,11 @@
                         </div>
                         <div class="hairline"></div>
                         <div class="flex justify-between text-[16px]">
-                            <span class="text-neutral-300">AWS burn rate</span>
+                            <span class="text-neutral-300">Akamai burn rate</span>
                             <span id="aws-burn-display" class="num font-medium text-red-400">$180/day</span>
                         </div>
                         <div class="flex justify-between text-[16px]">
-                            <span class="text-neutral-300">Cluster</span>
+                            <span class="text-neutral-300">Linode cluster</span>
                             <span id="aws-cluster-status" class="font-medium text-emerald-400">Running</span>
                         </div>
                     </div>

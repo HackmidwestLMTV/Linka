@@ -1,12 +1,6 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { 
-  EC2Client, 
-  DescribeInstancesCommand, 
-  StopInstancesCommand, 
-  StartInstancesCommand 
-} from "@aws-sdk/client-ec2";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -15,107 +9,149 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-// Determine mode: 'live' or 'demo'
-// In live mode, we talk to real AWS EC2. In demo mode, we simulate instance states safely.
-const isLiveMode = process.env.LINKA_MODE === 'live' || 
-  (Boolean(process.env.AWS_ACCESS_KEY_ID) && process.env.AWS_ACCESS_KEY_ID !== 'MOCK_KEY');
+// Akamai / Linode API configuration
+const AKAMAI_TOKEN = process.env.AKAMAI_API_TOKEN || process.env.LINODE_API_TOKEN;
+const isLiveAkamai = Boolean(AKAMAI_TOKEN && AKAMAI_TOKEN !== 'MOCK_TOKEN');
 
-// Initialize AWS EC2 Client
-// If credentials are in .env, use them. Otherwise, let AWS SDK automatically discover credentials
-// via IAM Role (on EC2 instance metadata) or ~/.aws/credentials (local AWS CLI profile).
-const ec2Config = {
-  region: process.env.AWS_REGION || "us-east-1"
-};
+console.log(`[Linka Engine] Cloud Provider: Akamai Connected Cloud (Linode)`);
+console.log(`[Linka Engine] Execution Mode: ${isLiveAkamai ? 'LIVE AKAMAI API' : 'DEMO SIMULATION'}`);
 
-if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY_ID !== "MOCK_KEY") {
-  ec2Config.credentials = {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-  };
-}
-
-const ec2Client = new EC2Client(ec2Config);
-
-console.log(`[Linka Engine] Running in ${isLiveMode ? 'LIVE AWS' : 'DEMO'} mode (Region: ${ec2Config.region})`);
-
-// Fallback mock resources
+// Default Linode compute resources for Freight Batch #104
 let currentResources = [
-  { id: "i-0a123bc45", name: "Freight-Sync-Worker", type: "t3.large", dailyCost: 45, status: "RUNNING", tag: "Batch-104" },
-  { id: "i-0b678de90", name: "Staging-DB-Cluster", type: "r5.large", dailyCost: 135, status: "RUNNING", tag: "Batch-104" }
+  { 
+    id: "linode-9842104", 
+    name: "Freight-Sync-Worker", 
+    type: "Linode 8GB (g6-standard-4)", 
+    dailyCost: 45, 
+    status: "RUNNING", 
+    tag: "Batch-104",
+    region: "us-ord (Chicago)"
+  },
+  { 
+    id: "linode-9842105", 
+    name: "Staging-DB-Cluster", 
+    type: "Dedicated 16GB (g6-dedicated-8)", 
+    dailyCost: 135, 
+    status: "RUNNING", 
+    tag: "Batch-104",
+    region: "us-ord (Chicago)"
+  }
 ];
 
 /**
- * Discovers instances tagged with Project=<batchId> from AWS EC2 in live mode,
- * or returns demo resources.
+ * Fetch Linode compute instances from Akamai API if live token is present,
+ * otherwise return current resources.
  */
 async function getResourcesForBatch(batchId = "Batch-104") {
-  if (!isLiveMode) {
+  if (!isLiveAkamai) {
     return currentResources;
   }
 
   try {
-    const command = new DescribeInstancesCommand({
-      Filters: [
-        { Name: "tag:Project", Values: [batchId] },
-        { Name: "instance-state-name", Values: ["running", "stopped", "stopping", "pending"] }
-      ]
+    const res = await fetch("https://api.linode.com/v4/linode/instances", {
+      headers: {
+        "Authorization": `Bearer ${AKAMAI_TOKEN}`,
+        "Content-Type": "application/json"
+      }
     });
 
-    const response = await ec2Client.send(command);
-    const discovered = [];
-
-    for (const reservation of response.Reservations || []) {
-      for (const instance of reservation.Instances || []) {
-        const nameTag = instance.Tags?.find(t => t.Key === "Name")?.Value || instance.InstanceId;
-        
-        // Approximate daily cost mapping
-        const costMap = {
-          "t3.nano": 1.25,
-          "t3.micro": 2.50,
-          "t3.small": 5.00,
-          "t3.medium": 10.00,
-          "t3.large": 45.00,
-          "r5.large": 135.00
-        };
-        const dailyCost = costMap[instance.InstanceType] || 45.00;
-
-        discovered.push({
-          id: instance.InstanceId,
-          name: nameTag,
-          type: instance.InstanceType,
-          dailyCost: dailyCost,
-          status: instance.State?.Name === "running" ? "RUNNING" : "HIBERNATED",
-          tag: batchId
-        });
-      }
+    if (!res.ok) {
+      console.warn(`[Linka Engine] Akamai API error: HTTP ${res.status}. Falling back to demo resources.`);
+      return currentResources;
     }
 
-    if (discovered.length > 0) {
-      currentResources = discovered;
-      return discovered;
+    const data = await res.json();
+    const batchTag = batchId.toLowerCase();
+    
+    // Match Linodes with tag or prefix
+    const matched = (data.data || []).filter(linode => {
+      const hasTag = linode.tags && linode.tags.some(t => t.toLowerCase() === batchTag);
+      const hasLabel = linode.label && linode.label.toLowerCase().includes(batchTag);
+      return hasTag || hasLabel;
+    });
+
+    if (matched.length > 0) {
+      currentResources = matched.map(linode => ({
+        id: `linode-${linode.id}`,
+        name: linode.label,
+        type: linode.type || "g6-standard-4",
+        dailyCost: linode.type?.includes("dedicated") ? 135 : 45,
+        status: linode.status === "running" ? "RUNNING" : "HIBERNATED",
+        tag: batchId,
+        region: linode.region || "us-ord"
+      }));
+      return currentResources;
     }
 
-    console.log(`[Linka Engine] No EC2 instances found matching tag Project=${batchId}. Falling back to demo list.`);
+    console.log(`[Linka Engine] No Linodes with tag ${batchId} found. Using demo resources.`);
     return currentResources;
   } catch (err) {
-    console.warn(`[Linka Engine] AWS EC2 DescribeInstances notice: ${err.message}. Using demo resources.`);
+    console.warn(`[Linka Engine] Akamai fetch error: ${err.message}. Using demo resources.`);
     return currentResources;
+  }
+}
+
+/**
+ * Shut down Linode instance on Akamai Connected Cloud
+ */
+async function shutdownLinodeInstance(numericId) {
+  if (!isLiveAkamai) return;
+  try {
+    const cleanId = String(numericId).replace("linode-", "");
+    const res = await fetch(`https://api.linode.com/v4/linode/instances/${cleanId}/shutdown`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${AKAMAI_TOKEN}`,
+        "Content-Type": "application/json"
+      }
+    });
+    console.log(`[Linka Engine] Akamai shutdown command for Linode ${cleanId}: HTTP ${res.status}`);
+  } catch (err) {
+    console.error(`[Linka Engine] Failed to shutdown Linode: ${err.message}`);
+  }
+}
+
+/**
+ * Boot Linode instance back up on Akamai Connected Cloud
+ */
+async function bootLinodeInstance(numericId) {
+  if (!isLiveAkamai) return;
+  try {
+    const cleanId = String(numericId).replace("linode-", "");
+    const res = await fetch(`https://api.linode.com/v4/linode/instances/${cleanId}/boot`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${AKAMAI_TOKEN}`,
+        "Content-Type": "application/json"
+      }
+    });
+    console.log(`[Linka Engine] Akamai boot command for Linode ${cleanId}: HTTP ${res.status}`);
+  } catch (err) {
+    console.error(`[Linka Engine] Failed to boot Linode: ${err.message}`);
   }
 }
 
 app.use(express.static('public'));
 app.use(express.json());
 
-// Health endpoint
+// Health & status endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: "healthy", mode: isLiveMode ? "live" : "demo", region: ec2Config.region });
+  res.json({ 
+    status: "healthy", 
+    provider: "Akamai Connected Cloud (Linode)", 
+    mode: isLiveAkamai ? "live" : "demo" 
+  });
 });
 
 io.on('connection', async (socket) => {
   const initial = await getResourcesForBatch("Batch-104");
-  socket.emit('INIT_STATE', { resources: initial, mode: isLiveMode ? "live" : "demo" });
+  socket.emit('INIT_STATE', { 
+    resources: initial, 
+    provider: "Akamai", 
+    mode: isLiveAkamai ? "live" : "demo" 
+  });
 
-  // Handle simulated disruption trigger
+  // Handle simulated logistics disruption
   socket.on('TRIGGER_DISRUPTION', async (payload) => {
     const delayDays = payload.delayDays || 14;
     const resources = await getResourcesForBatch(payload.batchId || "Batch-104");
@@ -136,14 +172,15 @@ io.on('connection', async (socket) => {
   socket.on('EXECUTE_PROTECTION', async (data) => {
     try {
       const resources = await getResourcesForBatch(data.batchId || "Batch-104");
-      const runningIds = resources.filter(r => r.status === "RUNNING").map(r => r.id);
+      const runningItems = resources.filter(r => r.status === "RUNNING");
 
-      if (isLiveMode && runningIds.length > 0) {
-        console.log(`[Linka Engine] Sending StopInstancesCommand to AWS EC2 for instances:`, runningIds);
-        await ec2Client.send(new StopInstancesCommand({ InstanceIds: runningIds }));
-        console.log(`[Linka Engine] StopInstancesCommand successfully acknowledged by AWS.`);
+      if (isLiveAkamai && runningItems.length > 0) {
+        console.log(`[Linka Engine] Initiating shutdown on Akamai Connected Cloud for:`, runningItems.map(r => r.id));
+        for (const item of runningItems) {
+          await shutdownLinodeInstance(item.id);
+        }
       } else {
-        console.log(`[Linka Engine] Simulated stop executed for instances:`, runningIds.length ? runningIds : resources.map(r => r.id));
+        console.log(`[Linka Engine] Simulated hibernation executed for Akamai compute resources.`);
       }
 
       currentResources.forEach(r => r.status = "HIBERNATED");
@@ -155,31 +192,33 @@ io.on('connection', async (socket) => {
         timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error("[Linka Engine] AWS Execution error:", error);
+      console.error("[Linka Engine] Akamai execution error:", error);
       socket.emit('EXECUTION_ERROR', { message: error.message });
     }
   });
 
-  // Handle demo reset (optionally start instances back up if live)
+  // Reset demo
   socket.on('RESET_DEMO', async () => {
     try {
-      if (isLiveMode) {
-        const resources = await getResourcesForBatch("Batch-104");
-        const stoppedIds = resources.filter(r => r.status === "HIBERNATED").map(r => r.id);
-        if (stoppedIds.length > 0) {
-          console.log(`[Linka Engine] Restarting instances for next demo dry-run:`, stoppedIds);
-          await ec2Client.send(new StartInstancesCommand({ InstanceIds: stoppedIds }));
+      if (isLiveAkamai) {
+        const stopped = currentResources.filter(r => r.status === "HIBERNATED");
+        for (const item of stopped) {
+          await bootLinodeInstance(item.id);
         }
       }
       currentResources.forEach(r => r.status = "RUNNING");
-      io.emit('INIT_STATE', { resources: currentResources, mode: isLiveMode ? "live" : "demo" });
+      io.emit('INIT_STATE', { 
+        resources: currentResources, 
+        provider: "Akamai", 
+        mode: isLiveAkamai ? "live" : "demo" 
+      });
     } catch (err) {
-      console.warn("[Linka Engine] Demo reset warning:", err.message);
+      console.warn("[Linka Engine] Reset warning:", err.message);
     }
   });
 });
 
 const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () => {
-  console.log(`Linka Engine listening on http://localhost:${PORT}`);
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`Linka Engine listening on http://0.0.0.0:${PORT}`);
 });

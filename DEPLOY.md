@@ -1,180 +1,157 @@
-# 🚀 Deploying Linka on AWS (EC2 Hosting & Live Server Linking)
+# 🌐 Hosting Linka on Akamai Connected Cloud (Linode)
 
-This guide walks you through hosting **Linka** on an AWS EC2 instance and linking real EC2 workloads to Linka's one-click protection engine.
-
----
-
-## 🔒 Do I need an AWS Access Key ID?
-
-### **Short Answer: NO (when running on EC2)**
-
-When Linka is hosted on an **AWS EC2 instance**, you **do NOT need an AWS Access Key ID or Secret Key**. 
-Instead, you attach an **IAM Role** to the EC2 server. AWS automatically and securely supplies rotating temporary credentials through the Instance Metadata Service (IMDS). 
-
-* **Zero keys to generate, copy, paste, or risk leaking.**
-* **Built-in least-privilege security** that judges look for in cloud architecture tracks.
-
-*(Note: If you run Linka on your local laptop against real AWS, you can optionally configure credentials via `aws configure` or `.env`, but for AWS hosting, the IAM Role method below is the gold standard).*
+This guide walks you through hosting **Linka** on **Akamai Connected Cloud (Linode)** in simple, beginner-friendly steps following the official tools specified for **Hack Midwest 2026** (Akamai Cloud Challenge · Flex Challenge).
 
 ---
 
-## 🏗️ Architecture Overview
+## 🧭 Websites & Tools Used
 
+| Tool / Platform | Website | Purpose |
+|---|---|---|
+| **Akamai Cloud Manager** | [cloud.linode.com](https://cloud.linode.com) | Launch your cloud compute instance (Linode) & manage VMs |
+| **GitHub** | [github.com/HackmidwestLMTV/Linka](https://github.com/HackmidwestLMTV/Linka) | Linka source code repository |
+| **Terminal / SSH** | Mac Terminal / Windows PowerShell | Connect to your cloud server |
+| **Browser (Laptop & Phone)** | `http://<LINODE_IP>:3000` | Live VisionOS dashboard & remote mobile trigger |
+
+---
+
+## ⚡ Why Akamai Cloud (Linode) is Simple & Smooth
+* **No complex IAM roles or STS permissions:** Instant personal access token.
+* **Instant public IP:** No NAT gateways or VPC route tables to troubleshoot.
+* **Open ports:** Port 3000 works out of the box with zero firewall roadblocks.
+* **Full $300 Hack Midwest cloud credit** provided to hackathon teams.
+
+---
+
+## Step 1: Log in to Akamai Cloud Manager
+1. Open your browser and go to **[https://cloud.linode.com](https://cloud.linode.com)**.
+2. Sign in with your Akamai/Linode account (or redeem the $300 Hack Midwest credit promo provided in your hackathon attendee packet).
+
+---
+
+## Step 2: Create Your Linka Host Server
+1. Click the blue **"Create"** button at the top of the dashboard, then select **"Linode"**.
+2. Fill out these quick settings:
+   * **Distribution:** Select **Ubuntu 24.04 LTS** (or 22.04 LTS).
+   * **Region:** Select **Chicago, IL (`us-ord`)** (or Newark, Dallas, Atlanta).
+   * **Linode Plan:** Click the **"Shared CPU"** tab:
+     * Select **Nanode 1 GB** ($5/mo) or **Linode 2 GB** ($12/mo).
+   * **Label:** Type `linka-web-host`.
+   * **Root Password:** Enter a password you will remember (you will use this to log in).
+3. Click **"Create Linode"** at the bottom right.
+4. Wait ~30 seconds until the status badge turns green and shows **"RUNNING"**.
+5. Copy the **Public IPv4 address** shown on your Linode overview screen (e.g., `172.234.xx.xx`).
+
+---
+
+## Step 3: (Optional) Launch Target Workloads for Live Shutdown
+If you want Linka to stop *real* Akamai servers during your live demo pitch:
+1. Click **Create** -> **Linode**.
+2. Choose **Ubuntu 24.04 LTS** + **Nanode 1 GB**.
+3. Label it `Freight-Sync-Worker`.
+4. In the **Tags** field, enter: `Batch-104`.
+5. Click **Create Linode**.
+*(Linka discovers any Linode tagged `Batch-104` and pauses it when the tariff hold is triggered!)*
+
+---
+
+## Step 4: (Optional) Generate an Akamai API Token
+*(Note: If you skip this step, Linka automatically runs in seamless Demo Mode and simulates everything flawlessly for judges).*
+
+If you want live Akamai API execution:
+1. In Cloud Manager, click your profile icon (top right) -> **API Tokens**.
+2. Click **Create Personal Access Token**.
+3. Label: `Linka-HackMidwest`.
+4. Set **Linodes** permission to **Read/Write**.
+5. Click **Create Token** and copy the long token string.
+
+---
+
+## Step 5: Connect to Your Akamai Server via SSH
+Open the **Terminal** app on your Mac (or PowerShell on Windows) and run:
+
+```bash
+ssh root@<YOUR_LINODE_IP>
 ```
-                      [Mobile Phone / Judge's Laptop]
-                                     │
-                                     ▼ (HTTP / WebSocket Port 3000)
-                     ┌───────────────────────────────┐
-                     │     Linka EC2 Host Server     │
-                     │  - Runs Node.js & Socket.IO   │
-                     │  - Attached: LinkaAppRole     │
-                     │  - Mode: LINKA_MODE=live      │
-                     └───────────────┬───────────────┘
-                                     │
-                     ec2:StopInstances / StartInstances
-                     (Restricted to Tag: Project=Batch-104)
-                                     ▼
-      ┌─────────────────────────────────────────────────────────────┐
-      │               Demo Target Workloads (AWS EC2)               │
-      │  ┌───────────────────────────┐ ┌───────────────────────────┐│
-      │  │   Freight-Sync-Worker     │ │     Staging-DB-Cluster    ││
-      │  │  Tag: Project=Batch-104   │ │  Tag: Project=Batch-104   ││
-      │  └───────────────────────────┘ └───────────────────────────┘│
-      └─────────────────────────────────────────────────────────────┘
-```
+*(Replace `<YOUR_LINODE_IP>` with the public IP address copied in Step 2).*
+
+* When asked `Are you sure you want to continue connecting (yes/no/[fingerprint])?`, type `yes` and press Enter.
+* Type the root password you set in Step 2 and press Enter.
 
 ---
 
-## Step 1: Launch Your Target Demo Instances (The Servers Being Protected)
+## Step 6: Install Node.js and Clone Linka
+Once logged into your Linode terminal prompt (`root@linka-web-host:~#`), run these commands:
 
-In the AWS Console:
-1. Open the **EC2 Console** (`us-east-1` recommended).
-2. Click **Launch instances**.
-3. Launch 2 small instances (e.g., `t3.micro` or `t3.nano` - free-tier eligible):
-   * **Instance 1 Name:** `Freight-Sync-Worker`
-   * **Instance 2 Name:** `Staging-DB-Cluster`
-4. Under **Advanced details** or **Tags**, click **Add tag**:
-   * **Key:** `Project`
-   * **Value:** `Batch-104`
-5. Launch the instances. They are now "linked" to Freight Batch #104 by metadata tag!
+```bash
+# 1. Update server packages
+apt update && apt install -y git curl
 
----
+# 2. Install Node.js (version 20 LTS)
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
 
-## Step 2: Create the IAM Role for Linka (`LinkaAppRole`)
-
-This role gives Linka permission to discover and pause **only** the instances tagged `Project=Batch-104`:
-
-1. Open the **IAM Console** ➔ **Policies** ➔ **Create policy**.
-2. Select the **JSON** tab and paste:
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "AllowDescribeAllInstances",
-      "Effect": "Allow",
-      "Action": [
-        "ec2:DescribeInstances",
-        "ec2:DescribeInstanceStatus"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "AllowStopStartTaggedInstancesOnly",
-      "Effect": "Allow",
-      "Action": [
-        "ec2:StopInstances",
-        "ec2:StartInstances"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": {
-          "aws:ResourceTag/Project": "Batch-104"
-        }
-      }
-    }
-  ]
-}
+# 3. Verify installation
+node -v
+npm -v
 ```
 
-3. Name the policy `LinkaEC2ProtectionPolicy` and click **Create policy**.
-4. In the IAM Console, go to **Roles** ➔ **Create role**:
-   * **Trusted entity type:** AWS service
-   * **Use case:** EC2
-   * **Permissions:** Attach `LinkaEC2ProtectionPolicy`
-   * **Role name:** `LinkaAppRole`
-5. Click **Create role**.
+Now clone the Linka project:
+
+```bash
+git clone https://github.com/HackmidwestLMTV/Linka.git
+cd Linka
+npm install
+```
 
 ---
 
-## Step 3: Launch the Linka Web Server on EC2
+## Step 7: (Optional) Set Your Akamai Token in `.env`
+If you created an Akamai API token in Step 4, run:
 
-Now launch the server that will host the dashboard:
-
-1. In the EC2 Console, click **Launch instances**:
-   * **Name:** `Linka-Web-Host`
-   * **AMI:** Amazon Linux 2023 (or Ubuntu 24.04 LTS)
-   * **Instance type:** `t3.micro` (Free tier)
-   * **Key pair:** Select or create an SSH key pair
-2. **Network settings / Security Group:**
-   * Allow **SSH (Port 22)** from `My IP`
-   * Allow **Custom TCP (Port 3000)** from `0.0.0.0/0` (Anywhere)
-3. **Advanced details:**
-   * Under **IAM instance profile**, select **`LinkaAppRole`**
-   *(IMPORTANT: Do not tag this host instance with `Project=Batch-104`, so it never stops itself!)*
-4. Click **Launch instance**.
-5. *(Recommended)* Under **Network & Security** ➔ **Elastic IPs**, allocate an Elastic IP and associate it with `Linka-Web-Host` so the IP remains static.
+```bash
+echo "AKAMAI_API_TOKEN=your_token_here" > .env
+```
+*(Otherwise, skip this step and Linka will run in instant demo mode).*
 
 ---
 
-## Step 4: Deploy and Start Linka on the Server
+## Step 8: Run the Server
+To start Linka:
 
-1. SSH into your newly created `Linka-Web-Host`:
-   ```bash
-   ssh -i your-key.pem ec2-user@<YOUR-EC2-PUBLIC-IP>
-   ```
+```bash
+node server.js
+```
 
-2. Install Node.js (v20+) and Git:
-   ```bash
-   sudo dnf install -y git nodejs
-   # Or verify node version:
-   node -v
-   ```
+You will see:
+```text
+[Linka Engine] Cloud Provider: Akamai Connected Cloud (Linode)
+[Linka Engine] Execution Mode: DEMO SIMULATION (or LIVE AKAMAI API)
+Linka Engine listening on http://0.0.0.0:3000
+```
 
-3. Clone the Linka repository:
-   ```bash
-   git clone https://github.com/HackmidwestLMTV/Linka.git
-   cd Linka
-   npm install
-   ```
+### Pro Tip: Keep Linka Running in the Background (PM2)
+To keep the server running even if you close your laptop or terminal:
 
-4. Configure the environment to **live** mode:
-   ```bash
-   echo "LINKA_MODE=live" > .env
-   echo "AWS_REGION=us-east-1" >> .env
-   ```
-   *(Notice: No access keys needed! The AWS SDK automatically picks up `LinkaAppRole` from EC2 instance metadata).*
-
-5. Start Linka with PM2 (production process manager):
-   ```bash
-   sudo npm install -g pm2
-   pm2 start server.js --name linka
-   pm2 save
-   pm2 startup
-   ```
+```bash
+npm install -g pm2
+pm2 start server.js --name linka
+```
 
 ---
 
-## Step 5: Test & Pitch Live!
+## Step 9: Open and Test Live
+1. **On your presentation laptop / screen:**
+   Open:
+   ```text
+   http://<YOUR_LINODE_IP>:3000
+   ```
+   You will see Linka’s spatial VisionOS dashboard running live on Akamai Cloud!
 
-1. Open your browser:
-   * **Main Dashboard:** `http://<YOUR-EC2-PUBLIC-IP>:3000`
-   * **Mobile Disruption Simulator:** `http://<YOUR-EC2-PUBLIC-IP>:3000/trigger.html`
-2. Open `/trigger.html` on your smartphone (cellular or any Wi-Fi).
-3. Tap **Trigger Tariff Hold**.
-4. On the main dashboard, advance to **Step 4** and click **Execute Protection Now**.
-5. Check your AWS EC2 Console:
-   * The instances tagged `Project=Batch-104` will immediately transition to **`stopping` / `stopped`**!
-6. Click **Reset Demo Presentation**:
-   * Linka sends `StartInstancesCommand` back to AWS to start the instances back up for your next pitch rehearsal!
+2. **On your phone (for the live judge demo):**
+   Open:
+   ```text
+   http://<YOUR_LINODE_IP>:3000/trigger.html
+   ```
+   Tap **"Trigger Tariff Hold"** on your phone.
+   Watch your laptop dashboard instantly leap into Step 2 (Disruption Detected) over live WebSockets!

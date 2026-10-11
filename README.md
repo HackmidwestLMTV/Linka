@@ -2,58 +2,64 @@
 
 **When a shipment gets stuck, stop paying for the servers that are waiting on it.**
 
-Linka connects shipping delays tracked in **Flex** (business banking) to the cloud servers on **AWS** that process those shipments. If a customs hold delays a freight batch by two weeks, Linka works out how much money the related servers will waste while idle. It then lets you pause them with one click.
+Linka connects shipping disruptions tracked in **Flex** (business banking & logistics) to cloud infrastructure on **Akamai Connected Cloud (Linode)** that processes those shipments. If a customs hold delays a freight batch by two weeks, Linka computes the working capital that idle servers will drain, matching the logistics PO with cloud tags to pause them with one click.
 
-Built for **Hack Midwest 2026** · Flex Challenge · AWS Challenge · Best AI & Agentic Workflow
+Built for **Hack Midwest 2026** · Akamai Cloud Challenge · Flex Challenge · Best AI & Agentic Workflow
 
 ---
 
-## The problem
+## The Problem
 
-Businesses run two systems that never talk to each other:
+Businesses run two operational systems that never communicate:
 
-| | Flex (finance) | AWS (cloud) |
+| | Flex (Finance & Logistics) | Akamai Cloud (Compute Infrastructure) |
 |---|---|---|
-| **Knows about** | Purchase orders, shipping dates, customs holds, cash reserves | CPU usage, memory, per-second billing |
-| **Doesn't know about** | What servers are running | Whether the goods have even arrived |
+| **Knows about** | Purchase orders, ocean transit, customs holds, working capital | CPU, memory, Linode instances, daily billing |
+| **Doesn't know about** | What cloud servers are currently running | Whether the goods are stuck in transit |
 
-When a container ship is held at customs:
+When a container ship is held at customs for a Section 301 tariff review:
 
-- The **logistics manager** knows the goods are stuck but has no access to AWS.
-- The **engineer** has AWS access but never sees the shipping updates.
-- **Result:** servers that sync inventory and run staging databases sit idle for weeks and keep billing the whole time.
+- The **logistics manager** knows the cargo is stuck for 14 days, but has no cloud access.
+- The **cloud engineer** has infrastructure access, but never sees supply chain events.
+- **Result:** compute workers and staging databases sit at 0% utilization while burning **$180/day** ($2,520 wasted).
 
-AWS's own cost tools only flag idle servers *after* days of low usage, and they have no idea a shipment is delayed. Linka acts on the delay itself, before the money is spent.
+Native cloud cost tools only flag idle servers *weeks after* money has already been wasted. Linka acts proactively on the shipping disruption event itself.
 
-## How it works
+---
+
+## How It Works
 
 ```
- Flex shipping update         Linka                         AWS
- ────────────────────         ─────                         ───
- Batch #104 delayed    ──►    Finds servers tagged   ──►    Pause those servers
- +14 days (customs)           "Batch-104"                   until the shipment clears
-                              $180/day × 14 = $2,520
+ Flex Logistics Event            Linka FinOps Engine          Akamai Connected Cloud
+ ────────────────────            ───────────────────          ──────────────────────
+ Batch #104 Delayed        ──►   Discovers Linodes      ──►   Hibernates idle Linodes
+ +14 days (Tariff hold)          tagged "Batch-104"           until shipment clears
+                                 $180/day × 14d = $2,520
 ```
 
-1. **Detect.** A shipping disruption arrives for a freight batch, for example *"Batch-104, tariff hold, +14 days"*.
-2. **Match.** Linka finds the AWS resources tagged with that batch.
-3. **Calculate.** Daily cost × delay days = money at risk.
-4. **Act.** You approve, and Linka stops the matched instances.
+1. **Detect.** A logistics disruption occurs (e.g., *"Batch-104, tariff hold, +14 days"*).
+2. **Correlate.** Linka locates the Akamai Linodes tagged with that freight batch (`Batch-104`).
+3. **Quantify.** Daily cost × delay duration = working capital at risk ($2,520).
+4. **Shield.** One click hibernates the Linode compute workloads, preserving cash flow in Flex.
 
-## The demo
+---
 
-The dashboard walks through the story in four steps. Click the tabs or use the **← →** arrow keys.
+## The 4-Step Interactive Demo (VisionOS Design)
+
+Designed in Apple Vision Pro spatial glassmorphism (`#000000` base, frosted blur, tabular figures):
 
 | Step | What you see |
 |---|---|
-| **1. Baseline** | Flex and AWS side by side, everything running normally |
-| **2. Disruption** | A customs hold hits Batch #104, with $2,520 of projected waste |
-| **3. Agent** | How Linka links the delay to the tagged servers, and the safety checks it runs |
-| **4. Protect** | One click pauses the servers, and the chart shows the cash you kept |
+| **1. Baseline** | Flex working capital and Akamai Linode cluster running normally |
+| **2. Disruption** | A customs tariff hold hits Batch #104, projecting $2,520 idle waste |
+| **3. Agent** | Linka links the delay to tagged Linodes and passes automated safety checks |
+| **4. Protect** | One-click execution pauses the Linodes; 30-day forecast chart locks in the savings |
 
-**Live trigger:** open `/trigger.html` on a phone (same Wi-Fi) and tap **Trigger Tariff Hold**. The dashboard jumps to step 2 instantly over WebSockets.
+**Mobile Remote Trigger:** Open `/trigger.html` on your phone (or judge's phone). Tapping **Trigger Tariff Hold** broadcasts over WebSockets to transition the live dashboard to Step 2 immediately.
 
-## Quick start
+---
+
+## Quick Start (Local)
 
 **Requires:** [Node.js](https://nodejs.org) 18 or newer.
 
@@ -64,58 +70,14 @@ npm install
 npm start
 ```
 
-Then open:
+Open:
+- **Dashboard:** [http://localhost:3000](http://localhost:3000)
+- **Phone trigger:** [http://localhost:3000/trigger.html](http://localhost:3000/trigger.html)
 
-- **Dashboard:** http://localhost:3000
-- **Phone trigger:** http://localhost:3000/trigger.html (on a phone, replace `localhost` with your computer's local IP)
+---
 
-### Demo mode vs. real AWS
+## 🌐 Cloud Deployment (Akamai Connected Cloud / Linode)
 
-By default Linka runs in **demo mode** with sample servers, and **nothing in AWS is touched**.
+For step-by-step instructions on launching a Linode instance, connecting via SSH, and hosting Linka live with a public IP for Hack Midwest judging:
 
-To stop real EC2 instances, create a `.env` file in the project root:
-
-```env
-AWS_ACCESS_KEY_ID=your-key
-AWS_SECRET_ACCESS_KEY=your-secret
-AWS_REGION=us-east-1
-```
-
-> [!WARNING]
-> With real credentials, clicking **Protect capital** sends a `StopInstances` call for the instance IDs listed in `server.js`. Replace those sample IDs with your own test instances first, and use an IAM user limited to `ec2:StopInstances`. `.env` is git-ignored, so never commit keys.
-
-## Project structure
-
-```
-Linka/
-├── server.js            # Express + Socket.IO server; AWS EC2 calls
-├── package.json
-└── public/
-    ├── index.html       # Four-step dashboard
-    ├── app.js           # Dashboard logic: steps, chart, live updates
-    ├── styles.css       # visionOS-style glass theme
-    └── trigger.html     # Phone page that fires the disruption event
-```
-
-### Real-time events
-
-| Event | Sent by | Purpose |
-|---|---|---|
-| `TRIGGER_DISRUPTION` | Phone trigger → server | Report a delayed batch `{ batchId, reason, delayDays }` |
-| `LOGISTICS_DISRUPTION_ALERT` | Server → dashboard | Delay details and projected savings |
-| `EXECUTE_PROTECTION` | Dashboard → server | User approved pausing the servers |
-| `PROTECTION_CONFIRMED` | Server → dashboard | Servers stopped, new status |
-
-## Tech stack
-
-- **Backend:** Node.js, Express, Socket.IO, AWS SDK v3 (`@aws-sdk/client-ec2`)
-- **Frontend:** HTML, Tailwind CSS (CDN), Chart.js, Font Awesome
-
-## Current limits and next steps
-
-This is a hackathon prototype:
-
-- **Flex data is simulated.** The disruption comes from the phone trigger, not a live Flex API.
-- **Servers are stopped, not hibernated.** The code calls EC2 `StopInstances`. True hibernation needs instances launched with hibernation enabled.
-- **Sample resources are hard-coded.** The next step is looking up resources by tag through the AWS Resource Groups Tagging API.
-- **No auto-restart yet.** Next is restarting the servers automatically when Flex reports the shipment cleared.
+👉 **See [DEPLOY.md](DEPLOY.md) for the complete walkthrough.**
