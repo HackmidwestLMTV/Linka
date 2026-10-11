@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Linka Remote Controller // Hack Midwest</title>
+    <title>Linka Remote Controller // FinOps Customizer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
@@ -12,17 +12,20 @@
     <style>
         * { -webkit-tap-highlight-color: transparent; }
         body { touch-action: manipulation; }
+        input[type="range"] {
+            accent-color: #38bdf8;
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-between p-5 vision-bg text-white selection:bg-white/20">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 vision-bg text-white selection:bg-white/20 pb-12">
 
     <!-- Top Connection Bar -->
-    <header class="w-full max-w-sm flex items-center justify-between pt-1">
-        <div class="flex items-center gap-2">
+    <header class="w-full max-w-md flex items-center justify-between pt-1 mb-4">
+        <div class="flex items-center gap-2.5">
             <div class="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 border border-white/20 flex items-center justify-center text-white font-bold text-xs shadow-md">L</div>
             <div>
-                <h1 class="text-sm font-semibold tracking-wide leading-tight">Linka Remote</h1>
-                <p class="text-[11px] text-neutral-400">Presentation Controller</p>
+                <h1 class="text-sm font-semibold tracking-wide leading-tight">Linka FinOps Remote</h1>
+                <p class="text-[11px] text-neutral-400">Customizer & Broadcaster</p>
             </div>
         </div>
         <div id="conn-pill" class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-xs">
@@ -32,65 +35,157 @@
     </header>
 
     <!-- Main Controller Stack -->
-    <main class="w-full max-w-sm my-auto space-y-4 py-4">
+    <main class="w-full max-w-md space-y-4">
 
-        <!-- 1. SIMULATE DISRUPTION CARD -->
-        <section class="vision-glass p-6 text-center relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-            <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-36 h-36 bg-red-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="flex items-center justify-center gap-2 mb-2">
-                <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
-                <span class="text-xs uppercase tracking-wider font-semibold text-red-300 font-mono">Stage 2 · Disruption</span>
+        <!-- 1. DOWNTIME DURATION CUSTOMIZER -->
+        <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-red-300 font-mono">1. Downtime Duration</span>
+                </div>
+                <span id="duration-readout" class="num font-bold text-sm text-red-400 px-2 py-0.5 rounded-lg bg-red-500/10 border border-red-500/20">14 Days</span>
             </div>
 
-            <h2 class="text-xl font-bold apple-heading tracking-tight mb-1">Customs Tariff Hold</h2>
-            <p class="text-neutral-300 text-xs leading-relaxed mb-5">
-                Broadcasts a 14-day hold on <strong class="text-white font-mono">Batch #104</strong> to the presentation screen.
-            </p>
+            <!-- Time Unit Selector Pills -->
+            <div class="grid grid-cols-4 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/[0.08] mb-3.5">
+                <button type="button" onclick="setDurationUnit('hours')" id="unit-hours" class="py-1.5 rounded-xl text-xs font-medium transition text-neutral-400 hover:text-white">Hours</button>
+                <button type="button" onclick="setDurationUnit('days')" id="unit-days" class="py-1.5 rounded-xl text-xs font-semibold transition bg-red-500/20 text-red-300 border border-red-500/30">Days</button>
+                <button type="button" onclick="setDurationUnit('weeks')" id="unit-weeks" class="py-1.5 rounded-xl text-xs font-medium transition text-neutral-400 hover:text-white">Weeks</button>
+                <button type="button" onclick="setDurationUnit('months')" id="unit-months" class="py-1.5 rounded-xl text-xs font-medium transition text-neutral-400 hover:text-white">Months</button>
+            </div>
 
-            <button id="trigger-btn" onclick="fireDisruption()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 active:scale-95 text-white font-bold text-[15px] uppercase tracking-wider shadow-[0_10px_25px_rgba(220,38,38,0.45)] transition-all flex items-center justify-center gap-2.5 border border-white/20">
+            <!-- Duration Slider & Stepper -->
+            <div class="space-y-2 mb-3">
+                <div class="flex items-center justify-between text-xs text-neutral-300">
+                    <span>Length of Downtime:</span>
+                    <span id="slider-min-max" class="font-mono text-neutral-400">1 to 60 days</span>
+                </div>
+                <input type="range" id="duration-slider" min="1" max="60" value="14" step="1" oninput="onDurationSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="flex items-center justify-between gap-1.5 pt-1 text-[11px] font-mono">
+                <button type="button" onclick="applyPreset(12, 'hours')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">12h</button>
+                <button type="button" onclick="applyPreset(3, 'days')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">3d</button>
+                <button type="button" onclick="applyPreset(14, 'days')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">14d</button>
+                <button type="button" onclick="applyPreset(3, 'weeks')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">3w</button>
+                <button type="button" onclick="applyPreset(2, 'months')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">2mo</button>
+            </div>
+        </section>
+
+        <!-- 2. COMPUTE BUDGET & ESTIMATION CUSTOMIZER -->
+        <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl space-y-3.5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-sky-300 font-mono">2. Compute Budget Allocation</span>
+                </div>
+                <span id="budget-readout" class="num font-bold text-sm text-sky-300 px-2 py-0.5 rounded-lg bg-sky-500/10 border border-sky-500/20">$5,400</span>
+            </div>
+
+            <!-- Budget Cycle Period Selector -->
+            <div class="grid grid-cols-4 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/[0.08]">
+                <button type="button" onclick="setBudgetPeriod('hours')" id="bperiod-hours" class="py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white">Hours</button>
+                <button type="button" onclick="setBudgetPeriod('days')" id="bperiod-days" class="py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white">Days</button>
+                <button type="button" onclick="setBudgetPeriod('months')" id="bperiod-months" class="py-1 rounded-xl text-[11px] font-semibold transition bg-sky-500/20 text-sky-300 border border-sky-500/30">Months</button>
+                <button type="button" onclick="setBudgetPeriod('years')" id="bperiod-years" class="py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white">Years</button>
+            </div>
+
+            <!-- Budget Slider -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs text-neutral-300">
+                    <span>Base Cycle Budget:</span>
+                    <span id="budget-sub-rate" class="font-mono text-neutral-400">$180/day baseline</span>
+                </div>
+                <input type="range" id="budget-slider" min="500" max="25000" value="5400" step="100" oninput="onBudgetSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Detailed Breakdown Grid -->
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                <div class="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
+                    <span class="text-neutral-400 block text-[10px]">Hourly Run Rate</span>
+                    <span id="stat-hourly-rate" class="text-white font-semibold text-xs">$7.50/hr</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
+                    <span class="text-neutral-400 block text-[10px]">Annual Projection</span>
+                    <span id="stat-annual-rate" class="text-white font-semibold text-xs">$65,700/yr</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PREDICTIVE RECOMMENDATION & PERCENTAGE MODEL -->
+        <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl space-y-3.5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">3. Predictive Efficiency Model</span>
+                </div>
+                <span id="usage-readout" class="num font-bold text-sm text-emerald-300 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">72% Active</span>
+            </div>
+
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between text-xs text-neutral-300">
+                    <span>Previous Cycle Efficiency:</span>
+                    <span id="idle-risk-readout" class="font-mono text-amber-300">28% idle risk</span>
+                </div>
+                <input type="range" id="usage-slider" min="30" max="95" value="72" step="1" oninput="onUsageSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <!-- Predictive Recommendation Output Card -->
+            <div class="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-black/60 border border-emerald-500/30 space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="text-emerald-400 font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+                        <span>Sample Recommendation</span>
+                    </span>
+                    <span id="rec-shield-pct" class="font-mono text-emerald-300 font-bold">32% Capital Shield</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px] font-mono pt-1">
+                    <div>
+                        <span class="text-neutral-400 block text-[10px]">Predicted Expense</span>
+                        <span id="rec-pred-expense" class="text-emerald-300 font-semibold">$2,880.00</span>
+                    </div>
+                    <div>
+                        <span class="text-neutral-400 block text-[10px]">Recommended Reserve</span>
+                        <span id="rec-reserve-amt" class="text-amber-300 font-semibold">$1,728.00 buffer</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. BROADCAST ACTION BUTTONS -->
+        <section class="space-y-3 pt-1">
+            <!-- Dynamic Big Red Trigger Button -->
+            <button id="trigger-btn" onclick="fireDisruption()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 active:scale-95 text-white font-bold text-[14px] uppercase tracking-wider shadow-[0_10px_25px_rgba(220,38,38,0.45)] transition-all flex items-center justify-center gap-2.5 border border-white/20">
                 <i class="fa-solid fa-triangle-exclamation"></i>
-                <span id="btn-text">Trigger Tariff Hold</span>
+                <span id="btn-text">Broadcast Hold (+14d • $2,520 at risk)</span>
             </button>
-        </section>
 
-        <!-- 2. RECOVER / RESET TO NORMAL CARD -->
-        <section class="vision-glass p-6 text-center relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-            <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-36 h-36 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
-
-            <div class="flex items-center justify-center gap-2 mb-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">Stage 1 · Recovery</span>
-            </div>
-
-            <h2 class="text-xl font-bold apple-heading tracking-tight mb-1">Recover Normal Baseline</h2>
-            <p class="text-neutral-300 text-xs leading-relaxed mb-5">
-                Clears the disruption and restores the laptop screen back to normal baseline operations.
-            </p>
-
-            <button id="reset-btn" onclick="recoverBaseline()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-600 hover:from-emerald-600 hover:to-teal-500 active:scale-95 text-white font-bold text-[14px] uppercase tracking-wider shadow-[0_8px_20px_rgba(16,185,129,0.35)] transition-all flex items-center justify-center gap-2.5 border border-white/20">
+            <!-- Reset to Baseline Button -->
+            <button id="reset-btn" onclick="recoverBaseline()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-bold text-[13px] uppercase tracking-wider shadow-[0_8px_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 border border-white/20">
                 <i class="fa-solid fa-rotate-left"></i>
-                <span id="reset-btn-text">Reset Broadcast to Normal</span>
+                <span id="reset-btn-text">Reset Broadcast to Normal Baseline</span>
             </button>
+
+            <!-- Status Notification Toast -->
+            <div id="status-box" class="p-3.5 rounded-2xl bg-white/[0.08] backdrop-blur-md border border-white/15 text-center text-xs font-mono font-medium hidden transition-all">
+                <span id="status-icon" class="mr-1.5"></span>
+                <span id="status-msg"></span>
+            </div>
         </section>
 
-        <!-- Status Notification Box -->
-        <div id="status-box" class="p-3.5 rounded-2xl bg-white/[0.08] backdrop-blur-md border border-white/15 text-center text-xs font-mono font-medium hidden transition-all">
-            <span id="status-icon" class="mr-1.5"></span>
-            <span id="status-msg"></span>
-        </div>
-
-        <!-- Secondary Navigation -->
+        <!-- Quick Switch to Dashboard -->
         <div class="pt-1 text-center">
             <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/10 text-neutral-300 text-xs font-medium border border-white/10 transition">
                 <i class="fa-solid fa-desktop text-neutral-400"></i>
-                <span>Open Full Presentation Dashboard</span>
+                <span>Open Presentation Dashboard</span>
             </a>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="w-full max-w-sm text-center text-xs text-neutral-500 pb-1">
+    <footer class="w-full max-w-md text-center text-xs text-neutral-500 pt-2">
         <span>Akamai Connected Cloud · Flex Challenge</span>
     </footer>
 
@@ -98,7 +193,24 @@
         const $ = (id) => document.getElementById(id);
         const socket = typeof io === 'function' ? io({ transports: ['websocket', 'polling'], timeout: 5000 }) : null;
 
-        // Monitor connection state
+        // State Machine
+        let state = {
+            durationValue: 14,
+            durationUnit: 'days',
+            budgetAmount: 5400,
+            budgetPeriod: 'months',
+            usageRate: 72,
+            dailyCost: 180
+        };
+
+        const UNIT_LIMITS = {
+            hours:  { min: 1, max: 72,  step: 1, label: '1 to 72 hours' },
+            days:   { min: 1, max: 60,  step: 1, label: '1 to 60 days' },
+            weeks:  { min: 1, max: 12,  step: 1, label: '1 to 12 weeks' },
+            months: { min: 1, max: 6,   step: 0.5, label: '1 to 6 months' }
+        };
+
+        // Socket connectivity
         if (socket) {
             socket.on('connect', () => {
                 $('conn-dot').className = 'dot dot-green';
@@ -112,6 +224,110 @@
                 $('conn-dot').className = 'dot dot-red';
                 $('conn-text').textContent = 'HTTP Mode';
             });
+        }
+
+        function calculateNormalizedDays() {
+            switch (state.durationUnit) {
+                case 'hours':  return state.durationValue / 24;
+                case 'weeks':  return state.durationValue * 7;
+                case 'months': return state.durationValue * 30;
+                case 'days':
+                default:       return state.durationValue;
+            }
+        }
+
+        function updateCalculations() {
+            const days = calculateNormalizedDays();
+            const idleWaste = Math.round(state.dailyCost * days);
+
+            // Unit readout
+            $('duration-readout').textContent = `${state.durationValue} ${state.durationUnit.charAt(0).toUpperCase() + state.durationUnit.slice(1)}`;
+            
+            // Budget readout & breakdown
+            $('budget-readout').textContent = `$${Number(state.budgetAmount).toLocaleString()}`;
+            const hourlyRate = (state.dailyCost / 24).toFixed(2);
+            $('stat-hourly-rate').textContent = `$${hourlyRate}/hr`;
+            $('stat-annual-rate').textContent = `$${(state.dailyCost * 365).toLocaleString()}/yr`;
+
+            // Percentage predictive model
+            const idleRisk = 100 - state.usageRate;
+            $('usage-readout').textContent = `${state.usageRate}% Active`;
+            $('idle-risk-readout').textContent = `${idleRisk}% idle risk`;
+
+            const reservePct = Math.min(50, Math.max(10, Math.round(idleRisk * 1.15)));
+            const reserveAmt = Math.round((state.budgetAmount * reservePct) / 100);
+            const predictedExpense = Math.max(0, state.budgetAmount - idleWaste);
+
+            $('rec-shield-pct').textContent = `${reservePct}% Capital Shield`;
+            $('rec-pred-expense').textContent = `$${predictedExpense.toLocaleString()}`;
+            $('rec-reserve-amt').textContent = `$${reserveAmt.toLocaleString()} buffer`;
+
+            // Update main trigger button label
+            let unitShort = state.durationUnit === 'hours' ? 'h' : state.durationUnit === 'days' ? 'd' : state.durationUnit === 'weeks' ? 'w' : 'mo';
+            $('btn-text').textContent = `Broadcast Hold (+${state.durationValue}${unitShort} • $${idleWaste.toLocaleString()} at risk)`;
+        }
+
+        function setDurationUnit(unit) {
+            state.durationUnit = unit;
+            ['hours', 'days', 'weeks', 'months'].forEach(u => {
+                const btn = $(`unit-${u}`);
+                if (u === unit) {
+                    btn.className = "py-1.5 rounded-xl text-xs font-semibold transition bg-red-500/20 text-red-300 border border-red-500/30";
+                } else {
+                    btn.className = "py-1.5 rounded-xl text-xs font-medium transition text-neutral-400 hover:text-white";
+                }
+            });
+
+            const limits = UNIT_LIMITS[unit];
+            const slider = $('duration-slider');
+            slider.min = limits.min;
+            slider.max = limits.max;
+            slider.step = limits.step;
+            $('slider-min-max').textContent = limits.label;
+
+            // Set sensible default value when unit changes
+            if (unit === 'hours') state.durationValue = 24;
+            else if (unit === 'days') state.durationValue = 14;
+            else if (unit === 'weeks') state.durationValue = 2;
+            else if (unit === 'months') state.durationValue = 1;
+
+            slider.value = state.durationValue;
+            updateCalculations();
+        }
+
+        function onDurationSliderChange(val) {
+            state.durationValue = parseFloat(val);
+            updateCalculations();
+        }
+
+        function applyPreset(val, unit) {
+            setDurationUnit(unit);
+            state.durationValue = val;
+            $('duration-slider').value = val;
+            updateCalculations();
+        }
+
+        function setBudgetPeriod(period) {
+            state.budgetPeriod = period;
+            ['hours', 'days', 'months', 'years'].forEach(p => {
+                const btn = $(`bperiod-${p}`);
+                if (p === period) {
+                    btn.className = "py-1 rounded-xl text-[11px] font-semibold transition bg-sky-500/20 text-sky-300 border border-sky-500/30";
+                } else {
+                    btn.className = "py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white";
+                }
+            });
+            updateCalculations();
+        }
+
+        function onBudgetSliderChange(val) {
+            state.budgetAmount = parseFloat(val);
+            updateCalculations();
+        }
+
+        function onUsageSliderChange(val) {
+            state.usageRate = parseInt(val, 10);
+            updateCalculations();
         }
 
         function showStatus(message, isSuccess = true) {
@@ -143,12 +359,17 @@
 
             btn.disabled = true;
             btn.classList.add('opacity-75');
-            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Broadcasting...';
+            const origText = btnText.textContent;
+            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Broadcasting Custom Hold...';
 
             const payload = {
                 batchId: "Batch-104",
                 reason: "Section 301 Tariff Compliance Review",
-                delayDays: 14
+                delayValue: state.durationValue,
+                delayUnit: state.durationUnit,
+                budgetAmount: state.budgetAmount,
+                budgetPeriod: state.budgetPeriod,
+                historicalUsageRate: state.usageRate
             };
 
             // 1. WebSocket Broadcast
@@ -167,13 +388,13 @@
                 console.warn('HTTP fallback note:', err);
             }
 
-            showStatus('Disruption active! Laptop screen jumped to Step 2.', true);
+            showStatus(`Broadcast live! Screen updated to +${state.durationValue} ${state.durationUnit}.`, true);
 
             setTimeout(() => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-75');
-                btnText.innerHTML = 'Trigger Tariff Hold';
-            }, 2500);
+                btnText.textContent = origText;
+            }, 2000);
         }
 
         async function recoverBaseline() {
@@ -200,14 +421,17 @@
                 console.warn('HTTP reset note:', err);
             }
 
-            showStatus('System recovered! Laptop screen returned to Baseline Step 1.', true);
+            showStatus('System recovered! Presentation returned to Baseline Step 1.', true);
 
             setTimeout(() => {
                 btn.disabled = false;
                 btn.classList.remove('opacity-75');
-                btnText.innerHTML = 'Reset Broadcast to Normal';
-            }, 2000);
+                btnText.innerHTML = 'Reset Broadcast to Normal Baseline';
+            }, 1800);
         }
+
+        // Initialize display
+        document.addEventListener('DOMContentLoaded', updateCalculations);
     </script>
 </body>
 </html>

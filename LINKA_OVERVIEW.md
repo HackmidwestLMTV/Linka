@@ -93,7 +93,30 @@ Before making any recommendation, the Linka agent runs strict policy guardrails:
 
 ---
 
-## 3. Design Philosophy: Fluidity, Ease, and Cognitive Clarity
+## 3. Dynamic Downtime & Predictive FinOps Modeling
+
+Linka provides handheld fine-grained control and predictive intelligence directly from the mobile remote controller (`/trigger.html`):
+
+### ⏱️ Customizable Downtime Duration
+Users can customize the exact downtime horizon across flexible time units:
+* **Hours:** (1 to 72 hours) — e.g., brief staging pipeline outages or port gate inspections.
+* **Days:** (1 to 60 days) — e.g., standard Section 301 customs holds (+14 days).
+* **Weeks:** (1 to 12 weeks) — e.g., extended maritime shipping delays or canal blockages.
+* **Months:** (1 to 6 months) — e.g., seasonal procurement embargoes or factory retooling.
+
+### 💰 Compute Budget Allocation & Granular Estimation
+Users can adjust their available compute budget across custom time horizons:
+* **Granular Time Units:** Hours ($7.50/hr), Days ($180/day), 30-Day Baselines ($5,400), and Annual Projections ($65,700).
+* **Dynamic Bleed Calculation:** Multiplies active workloads ($180/day) by the exact normalized downtime duration to isolate the precise dollar amount at risk.
+
+### 📊 Predictive Percentage Recommendation Model
+Linka includes an intelligent recommendation engine calibrated to the business's previous billing cycle:
+* **Previous Usage Efficiency Rate:** Configurable from 30% to 95% active compute load (e.g., 72% active).
+* **Idle Risk Factor:** Automatically calculates remaining idle risk ($100\% - \text{Efficiency} = 28\%$).
+* **Recommended Capital Shield Reserve:** Calibrates a dynamic reserve buffer (e.g., 32% reserve / $1,728) to protect against future logistics lead-time variances.
+* **Predicted Cycle Expense Estimate:** Accurately forecasts the enterprise's net cloud spend for the upcoming cycle with idle drain eliminated ($2,880 protected expense, saving 46.7% of total budget).
+
+## 4. Design Philosophy: Fluidity, Ease, and Cognitive Clarity
 
 To appeal to non-technical financial executives, supply chain directors, and technical judges alike, Linka is built with an **Apple VisionOS spatial glassmorphism design system**.
 
@@ -115,7 +138,7 @@ To appeal to non-technical financial executives, supply chain directors, and tec
 
 ---
 
-## 4. Technical Architecture & Implementation
+## 5. Technical Architecture & Implementation
 
 ```
  ┌────────────────────────────────────────────────────────────┐
@@ -158,7 +181,7 @@ To appeal to non-technical financial executives, supply chain directors, and tec
 
 ---
 
-## 5. Hack Midwest 2026 Pitch Strategy (3-Minute Live Demo)
+## 6. Hack Midwest 2026 Pitch Strategy (3-Minute Live Demo)
 
 Linka is engineered to strictly satisfy Hack Midwest rules (**Strictly Live Working Prototype MVP, Zero Slide Decks**):
 
@@ -172,7 +195,7 @@ Linka is engineered to strictly satisfy Hack Midwest rules (**Strictly Live Work
 
 ---
 
-## 6. Project Directory & File Reference
+## 7. Project Directory & File Reference
 
 - **[`server.js`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/server.js):** Express backend, Socket.IO gateway, Akamai Linode REST API integration, and dual-channel REST endpoints (`/api/trigger`, `/api/reset`).
 - **[`public/index.html`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/index.html):** 4-step VisionOS presentation dashboard with responsive glassmorphism layout and live metric cards.

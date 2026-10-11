@@ -148,20 +148,128 @@ app.get('/trigger', (req, res) => {
   res.sendFile('trigger.html', { root: 'public' });
 });
 
+/**
+ * Normalizes user-selected downtime duration into days and human-readable label.
+ * Supports: hours, days, weeks, months.
+ */
+function normalizeDuration(value, unit = 'days') {
+  const num = Math.max(0.5, parseFloat(value) || 14);
+  const u = String(unit || 'days').toLowerCase();
+  let days = num;
+  let label = `${num} days`;
+
+  switch (u) {
+    case 'hours':
+      days = Math.round((num / 24) * 100) / 100;
+      label = `${num} hour${num === 1 ? '' : 's'}`;
+      break;
+    case 'weeks':
+      days = num * 7;
+      label = `${num} week${num === 1 ? '' : 's'}`;
+      break;
+    case 'months':
+      days = num * 30;
+      label = `${num} month${num === 1 ? '' : 's'}`;
+      break;
+    case 'days':
+    default:
+      days = num;
+      label = `${num} day${num === 1 ? '' : 's'}`;
+      break;
+  }
+
+  return { days, label, value: num, unit: u };
+}
+
+/**
+ * Computes detailed compute budget estimation, 30-day baseline, and predictive recommendation model.
+ * Enables customization across hours, days, months, years, and usage efficiency percentage.
+ */
+function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDays = 14, dailyBurn = 180, historicalUsageRate = 72) {
+  const rawBudget = Math.max(50, parseFloat(budgetAmount) || 5400);
+  const p = String(budgetPeriod || 'months').toLowerCase();
+  
+  // Normalize budget to 30-day equivalent for consistent comparison
+  let monthlyBudget = rawBudget;
+  switch (p) {
+    case 'hours':
+      monthlyBudget = rawBudget * 24 * 30;
+      break;
+    case 'days':
+      monthlyBudget = rawBudget * 30;
+      break;
+    case 'years':
+      monthlyBudget = rawBudget / 12;
+      break;
+    case 'months':
+    default:
+      monthlyBudget = rawBudget;
+      break;
+  }
+
+  // Cost breakdowns
+  const hourlyBurn = Math.round((dailyBurn / 24) * 100) / 100;
+  const annualBurn = dailyBurn * 365;
+
+  // Unbound idle waste during downtime
+  const idleBleed = Math.round(dailyBurn * delayDays);
+
+  // Percentage predictive recommendation model:
+  // Based on previous cycle usage efficiency rate (e.g. 72%)
+  const usageRate = Math.min(99, Math.max(10, parseFloat(historicalUsageRate) || 72));
+  const idleRiskRate = Math.round((100 - usageRate) * 10) / 10;
+  
+  // Recommended capital shield reserve (calibrated to idle risk rate + contingency)
+  const recommendedReservePct = Math.min(50, Math.max(10, Math.round(idleRiskRate * 1.15)));
+  const recommendedReserveAmount = Math.round((monthlyBudget * (recommendedReservePct / 100)));
+
+  // Predicted expense for new cycle
+  const predictedCycleExpenseWithoutShield = Math.round(monthlyBudget);
+  const predictedCycleExpenseWithShield = Math.max(0, Math.round(monthlyBudget - idleBleed));
+  const savingsPct = Math.min(100, Math.round((idleBleed / monthlyBudget) * 1000) / 10);
+
+  return {
+    rawBudget,
+    budgetPeriod: p,
+    monthlyBudget: Math.round(monthlyBudget),
+    hourlyBurn,
+    dailyBurn,
+    annualBurn,
+    idleBleed,
+    historicalUsageRate: usageRate,
+    idleRiskRate,
+    recommendedReservePct,
+    recommendedReserveAmount,
+    predictedCycleExpenseWithoutShield,
+    predictedCycleExpenseWithShield,
+    savingsPct
+  };
+}
+
 // REST endpoint for mobile disruption trigger (guaranteed delivery over mobile carrier networks)
 app.post('/api/trigger', async (req, res) => {
   const payload = req.body || {};
-  const delayDays = payload.delayDays || 14;
+  const duration = normalizeDuration(payload.delayValue ?? payload.delayDays ?? 14, payload.delayUnit ?? 'days');
   const resources = await getResourcesForBatch(payload.batchId || "Batch-104");
   const dailyCost = resources.reduce((acc, item) => acc + item.dailyCost, 0);
-  const projectedSavings = dailyCost * delayDays;
+  const budgetModel = computeBudgetEstimation(
+    payload.budgetAmount ?? 5400,
+    payload.budgetPeriod ?? 'months',
+    duration.days,
+    dailyCost,
+    payload.historicalUsageRate ?? 72
+  );
 
   const alertPayload = {
     batchId: payload.batchId || "Batch-104",
     reason: payload.reason || "Section 301 Tariff Compliance Review",
-    delayDays,
+    delayDays: duration.days,
+    delayLabel: duration.label,
+    delayValue: duration.value,
+    delayUnit: duration.unit,
     dailyCost,
-    projectedSavings,
+    projectedSavings: budgetModel.idleBleed,
+    budgetModel,
     affectedResources: resources
   };
 
@@ -200,18 +308,28 @@ io.on('connection', async (socket) => {
   });
 
   // Handle simulated logistics disruption
-  socket.on('TRIGGER_DISRUPTION', async (payload) => {
-    const delayDays = payload.delayDays || 14;
+  socket.on('TRIGGER_DISRUPTION', async (payload = {}) => {
+    const duration = normalizeDuration(payload.delayValue ?? payload.delayDays ?? 14, payload.delayUnit ?? 'days');
     const resources = await getResourcesForBatch(payload.batchId || "Batch-104");
     const dailyCost = resources.reduce((acc, item) => acc + item.dailyCost, 0);
-    const projectedSavings = dailyCost * delayDays;
+    const budgetModel = computeBudgetEstimation(
+      payload.budgetAmount ?? 5400,
+      payload.budgetPeriod ?? 'months',
+      duration.days,
+      dailyCost,
+      payload.historicalUsageRate ?? 72
+    );
 
     io.emit('LOGISTICS_DISRUPTION_ALERT', {
       batchId: payload.batchId || "Batch-104",
       reason: payload.reason || "Section 301 Tariff Compliance Review",
-      delayDays,
+      delayDays: duration.days,
+      delayLabel: duration.label,
+      delayValue: duration.value,
+      delayUnit: duration.unit,
       dailyCost,
-      projectedSavings,
+      projectedSavings: budgetModel.idleBleed,
+      budgetModel,
       affectedResources: resources
     });
   });

@@ -1,4 +1,4 @@
-// Linka dashboard logic: step navigation, protection flow, and live socket sync.
+// Linka dashboard logic: step navigation, dynamic disruption models, and live socket sync.
 const socket = io();
 const $ = (id) => document.getElementById(id);
 const getEl = (...ids) => ids.map(id => $(id)).find(Boolean);
@@ -7,6 +7,20 @@ const TOTAL_STEPS = 4;
 let currentStep = 1;
 let isExecuted = false;
 let chart = null;
+
+// Dynamic model state (customizable via remote)
+let currentSavings = 2520;
+let currentDelayDays = 14;
+let currentDelayLabel = "14 days";
+let activeBudgetModel = {
+    monthlyBudget: 5400,
+    historicalUsageRate: 72.0,
+    idleRiskRate: 28.0,
+    recommendedReservePct: 32,
+    recommendedReserveAmount: 1728,
+    predictedCycleExpenseWithShield: 2880,
+    savingsPct: 46.7
+};
 
 const EXECUTE_BTN_DEFAULT = {
     className: 'vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0',
@@ -46,6 +60,36 @@ function switchStep(step) {
         }
     }
     if (step >= 2 && !isExecuted) setState('alert');
+}
+
+function updateChartCurves(savedAmount = 2520, delayDays = 14) {
+    if (!chart) return;
+    const baseCapital = 248500;
+    const dailyLoss = 180;
+    
+    // Dataset 0: Unprotected bleed
+    chart.data.datasets[0].data = [
+        baseCapital,
+        baseCapital - (dailyLoss * 4),
+        baseCapital - (dailyLoss * 9),
+        baseCapital - Math.min(savedAmount, dailyLoss * 14),
+        baseCapital - Math.min(savedAmount + 1000, dailyLoss * 20),
+        baseCapital - Math.min(savedAmount + 2000, dailyLoss * 25),
+        baseCapital - Math.min(savedAmount + 3000, dailyLoss * 30)
+    ];
+
+    // Dataset 1: Protected with Linka shield
+    chart.data.datasets[1].data = [
+        baseCapital,
+        baseCapital - (dailyLoss * 4),
+        baseCapital - (dailyLoss * 7),
+        baseCapital - (dailyLoss * 7), // shielded point
+        baseCapital - (dailyLoss * 7.5),
+        baseCapital - (dailyLoss * 8),
+        baseCapital - (dailyLoss * 8.2)
+    ];
+
+    chart.update();
 }
 
 function initChart() {
@@ -111,7 +155,7 @@ function executeProtectionNow() {
 
     const savedEl = $('saved-amount-display');
     if (savedEl) {
-        savedEl.textContent = '$2,520';
+        savedEl.textContent = `$${currentSavings.toLocaleString()}`;
         savedEl.className = 'num text-[38px] font-semibold text-emerald-400 mt-1';
     }
 
@@ -129,7 +173,7 @@ function executeProtectionNow() {
 
     const badgeEl = $('chart-status-badge');
     if (badgeEl) {
-        badgeEl.textContent = 'Protected · $2,520 saved';
+        badgeEl.textContent = `Protected · $${currentSavings.toLocaleString()} saved`;
         badgeEl.className = 'text-[14px] text-emerald-400';
     }
 
@@ -145,11 +189,14 @@ function executeProtectionNow() {
     }
 
     setState('protected');
-    socket.emit('EXECUTE_PROTECTION', { projectedSavings: 2520 });
+    socket.emit('EXECUTE_PROTECTION', { projectedSavings: currentSavings, batchId: "Batch-104" });
 }
 
 function resetWholeDemo(emitEvent = true) {
     isExecuted = false;
+    currentSavings = 2520;
+    currentDelayDays = 14;
+    currentDelayLabel = "14 days";
 
     const savedEl = $('saved-amount-display');
     if (savedEl) {
@@ -181,9 +228,19 @@ function resetWholeDemo(emitEvent = true) {
         btn.innerHTML = EXECUTE_BTN_DEFAULT.html;
     }
 
+    // Reset Step 2 cards to defaults
+    const idleWasteEl = $('step2-idle-waste');
+    if (idleWasteEl) idleWasteEl.textContent = '$2,520';
+    const wasteMathEl = $('step2-waste-math');
+    if (wasteMathEl) wasteMathEl.textContent = '$180/day × 14 days';
+    const leadTimeEl = $('step2-lead-time');
+    if (leadTimeEl) leadTimeEl.textContent = '+14 days';
+    const narrativeDaysEl = $('step2-narrative-days');
+    if (narrativeDaysEl) narrativeDaysEl.textContent = '14 days';
+
     if (chart && chart.data.datasets[1]) {
         chart.data.datasets[1].hidden = true;
-        chart.update();
+        updateChartCurves(2520, 14);
     }
 
     setState('normal');
@@ -200,7 +257,77 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Live events from the server / mobile trigger
-socket.on('LOGISTICS_DISRUPTION_ALERT', () => switchStep(2));
+socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
+    if (data) {
+        currentSavings = data.projectedSavings || (data.dailyCost ? Math.round(data.dailyCost * (data.delayDays || 14)) : 2520);
+        currentDelayDays = data.delayDays || 14;
+        currentDelayLabel = data.delayLabel || `${currentDelayDays} days`;
+        activeBudgetModel = data.budgetModel || null;
+
+        // Update Step 2 metrics
+        const idleWasteEl = $('step2-idle-waste');
+        if (idleWasteEl) idleWasteEl.textContent = `$${currentSavings.toLocaleString()}`;
+
+        const wasteMathEl = $('step2-waste-math');
+        if (wasteMathEl) wasteMathEl.textContent = `$${data.dailyCost || 180}/day × ${currentDelayLabel}`;
+
+        const leadTimeEl = $('step2-lead-time');
+        if (leadTimeEl) leadTimeEl.textContent = `+${currentDelayLabel}`;
+
+        const narrativeDaysEl = $('step2-narrative-days');
+        if (narrativeDaysEl) narrativeDaysEl.textContent = currentDelayLabel;
+
+        // Update Predictive Model Cards
+        if (activeBudgetModel) {
+            const bDisp = $('model-budget-display');
+            if (bDisp) bDisp.textContent = `$${activeBudgetModel.monthlyBudget.toLocaleString()}`;
+
+            const uDisp = $('model-usage-display');
+            if (uDisp) uDisp.textContent = `${activeBudgetModel.historicalUsageRate.toFixed(1)}%`;
+
+            const rSub = $('model-risk-sub');
+            if (rSub) rSub.textContent = `${activeBudgetModel.idleRiskRate.toFixed(1)}% idle risk rate`;
+
+            const pExp = $('model-predicted-expense');
+            if (pExp) pExp.textContent = `$${activeBudgetModel.predictedCycleExpenseWithShield.toLocaleString()}`;
+
+            const sSub = $('model-savings-sub');
+            if (sSub) sSub.textContent = `Saves ${activeBudgetModel.savingsPct.toFixed(1)}% of budget`;
+
+            const rBuf = $('model-reserve-buffer');
+            if (rBuf) rBuf.textContent = `$${activeBudgetModel.recommendedReserveAmount.toLocaleString()}`;
+
+            const recSub = $('model-reserve-sub');
+            if (recSub) recSub.textContent = `${activeBudgetModel.recommendedReservePct}% capital shield`;
+
+            const recChip = $('model-recommendation-chip');
+            if (recChip) recChip.textContent = `Recommendation: Shield ${activeBudgetModel.recommendedReservePct}% Reserve ($${activeBudgetModel.recommendedReserveAmount.toLocaleString()})`;
+        }
+
+        // Update JSON Preview
+        const jsonDays = $('json-delay-days');
+        if (jsonDays) jsonDays.textContent = currentDelayDays;
+        const jsonLabel = $('json-delay-label');
+        if (jsonLabel) jsonLabel.textContent = `"${currentDelayLabel}"`;
+        const jsonWaste = $('json-waste');
+        if (jsonWaste) jsonWaste.textContent = `${currentSavings.toFixed(2)}`;
+
+        if (activeBudgetModel) {
+            const jBud = $('json-budget');
+            if (jBud) jBud.textContent = `${activeBudgetModel.monthlyBudget.toFixed(2)}`;
+            const jUse = $('json-usage');
+            if (jUse) jUse.textContent = `${activeBudgetModel.historicalUsageRate.toFixed(1)}`;
+            const jExp = $('json-pred-expense');
+            if (jExp) jExp.textContent = `${activeBudgetModel.predictedCycleExpenseWithShield.toFixed(2)}`;
+            const jRec = $('json-rec-pct');
+            if (jRec) jRec.textContent = `${activeBudgetModel.recommendedReservePct}`;
+        }
+
+        updateChartCurves(currentSavings, currentDelayDays);
+    }
+    switchStep(2);
+});
+
 socket.on('PROTECTION_CONFIRMED', () => { if (!isExecuted) executeProtectionNow(); });
 socket.on('RESET_DEMO_BROADCAST', () => resetWholeDemo(false));
 socket.on('INIT_STATE', (data) => {

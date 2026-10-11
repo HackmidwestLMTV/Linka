@@ -165,7 +165,7 @@
                 <div class="max-w-2xl">
                     <p class="eyebrow text-red-400">Step 2 · Disruption detected</p>
                     <h2 class="text-4xl font-semibold text-white mt-2">Customs hold on Batch #104.</h2>
-                    <p class="text-[17px] text-red-100/90 mt-3">A Section 301 tariff review adds 14 days. The Akamai pipeline will sit idle the whole time.</p>
+                    <p id="step2-narrative" class="text-[17px] text-red-100/90 mt-3">A Section 301 tariff review adds <span id="step2-narrative-days" class="font-semibold text-white">14 days</span>. The Akamai pipeline will sit idle the whole time.</p>
                 </div>
                 <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-500 hover:bg-red-400 text-white text-[16px] font-semibold transition shrink-0 flex items-center gap-2">
                     See agent decision <i class="fa-solid fa-arrow-right text-[14px]"></i>
@@ -175,31 +175,83 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="vision-glass p-7">
                     <p class="label">Projected idle waste</p>
-                    <p class="num text-[38px] font-semibold text-amber-300 mt-1">$2,520</p>
-                    <p class="text-[15px] text-neutral-400 mt-1">$180/day × 14 days</p>
+                    <p id="step2-idle-waste" class="num text-[38px] font-semibold text-amber-300 mt-1">$2,520</p>
+                    <p id="step2-waste-math" class="text-[15px] text-neutral-400 mt-1">$180/day × 14 days</p>
                 </div>
                 <div class="vision-glass p-7">
                     <p class="label">Added lead time</p>
-                    <p class="num text-[38px] font-semibold text-red-400 mt-1">+14 days</p>
-                    <p class="text-[15px] text-neutral-400 mt-1">Tariff compliance review</p>
+                    <p id="step2-lead-time" class="num text-[38px] font-semibold text-red-400 mt-1">+14 days</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">Customs quarantine duration</p>
                 </div>
                 <div class="vision-glass p-7">
                     <p class="label">Expected utilization</p>
                     <p class="num text-[38px] font-semibold text-white mt-1">0%</p>
-                    <p class="text-[15px] text-neutral-400 mt-1">No inventory to sync</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">No cargo to process</p>
                 </div>
             </div>
 
+            <!-- Predictive Compute Budget & Expense Model -->
+            <div class="vision-glass p-7 space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="h-9 w-9 rounded-xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center text-sky-400 text-base">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-[18px] font-semibold text-white">Compute Budget & Expense Estimation Model</h3>
+                            <p class="text-[14px] text-neutral-400">Dynamic cycle prediction calibrated to previous usage efficiency</p>
+                        </div>
+                    </div>
+                    <span id="model-recommendation-chip" class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 w-fit">
+                        Recommendation: Shield 32% Reserve
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="vision-card p-4">
+                        <p class="label text-xs">Allocated Compute Budget</p>
+                        <p id="model-budget-display" class="num text-[22px] font-semibold text-white mt-1">$5,400</p>
+                        <p id="model-period-sub" class="text-[12px] text-neutral-400 mt-0.5">30-day baseline cycle</p>
+                    </div>
+                    <div class="vision-card p-4">
+                        <p class="label text-xs">Previous Usage Efficiency</p>
+                        <p id="model-usage-display" class="num text-[22px] font-semibold text-sky-400 mt-1">72.0%</p>
+                        <p id="model-risk-sub" class="text-[12px] text-neutral-400 mt-0.5">28.0% idle risk rate</p>
+                    </div>
+                    <div class="vision-card p-4">
+                        <p class="label text-xs">Predicted Protected Expense</p>
+                        <p id="model-predicted-expense" class="num text-[22px] font-semibold text-emerald-400 mt-1">$2,880</p>
+                        <p id="model-savings-sub" class="text-[12px] text-neutral-400 mt-0.5">Saves 46.7% of budget</p>
+                    </div>
+                    <div class="vision-card p-4">
+                        <p class="label text-xs">Recommended Reserve Buffer</p>
+                        <p id="model-reserve-buffer" class="num text-[22px] font-semibold text-amber-300 mt-1">$1,728</p>
+                        <p id="model-reserve-sub" class="text-[12px] text-neutral-400 mt-0.5">32% capital shield</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Intercepted Logistics JSON Payload -->
             <div class="vision-glass p-7 space-y-4">
-                <h3 class="text-[17px] font-semibold text-white">Intercepted logistics event</h3>
-                <pre class="font-mono text-[14px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/50 border border-white/[0.06] overflow-x-auto">{
+                <div class="flex items-center justify-between">
+                    <h3 class="text-[17px] font-semibold text-white">Intercepted logistics telemetry</h3>
+                    <span class="text-xs font-mono text-neutral-400">WebSocket ➔ FinOps Engine</span>
+                </div>
+                <pre id="step2-json-preview" class="font-mono text-[13px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/60 border border-white/[0.08] overflow-x-auto">{
   <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
   <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"Batch-104"</span>,
   <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
-  <span class="text-emerald-400">"delayDays"</span>: <span class="text-amber-300">14</span>,
+  <span class="text-emerald-400">"delayDays"</span>: <span id="json-delay-days" class="text-amber-300">14</span>,
+  <span class="text-emerald-400">"delayLabel"</span>: <span id="json-delay-label" class="text-amber-300">"14 days"</span>,
   <span class="text-emerald-400">"provider"</span>: <span class="text-sky-300">"Akamai Connected Cloud"</span>,
   <span class="text-emerald-400">"taggedLinodes"</span>: [<span class="text-sky-300">"linode-9842104"</span>, <span class="text-sky-300">"linode-9842105"</span>],
-  <span class="text-emerald-400">"projectedWaste"</span>: <span class="text-red-400">2520.00</span>
+  <span class="text-emerald-400">"projectedWaste"</span>: <span id="json-waste" class="text-red-400">2520.00</span>,
+  <span class="text-emerald-400">"budgetModel"</span>: {
+    <span class="text-emerald-400">"monthlyBudget"</span>: <span id="json-budget" class="text-sky-300">5400.00</span>,
+    <span class="text-emerald-400">"historicalUsageRate"</span>: <span id="json-usage" class="text-sky-300">72.0</span>,
+    <span class="text-emerald-400">"predictedCycleExpense"</span>: <span id="json-pred-expense" class="text-emerald-400">2880.00</span>,
+    <span class="text-emerald-400">"recommendedReservePct"</span>: <span id="json-rec-pct" class="text-amber-300">32</span>
+  }
 }</pre>
             </div>
         </section>
