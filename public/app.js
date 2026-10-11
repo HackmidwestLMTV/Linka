@@ -1,6 +1,7 @@
 // Linka dashboard logic: step navigation, protection flow, and live socket sync.
 const socket = io();
 const $ = (id) => document.getElementById(id);
+const getEl = (...ids) => ids.map(id => $(id)).find(Boolean);
 
 const TOTAL_STEPS = 4;
 let currentStep = 1;
@@ -14,35 +15,46 @@ const EXECUTE_BTN_DEFAULT = {
 
 // Header status presets
 const STATES = {
-    normal:    { dot: 'dot dot-green', text: 'Operating normally',   aws: 'Running · $180/day',    awsColor: 'text-emerald-400' },
-    alert:     { dot: 'dot dot-red',   text: 'Tariff hold detected', aws: 'Idle burn · $180/day',  awsColor: 'text-red-400' },
-    protected: { dot: 'dot dot-green', text: 'Capital protected',    aws: 'Hibernated · $0/day',   awsColor: 'text-sky-400' }
+    normal:    { dot: 'dot dot-green', text: 'Operating normally',   cloud: 'Running · $180/day',    cloudColor: 'text-emerald-400' },
+    alert:     { dot: 'dot dot-red',   text: 'Tariff hold detected', cloud: 'Idle burn · $180/day',  cloudColor: 'text-red-400' },
+    protected: { dot: 'dot dot-green', text: 'Capital protected',    cloud: 'Hibernated · $0/day',   cloudColor: 'text-sky-400' }
 };
 
 function setState(name) {
     const s = STATES[name];
-    $('global-pulse-dot').className = s.dot;
-    $('global-status-text').textContent = s.text;
-    const aws = $('header-aws-status');
-    aws.textContent = s.aws;
-    aws.className = `num font-medium ${s.awsColor}`;
+    const dot = $('global-pulse-dot');
+    const statusText = $('global-status-text');
+    if (dot) dot.className = s.dot;
+    if (statusText) statusText.textContent = s.text;
+
+    const cloud = getEl('header-cloud-status', 'header-aws-status');
+    if (cloud) {
+        cloud.textContent = s.cloud;
+        cloud.className = `num font-medium ${s.cloudColor}`;
+    }
 }
 
 function switchStep(step) {
     currentStep = step;
     for (let i = 1; i <= TOTAL_STEPS; i++) {
-        $(`step-${i}-content`).classList.toggle('hidden', i !== step);
+        const content = $(`step-${i}-content`);
         const btn = $(`step-btn-${i}`);
-        btn.classList.toggle('vision-step-active', i === step);
-        btn.setAttribute('aria-selected', i === step);
+        if (content) content.classList.toggle('hidden', i !== step);
+        if (btn) {
+            btn.classList.toggle('vision-step-active', i === step);
+            btn.setAttribute('aria-selected', i === step);
+        }
     }
     if (step >= 2 && !isExecuted) setState('alert');
 }
 
 function initChart() {
+    const chartEl = $('cashFlowChart');
+    if (!chartEl) return;
+
     const muted = '#c7c7cc';
     const chartFont = { family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif', size: 14 };
-    chart = new Chart($('cashFlowChart').getContext('2d'), {
+    chart = new Chart(chartEl.getContext('2d'), {
         type: 'line',
         data: {
             labels: ['Day 1', 'Day 5', 'Day 10', 'Day 14', 'Day 20', 'Day 25', 'Day 30'],
@@ -97,21 +109,40 @@ function executeProtectionNow() {
     if (isExecuted) return;
     isExecuted = true;
 
-    $('saved-amount-display').textContent = '$2,520';
-    $('saved-amount-display').className = 'num text-[38px] font-semibold text-emerald-400 mt-1';
-    $('aws-burn-display').textContent = '$0/day';
-    $('aws-burn-display').className = 'num font-medium text-emerald-400';
-    $('aws-cluster-status').textContent = 'Hibernated';
-    $('aws-cluster-status').className = 'font-medium text-sky-400';
-    $('chart-status-badge').textContent = 'Protected · $2,520 saved';
-    $('chart-status-badge').className = 'text-[14px] text-emerald-400';
+    const savedEl = $('saved-amount-display');
+    if (savedEl) {
+        savedEl.textContent = '$2,520';
+        savedEl.className = 'num text-[38px] font-semibold text-emerald-400 mt-1';
+    }
+
+    const burnEl = getEl('cloud-burn-display', 'aws-burn-display');
+    if (burnEl) {
+        burnEl.textContent = '$0/day';
+        burnEl.className = 'num font-medium text-emerald-400';
+    }
+
+    const clusterEl = getEl('cloud-cluster-status', 'aws-cluster-status');
+    if (clusterEl) {
+        clusterEl.textContent = 'Hibernated';
+        clusterEl.className = 'font-medium text-sky-400';
+    }
+
+    const badgeEl = $('chart-status-badge');
+    if (badgeEl) {
+        badgeEl.textContent = 'Protected · $2,520 saved';
+        badgeEl.className = 'text-[14px] text-emerald-400';
+    }
 
     const btn = $('execute-now-btn');
-    btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[16px] flex items-center gap-2 shrink-0 cursor-default';
-    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Protected';
+    if (btn) {
+        btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[16px] flex items-center gap-2 shrink-0 cursor-default';
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Protected';
+    }
 
-    chart.data.datasets[1].hidden = false;
-    chart.update();
+    if (chart && chart.data.datasets[1]) {
+        chart.data.datasets[1].hidden = false;
+        chart.update();
+    }
 
     setState('protected');
     socket.emit('EXECUTE_PROTECTION', { projectedSavings: 2520 });
@@ -120,21 +151,40 @@ function executeProtectionNow() {
 function resetWholeDemo() {
     isExecuted = false;
 
-    $('saved-amount-display').textContent = '$0';
-    $('saved-amount-display').className = 'num text-[38px] font-semibold text-neutral-400 mt-1';
-    $('aws-burn-display').textContent = '$180/day';
-    $('aws-burn-display').className = 'num font-medium text-red-400';
-    $('aws-cluster-status').textContent = 'Running';
-    $('aws-cluster-status').className = 'font-medium text-emerald-400';
-    $('chart-status-badge').textContent = 'Unprotected';
-    $('chart-status-badge').className = 'text-[14px] text-red-400';
+    const savedEl = $('saved-amount-display');
+    if (savedEl) {
+        savedEl.textContent = '$0';
+        savedEl.className = 'num text-[38px] font-semibold text-neutral-400 mt-1';
+    }
+
+    const burnEl = getEl('cloud-burn-display', 'aws-burn-display');
+    if (burnEl) {
+        burnEl.textContent = '$180/day';
+        burnEl.className = 'num font-medium text-red-400';
+    }
+
+    const clusterEl = getEl('cloud-cluster-status', 'aws-cluster-status');
+    if (clusterEl) {
+        clusterEl.textContent = 'Running';
+        clusterEl.className = 'font-medium text-emerald-400';
+    }
+
+    const badgeEl = $('chart-status-badge');
+    if (badgeEl) {
+        badgeEl.textContent = 'Unprotected';
+        badgeEl.className = 'text-[14px] text-red-400';
+    }
 
     const btn = $('execute-now-btn');
-    btn.className = EXECUTE_BTN_DEFAULT.className;
-    btn.innerHTML = EXECUTE_BTN_DEFAULT.html;
+    if (btn) {
+        btn.className = EXECUTE_BTN_DEFAULT.className;
+        btn.innerHTML = EXECUTE_BTN_DEFAULT.html;
+    }
 
-    chart.data.datasets[1].hidden = true;
-    chart.update();
+    if (chart && chart.data.datasets[1]) {
+        chart.data.datasets[1].hidden = true;
+        chart.update();
+    }
 
     setState('normal');
     switchStep(1);
