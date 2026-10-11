@@ -72,7 +72,7 @@ npm start
 
 Open:
 - **Dashboard:** [http://localhost:3000](http://localhost:3000)
-- **Phone trigger:** [ http://172.237.128.254:3000/trigger.html)
+- **Phone trigger:** [http://172.237.128.254:3000/trigger.html)
 
 ---
 
