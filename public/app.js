@@ -1,4 +1,5 @@
-// Linka dashboard logic: step navigation, dynamic disruption models, and live socket sync.
+// Linka Dashboard Logic: Flex Commercial Banking API Integration,
+// Step Navigation, Dynamic Disruption Models, and Live Socket Sync.
 const socket = io();
 const $ = (id) => document.getElementById(id);
 const getEl = (...ids) => ids.map(id => $(id)).find(Boolean);
@@ -8,18 +9,35 @@ let currentStep = 1;
 let isExecuted = false;
 let chart = null;
 
-// Dynamic model state (customizable via remote)
-let currentSavings = 2520;
-let currentDelayDays = 14;
-let currentDelayLabel = "14 days";
+// Active Business State (Default: Ace Art Global Trading Ltd)
+let activeBusinessId = "ace-art";
+let activeAccountData = null;
+
+// Dynamic model state (customizable via remote controller or Flex API)
+let currentSavings = 3780;
+let currentDelayDays = 18;
+let currentDelayLabel = "18 days";
+let activeDailyCost = 210;
+let activeBaseCapital = 342800;
+
 let activeBudgetModel = {
-    monthlyBudget: 5400,
+    monthlyBudget: 6300,
     historicalUsageRate: 72.0,
     idleRiskRate: 28.0,
     recommendedReservePct: 32,
-    recommendedReserveAmount: 1728,
-    predictedCycleExpenseWithShield: 2880,
-    savingsPct: 46.7
+    recommendedReserveAmount: 2016,
+    predictedCycleExpenseWithShield: 3528,
+    savingsPct: 44.0,
+    clientAnnualExpense: 270000,
+    clientMonthlyBurn: 22500,
+    clientExpenseRatio: 28.0,
+    businessName: "Ace Art Global Trading Ltd",
+    aiAdvisor: {
+        advisedFutureUsagePct: 64.4,
+        confidenceScore: 95.8,
+        reasoning: "AI calibrated against Ace Art's 3D render workloads and 18-day CITES provenance quarantine.",
+        mode: "ELASTIC_FINOPS"
+    }
 };
 
 const EXECUTE_BTN_DEFAULT = {
@@ -28,14 +46,18 @@ const EXECUTE_BTN_DEFAULT = {
 };
 
 // Header status presets
-const STATES = {
-    normal:    { dot: 'dot dot-green', text: 'Operating normally',   cloud: 'Running · $180/day',    cloudColor: 'text-emerald-400' },
-    alert:     { dot: 'dot dot-red',   text: 'Tariff hold detected', cloud: 'Idle burn · $180/day',  cloudColor: 'text-red-400' },
-    protected: { dot: 'dot dot-green', text: 'Capital protected',    cloud: 'Hibernated · $0/day',   cloudColor: 'text-sky-400' }
-};
+function getHeaderStates() {
+    const dailyStr = `$${activeDailyCost}/day`;
+    return {
+        normal:    { dot: 'dot dot-green', text: 'Operating normally',   cloud: `Running · ${dailyStr}`,    cloudColor: 'text-emerald-400' },
+        alert:     { dot: 'dot dot-red',   text: 'Quarantine hold detected', cloud: `Idle burn · ${dailyStr}`,  cloudColor: 'text-red-400' },
+        protected: { dot: 'dot dot-green', text: 'Capital protected',    cloud: 'Hibernated · $0/day',   cloudColor: 'text-sky-400' }
+    };
+}
 
 function setState(name) {
-    const s = STATES[name];
+    const states = getHeaderStates();
+    const s = states[name] || states.normal;
     const dot = $('global-pulse-dot');
     const statusText = $('global-status-text');
     if (dot) dot.className = s.dot;
@@ -62,31 +84,34 @@ function switchStep(step) {
     if (step >= 2 && !isExecuted) setState('alert');
 }
 
-function updateChartCurves(savedAmount = 2520, delayDays = 14) {
+/**
+ * Update Chart curves dynamically calibrated to active business working capital & daily burn
+ */
+function updateChartCurves(savedAmount = currentSavings, delayDays = currentDelayDays) {
     if (!chart) return;
-    const baseCapital = 248500;
-    const dailyLoss = 180;
-    
+    const baseCapital = activeBaseCapital || 342800;
+    const dailyLoss = activeDailyCost || 210;
+
     // Dataset 0: Unprotected bleed
     chart.data.datasets[0].data = [
         baseCapital,
-        baseCapital - (dailyLoss * 4),
-        baseCapital - (dailyLoss * 9),
-        baseCapital - Math.min(savedAmount, dailyLoss * 14),
-        baseCapital - Math.min(savedAmount + 1000, dailyLoss * 20),
-        baseCapital - Math.min(savedAmount + 2000, dailyLoss * 25),
-        baseCapital - Math.min(savedAmount + 3000, dailyLoss * 30)
+        Math.round(baseCapital - (dailyLoss * 4)),
+        Math.round(baseCapital - (dailyLoss * 9)),
+        Math.round(baseCapital - Math.min(savedAmount, dailyLoss * 14)),
+        Math.round(baseCapital - Math.min(savedAmount + (dailyLoss * 4), dailyLoss * 20)),
+        Math.round(baseCapital - Math.min(savedAmount + (dailyLoss * 7), dailyLoss * 25)),
+        Math.round(baseCapital - Math.min(savedAmount + (dailyLoss * 10), dailyLoss * 30))
     ];
 
     // Dataset 1: Protected with Linka shield
     chart.data.datasets[1].data = [
         baseCapital,
-        baseCapital - (dailyLoss * 4),
-        baseCapital - (dailyLoss * 7),
-        baseCapital - (dailyLoss * 7), // shielded point
-        baseCapital - (dailyLoss * 7.5),
-        baseCapital - (dailyLoss * 8),
-        baseCapital - (dailyLoss * 8.2)
+        Math.round(baseCapital - (dailyLoss * 4)),
+        Math.round(baseCapital - (dailyLoss * 7)),
+        Math.round(baseCapital - (dailyLoss * 7)), // Shielded point: flatline!
+        Math.round(baseCapital - (dailyLoss * 7.4)),
+        Math.round(baseCapital - (dailyLoss * 7.8)),
+        Math.round(baseCapital - (dailyLoss * 8.0))
     ];
 
     chart.update();
@@ -98,6 +123,9 @@ function initChart() {
 
     const muted = '#c7c7cc';
     const chartFont = { family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif', size: 14 };
+    const baseCapital = activeBaseCapital || 342800;
+    const dailyLoss = activeDailyCost || 210;
+
     chart = new Chart(chartEl.getContext('2d'), {
         type: 'line',
         data: {
@@ -105,7 +133,15 @@ function initChart() {
             datasets: [
                 {
                     label: 'Without Linka',
-                    data: [248500, 245000, 241000, 237000, 233000, 229000, 225000],
+                    data: [
+                        baseCapital,
+                        baseCapital - (dailyLoss * 4),
+                        baseCapital - (dailyLoss * 9),
+                        baseCapital - (dailyLoss * 14),
+                        baseCapital - (dailyLoss * 20),
+                        baseCapital - (dailyLoss * 25),
+                        baseCapital - (dailyLoss * 30)
+                    ],
                     borderColor: '#ff453a',
                     borderDash: [5, 5],
                     borderWidth: 2,
@@ -113,8 +149,16 @@ function initChart() {
                     tension: 0.35
                 },
                 {
-                    label: 'With Linka',
-                    data: [248500, 245000, 241000, 241000, 240500, 240000, 239800],
+                    label: 'With Linka Shield',
+                    data: [
+                        baseCapital,
+                        baseCapital - (dailyLoss * 4),
+                        baseCapital - (dailyLoss * 7),
+                        baseCapital - (dailyLoss * 7),
+                        baseCapital - (dailyLoss * 7.4),
+                        baseCapital - (dailyLoss * 7.8),
+                        baseCapital - (dailyLoss * 8.0)
+                    ],
                     borderColor: '#34c759',
                     backgroundColor: 'rgba(52, 199, 89, 0.08)',
                     borderWidth: 3,
@@ -143,15 +187,34 @@ function initChart() {
             },
             scales: {
                 x: { grid: { display: false }, ticks: { color: muted, font: chartFont } },
-                y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: muted, font: chartFont, callback: (v) => `$${v / 1000}k` } }
+                y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: muted, font: chartFont, callback: (v) => `$${(v / 1000).toFixed(0)}k` } }
             }
         }
     });
 }
 
-function executeProtectionNow() {
+/**
+ * Execute capital protection:
+ * Hibernates Akamai Linodes and locks Capital Shield escrow reserve via Flex API
+ */
+async function executeProtectionNow() {
     if (isExecuted) return;
     isExecuted = true;
+
+    // Call Flex Commercial Banking API to allocate Capital Shield reserve
+    try {
+        await fetch('/api/flex/capital-shield', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                businessId: activeBusinessId,
+                amount: activeBudgetModel ? activeBudgetModel.recommendedReserveAmount : 2016,
+                action: 'ALLOCATE'
+            })
+        });
+    } catch (err) {
+        console.warn('Flex capital shield API call:', err);
+    }
 
     const savedEl = $('saved-amount-display');
     if (savedEl) {
@@ -173,14 +236,14 @@ function executeProtectionNow() {
 
     const badgeEl = $('chart-status-badge');
     if (badgeEl) {
-        badgeEl.textContent = `Protected · $${currentSavings.toLocaleString()} saved`;
+        badgeEl.textContent = `Protected · $${currentSavings.toLocaleString()} preserved`;
         badgeEl.className = 'text-[14px] text-emerald-400';
     }
 
     const btn = $('execute-now-btn');
     if (btn) {
         btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[16px] flex items-center gap-2 shrink-0 cursor-default';
-        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Protected';
+        btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Capital protected in Flex account';
     }
 
     if (chart && chart.data.datasets[1]) {
@@ -189,14 +252,33 @@ function executeProtectionNow() {
     }
 
     setState('protected');
-    socket.emit('EXECUTE_PROTECTION', { projectedSavings: currentSavings, batchId: "Batch-104" });
+    socket.emit('EXECUTE_PROTECTION', {
+        projectedSavings: currentSavings,
+        batchId: activeAccountData?.activeShipment?.batchTag || (activeBusinessId === 'ace-art' ? "AceArt-402" : "Batch-104"),
+        businessId: activeBusinessId
+    });
 }
 
+/**
+ * Resets the demo state back to normal baseline
+ */
 function resetWholeDemo(emitEvent = true) {
     isExecuted = false;
-    currentSavings = 2520;
-    currentDelayDays = 14;
-    currentDelayLabel = "14 days";
+
+    // Default savings and delay calibrated to active business
+    if (activeBusinessId === 'ace-art') {
+        currentSavings = 3780;
+        currentDelayDays = 18;
+        currentDelayLabel = "18 days";
+        activeDailyCost = 210;
+        activeBaseCapital = 342800;
+    } else {
+        currentSavings = 2520;
+        currentDelayDays = 14;
+        currentDelayLabel = "14 days";
+        activeDailyCost = 180;
+        activeBaseCapital = 248500;
+    }
 
     const savedEl = $('saved-amount-display');
     if (savedEl) {
@@ -206,7 +288,7 @@ function resetWholeDemo(emitEvent = true) {
 
     const burnEl = getEl('cloud-burn-display', 'akamai-burn-display');
     if (burnEl) {
-        burnEl.textContent = '$180/day';
+        burnEl.textContent = `$${activeDailyCost}/day`;
         burnEl.className = 'num font-medium text-red-400';
     }
 
@@ -228,56 +310,23 @@ function resetWholeDemo(emitEvent = true) {
         btn.innerHTML = EXECUTE_BTN_DEFAULT.html;
     }
 
-    // Reset Step 2 cards to defaults
+    // Refresh Step 2 metrics for active business
     const idleWasteEl = $('step2-idle-waste');
-    if (idleWasteEl) idleWasteEl.textContent = '$2,520';
+    if (idleWasteEl) idleWasteEl.textContent = `$${currentSavings.toLocaleString()}`;
     const wasteMathEl = $('step2-waste-math');
-    if (wasteMathEl) wasteMathEl.textContent = '$180/day × 14 days';
+    if (wasteMathEl) wasteMathEl.textContent = `$${activeDailyCost}/day × ${currentDelayLabel}`;
     const leadTimeEl = $('step2-lead-time');
-    if (leadTimeEl) leadTimeEl.textContent = '+14 days';
+    if (leadTimeEl) leadTimeEl.textContent = `+${currentDelayLabel}`;
     const narrativeDaysEl = $('step2-narrative-days');
-    if (narrativeDaysEl) narrativeDaysEl.textContent = '14 days';
+    if (narrativeDaysEl) narrativeDaysEl.textContent = currentDelayLabel;
 
-    const ratioDisp = $('model-ratio-display');
-    if (ratioDisp) ratioDisp.textContent = '38.0%';
-    const bDisp = $('model-budget-display');
-    if (bDisp) bDisp.textContent = '$5,400';
-    const annualProj = $('model-annual-proj');
-    if (annualProj) annualProj.textContent = '$64.8k/yr';
-    const bBadge = $('model-business-badge');
-    if (bBadge) bBadge.textContent = 'Flex Logistics';
-    const aExp = $('model-annual-expense');
-    if (aExp) aExp.textContent = '$170,400/yr';
-    const highOpFlag = $('high-op-flag');
-    if (highOpFlag) highOpFlag.classList.add('hidden');
-
-    const uDisp = $('model-usage-display');
-    if (uDisp) uDisp.textContent = '72.0%';
-    const rSub = $('model-risk-sub');
-    if (rSub) rSub.textContent = '28.0% idle risk rate';
-    const pExp = $('model-predicted-expense');
-    if (pExp) pExp.textContent = '$2,880';
-    const sSub = $('model-savings-sub');
-    if (sSub) sSub.textContent = 'Saves 46.7% of budget';
-    const rBuf = $('model-reserve-buffer');
-    if (rBuf) rBuf.textContent = '$1,728';
-    const recSub = $('model-reserve-sub');
-    if (recSub) recSub.textContent = '32% capital shield';
-    const recChip = $('model-recommendation-chip');
-    if (recChip) recChip.textContent = 'Recommendation: Shield 32% Reserve ($1,728)';
-
-    const aiPct = $('ai-banner-pct');
-    if (aiPct) aiPct.textContent = '68.0%';
-    const aiConf = $('ai-banner-conf');
-    if (aiConf) aiConf.textContent = '95.4%';
-    const aiReason = $('ai-banner-reasoning');
-    if (aiReason) aiReason.textContent = 'AI calibrated against historical Linode compute and 14-day tariff quarantine hold.';
-    const aiTag = $('ai-banner-tag');
-    if (aiTag) aiTag.textContent = 'ELASTIC_FINOPS';
+    if (activeAccountData) {
+        renderBusinessData(activeAccountData);
+    }
 
     if (chart && chart.data.datasets[1]) {
         chart.data.datasets[1].hidden = true;
-        updateChartCurves(2520, 14);
+        updateChartCurves(currentSavings, currentDelayDays);
     }
 
     setState('normal');
@@ -287,18 +336,269 @@ function resetWholeDemo(emitEvent = true) {
     }
 }
 
-// Arrow keys step through the demo during the live pitch
+/**
+ * Renders verified business details directly from the Flex API
+ */
+function renderBusinessData(account) {
+    if (!account) return;
+    activeAccountData = account;
+    activeBaseCapital = account.treasuryBalance || 342800;
+    activeDailyCost = account.cloudComputeDailyCost || 210;
+
+    // Header cloud status
+    const cloudEl = $('header-cloud-status');
+    if (cloudEl && !isExecuted) {
+        cloudEl.textContent = `Running · $${activeDailyCost}/day`;
+    }
+
+    // Switcher buttons state
+    const btnAce = $('biz-btn-ace');
+    const btnLogistics = $('biz-btn-logistics');
+    if (btnAce && btnLogistics) {
+        if (account.businessId === 'ace-art') {
+            btnAce.className = "px-3 py-1.5 rounded-lg transition font-semibold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5";
+            btnLogistics.className = "px-3 py-1.5 rounded-lg transition text-neutral-400 hover:text-white flex items-center gap-1.5";
+        } else {
+            btnAce.className = "px-3 py-1.5 rounded-lg transition text-neutral-400 hover:text-white flex items-center gap-1.5";
+            btnLogistics.className = "px-3 py-1.5 rounded-lg transition font-semibold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5";
+        }
+    }
+
+    // Step 1 Company badges & narrative
+    const bBadge = $('step1-company-badge');
+    if (bBadge) bBadge.textContent = account.companyName;
+
+    const s1Narrative = $('step1-narrative');
+    if (s1Narrative) {
+        if (account.businessId === 'ace-art') {
+            s1Narrative.textContent = "Flex monitors fine art consignment PO #402 while Akamai Connected Cloud 3D render clusters process incoming digital exhibits normally.";
+        } else {
+            s1Narrative.textContent = "Flex tracks Freight Batch #104 while its Akamai Connected Cloud telemetry ingest pipeline runs normally.";
+        }
+    }
+
+    // Flex Commercial Banking card
+    const nameEl = $('flex-biz-name');
+    if (nameEl) nameEl.textContent = account.companyName;
+
+    const acctEl = $('flex-acct-num');
+    if (acctEl) acctEl.textContent = account.flexAccountNumber;
+
+    const indEl = $('flex-industry-label');
+    if (indEl) indEl.textContent = `${account.industry} · ${account.website}`;
+
+    const balEl = $('flex-treasury-balance');
+    if (balEl) balEl.textContent = `$${account.treasuryBalance.toLocaleString()}`;
+
+    const burnEl = $('flex-monthly-burn');
+    if (burnEl) burnEl.textContent = `$${account.monthlyOperatingBurn.toLocaleString()}`;
+
+    const annSubEl = $('flex-annual-exp-sub');
+    if (annSubEl) annSubEl.textContent = `$${account.annualOperatingExpense.toLocaleString()}/yr total budget`;
+
+    // Active Shipment / Consignment Card
+    if (account.activeShipment) {
+        const s = account.activeShipment;
+        const poRouteEl = $('shipment-po-route');
+        if (poRouteEl) poRouteEl.textContent = `${s.poNumber} · ${s.origin} → ${s.destination}`;
+
+        const sTitleEl = $('shipment-title');
+        if (sTitleEl) sTitleEl.textContent = s.title;
+
+        const sValEl = $('shipment-value');
+        if (sValEl) sValEl.textContent = `$${s.consignmentValue.toLocaleString()}`;
+
+        const sModeEl = $('shipment-mode');
+        if (sModeEl) sModeEl.textContent = s.transitMode;
+
+        const sEtaEl = $('shipment-eta');
+        if (sEtaEl) sEtaEl.textContent = s.normalEta;
+    }
+
+    // Flex Corporate Ledger Transaction Feed (from Flex API)
+    const ledgerContainer = $('flex-ledger-list');
+    if (ledgerContainer && account.ledgerTransactions && account.ledgerTransactions.length > 0) {
+        ledgerContainer.innerHTML = account.ledgerTransactions.slice(0, 4).map(tx => {
+            const isNegative = tx.amount < 0;
+            const amtStr = `${isNegative ? '-' : '+'}$${Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            const amtClass = isNegative ? 'text-red-400' : 'text-emerald-400';
+            const iconClass = tx.category.includes('Cloud') ? 'fa-cloud text-sky-400 bg-sky-500/20' :
+                             tx.category.includes('Escrow') ? 'fa-arrow-down-left text-emerald-400 bg-emerald-500/20' :
+                             'fa-money-bill-transfer text-purple-400 bg-purple-500/20';
+
+            return `
+                <div class="vision-card p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="h-7 w-7 rounded-lg flex items-center justify-center text-xs ${iconClass}">
+                            <i class="fa-solid ${iconClass.split(' ')[0]}"></i>
+                        </div>
+                        <div>
+                            <p class="text-white font-medium truncate max-w-[280px]">${tx.description}</p>
+                            <p class="text-[11px] text-neutral-400">${tx.date} · ${tx.method}</p>
+                        </div>
+                    </div>
+                    <span class="${amtClass} font-bold font-mono ml-2 shrink-0">${amtStr}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Akamai Connected Cloud Compute Instances (Linodes)
+    const tagEl = $('akamai-tag-label');
+    if (tagEl) {
+        tagEl.innerHTML = `Linodes tagged <code class="font-mono text-neutral-300">${account.activeShipment?.batchTag || 'AceArt-402'}</code>`;
+    }
+
+    const linodeContainer = $('linode-resource-list');
+    if (linodeContainer && account.akamaiResources) {
+        linodeContainer.innerHTML = account.akamaiResources.map(res => `
+            <div class="vision-card p-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center ${res.type.includes('Dedicated') ? 'text-emerald-400' : 'text-sky-400'}">
+                        <i class="fa-solid ${res.type.includes('Dedicated') ? 'fa-database' : 'fa-server'} text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-[16px] font-medium text-white">${res.name}</h4>
+                        <p class="text-[14px] text-neutral-400">${res.type} · <span class="font-mono">${res.id}</span></p>
+                        <p class="text-[12px] text-neutral-400">${res.purpose || 'Active pipeline cluster'}</p>
+                    </div>
+                </div>
+                <p class="num text-[16px] text-white shrink-0">$${res.dailyCost}<span class="text-neutral-400">/day</span></p>
+            </div>
+        `).join('');
+    }
+
+    const dailyTotalEl = $('akamai-daily-total');
+    if (dailyTotalEl) dailyTotalEl.textContent = `$${account.cloudComputeDailyCost}/day`;
+
+    const monthlyTotalEl = $('akamai-monthly-total');
+    if (monthlyTotalEl) monthlyTotalEl.textContent = `$${account.cloudComputeMonthlyExpenditure.toLocaleString()}/mo`;
+
+    const ratioTotalEl = $('akamai-ratio-total');
+    if (ratioTotalEl) ratioTotalEl.textContent = `${account.cloudExpenseRatio.toFixed(1)}%`;
+
+    // Step 2 Headlines & Narrative
+    const s2Heading = $('step2-heading');
+    if (s2Heading) {
+        s2Heading.textContent = account.businessId === 'ace-art' 
+            ? "Customs & Provenance hold on PO #402." 
+            : "Customs hold on Batch #104.";
+    }
+
+    const s2Narrative = $('step2-narrative');
+    if (s2Narrative) {
+        if (account.businessId === 'ace-art') {
+            s2Narrative.innerHTML = `A CITES Provenance and customs clearance audit adds <span id="step2-narrative-days" class="font-semibold text-white">18 days</span>. Ace Art's Akamai render pipeline will sit idle the whole time.`;
+        } else {
+            s2Narrative.innerHTML = `A Section 301 tariff review adds <span id="step2-narrative-days" class="font-semibold text-white">14 days</span>. The Akamai pipeline will sit idle the whole time.`;
+        }
+    }
+
+    // Step 2 Models
+    const modelBadge = $('model-business-badge');
+    if (modelBadge) modelBadge.textContent = account.companyName;
+
+    const modelAnnExp = $('model-annual-expense');
+    if (modelAnnExp) modelAnnExp.textContent = `$${account.annualOperatingExpense.toLocaleString()}/yr`;
+
+    const modelBudgetDisp = $('model-budget-display');
+    if (modelBudgetDisp) modelBudgetDisp.textContent = `$${account.cloudComputeMonthlyExpenditure.toLocaleString()}`;
+
+    const modelRatioDisp = $('model-ratio-display');
+    if (modelRatioDisp) modelRatioDisp.textContent = `${account.cloudExpenseRatio.toFixed(1)}%`;
+
+    const modelAnnualProj = $('model-annual-proj');
+    if (modelAnnualProj) modelAnnualProj.textContent = `$${((account.cloudComputeMonthlyExpenditure * 12) / 1000).toFixed(1)}k/yr`;
+
+    // Step 3 Agent
+    const s3FlexEvent = $('step3-flex-event');
+    if (s3FlexEvent) {
+        s3FlexEvent.textContent = account.businessId === 'ace-art' ? "PO #402 delayed 18 days." : "Batch #104 delayed 14 days.";
+    }
+
+    const s3AgentText = $('step3-agent-text');
+    if (s3AgentText) {
+        const tag = account.activeShipment?.batchTag || (account.businessId === 'ace-art' ? 'AceArt-402' : 'Batch-104');
+        const waste = account.activeShipment?.idleBleedWaste || (account.businessId === 'ace-art' ? 3780 : 2520);
+        s3AgentText.innerHTML = `Matches the <code class="font-mono">${tag}</code> tag and computes $${waste.toLocaleString()} at risk.`;
+    }
+
+    // Step 4 Headline
+    const s4Headline = $('step4-headline');
+    if (s4Headline) {
+        const waste = account.activeShipment?.idleBleedWaste || (account.businessId === 'ace-art' ? 3780 : 2520);
+        s4Headline.textContent = `One click. $${waste.toLocaleString()} saved.`;
+    }
+
+    updateChartCurves(account.activeShipment?.idleBleedWaste || currentSavings, account.activeShipment?.disruptionDelayDays || currentDelayDays);
+}
+
+/**
+ * Switch active commercial business via Flex API
+ */
+async function selectBusiness(businessId) {
+    if (!businessId || businessId === activeBusinessId) return;
+    activeBusinessId = businessId;
+
+    try {
+        const res = await fetch('/api/flex/switch-business', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ businessId })
+        });
+        const data = await res.json();
+        if (data.success && data.account) {
+            renderBusinessData(data.account);
+        }
+    } catch (err) {
+        console.warn('Switch business error:', err);
+    }
+
+    if (socket && socket.connected) {
+        socket.emit('SWITCH_BUSINESS', { businessId });
+    }
+}
+
+/**
+ * Fetch initial business profile from Flex API on page load
+ */
+async function loadFlexBusinessProfile(businessId = "ace-art") {
+    try {
+        const res = await fetch(`/api/flex/accounts/${businessId}`);
+        const data = await res.json();
+        if (data.success && data.account) {
+            renderBusinessData(data.account);
+        }
+    } catch (err) {
+        console.warn('Load Flex business profile failed:', err);
+    }
+}
+
+// Arrow keys navigation
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' && currentStep < TOTAL_STEPS) switchStep(currentStep + 1);
     if (e.key === 'ArrowLeft' && currentStep > 1) switchStep(currentStep - 1);
 });
 
-// Live events from the server / mobile trigger
+// Live Socket.IO Events
+socket.on('BUSINESS_SWITCHED', (data) => {
+    if (data && data.account) {
+        activeBusinessId = data.businessId;
+        renderBusinessData(data.account);
+    }
+});
+
 socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
     if (data) {
-        currentSavings = data.projectedSavings || (data.dailyCost ? Math.round(data.dailyCost * (data.delayDays || 14)) : 2520);
-        currentDelayDays = data.delayDays || 14;
+        if (data.businessId && data.businessId !== activeBusinessId) {
+            activeBusinessId = data.businessId;
+            if (data.flexAccount) renderBusinessData(data.flexAccount);
+        }
+
+        currentSavings = data.projectedSavings || (data.dailyCost ? Math.round(data.dailyCost * (data.delayDays || 18)) : 3780);
+        currentDelayDays = data.delayDays || 18;
         currentDelayLabel = data.delayLabel || `${currentDelayDays} days`;
+        activeDailyCost = data.dailyCost || 210;
         activeBudgetModel = data.budgetModel || null;
 
         // Update Step 2 metrics
@@ -306,7 +606,7 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
         if (idleWasteEl) idleWasteEl.textContent = `$${currentSavings.toLocaleString()}`;
 
         const wasteMathEl = $('step2-waste-math');
-        if (wasteMathEl) wasteMathEl.textContent = `$${data.dailyCost || 180}/day × ${currentDelayLabel}`;
+        if (wasteMathEl) wasteMathEl.textContent = `$${activeDailyCost}/day × ${currentDelayLabel}`;
 
         const leadTimeEl = $('step2-lead-time');
         if (leadTimeEl) leadTimeEl.textContent = `+${currentDelayLabel}`;
@@ -323,7 +623,7 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
             if (ratioDisp) {
                 const ratioVal = activeBudgetModel.clientExpenseRatio !== undefined 
                     ? activeBudgetModel.clientExpenseRatio 
-                    : ((activeBudgetModel.monthlyBudget / (activeBudgetModel.clientMonthlyBurn || 14200)) * 100);
+                    : ((activeBudgetModel.monthlyBudget / (activeBudgetModel.clientMonthlyBurn || 22500)) * 100);
                 ratioDisp.textContent = `${Number(ratioVal).toFixed(1)}%`;
             }
 
@@ -392,9 +692,9 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
 
         if (activeBudgetModel) {
             const jBiz = $('json-business');
-            if (jBiz) jBiz.textContent = `"${activeBudgetModel.businessName || 'Flex Logistics'}"`;
+            if (jBiz) jBiz.textContent = `"${activeBudgetModel.businessName || 'Ace Art Global Trading Ltd'}"`;
             const jAnnExp = $('json-annual-expense');
-            if (jAnnExp) jAnnExp.textContent = `${(activeBudgetModel.clientAnnualExpense || 170400).toFixed(2)}`;
+            if (jAnnExp) jAnnExp.textContent = `${(activeBudgetModel.clientAnnualExpense || 270000).toFixed(2)}`;
             const jBud = $('json-budget');
             if (jBud) jBud.textContent = `${activeBudgetModel.monthlyBudget.toFixed(2)}`;
             const jAnnComp = $('json-annual-compute');
@@ -403,7 +703,7 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
             if (jRatio) {
                 const ratioVal = activeBudgetModel.clientExpenseRatio !== undefined 
                     ? activeBudgetModel.clientExpenseRatio 
-                    : ((activeBudgetModel.monthlyBudget / (activeBudgetModel.clientMonthlyBurn || 14200)) * 100);
+                    : ((activeBudgetModel.monthlyBudget / (activeBudgetModel.clientMonthlyBurn || 22500)) * 100);
                 jRatio.textContent = `"${Number(ratioVal).toFixed(1)}%"`;
             }
             const jUse = $('json-usage');
@@ -428,10 +728,20 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
 
 socket.on('PROTECTION_CONFIRMED', () => { if (!isExecuted) executeProtectionNow(); });
 socket.on('RESET_DEMO_BROADCAST', () => resetWholeDemo(false));
+
 socket.on('INIT_STATE', (data) => {
-    if (data && data.resources && data.resources.every(r => r.status === 'RUNNING')) {
-        resetWholeDemo(false);
+    if (data) {
+        if (data.currentAccount) {
+            activeBusinessId = data.activeBusinessId || "ace-art";
+            renderBusinessData(data.currentAccount);
+        }
+        if (data.resources && data.resources.every(r => r.status === 'RUNNING')) {
+            resetWholeDemo(false);
+        }
     }
 });
 
-document.addEventListener('DOMContentLoaded', initChart);
+document.addEventListener('DOMContentLoaded', () => {
+    initChart();
+    loadFlexBusinessProfile("ace-art");
+});

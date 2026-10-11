@@ -27,7 +27,7 @@
                 <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-flex to-emerald-500 flex items-center justify-center text-white font-bold border border-white/20">L</div>
                 <div class="leading-tight">
                     <h1 class="text-[19px] font-semibold text-white">Linka</h1>
-                    <p class="text-[14px] text-neutral-300">Flex + Akamai Cloud capital shield</p>
+                    <p class="text-[14px] text-neutral-300">Flex API + Akamai Cloud capital shield</p>
                 </div>
             </div>
 
@@ -38,14 +38,40 @@
                 </div>
                 <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
                     <i class="fa-solid fa-cloud text-sky-400"></i>
-                    <span id="header-cloud-status" class="num font-medium text-emerald-400">Running · $180/day</span>
+                    <span id="header-cloud-status" class="num font-medium text-emerald-400">Running · $210/day</span>
                 </div>
             </div>
         </div>
     </header>
 
+    <!-- Flex Commercial Business Switcher & Directory Bar -->
+    <div class="px-6 pt-4 flex justify-center">
+        <div class="max-w-6xl w-full flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md">
+            <div class="flex items-center gap-2.5">
+                <div class="h-7 w-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xs">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+                <div>
+                    <span class="text-xs uppercase font-mono tracking-wider text-emerald-400 font-semibold">Flex Commercial Banking API</span>
+                    <span class="text-xs text-neutral-400 ml-2 hidden md:inline">Live Registered Business Registry & Cloud Expenditure</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/[0.08] text-xs font-mono">
+                <button type="button" onclick="selectBusiness('ace-art')" id="biz-btn-ace" class="px-3 py-1.5 rounded-lg transition font-semibold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
+                    <span>🎨</span> <span>Ace Art (Art Trading)</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-white/10 text-neutral-300">FLX-8842</span>
+                </button>
+                <button type="button" onclick="selectBusiness('flex-logistics')" id="biz-btn-logistics" class="px-3 py-1.5 rounded-lg transition text-neutral-400 hover:text-white flex items-center gap-1.5">
+                    <span>📦</span> <span>Flex Logistics</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-white/10 text-neutral-300">FLX-1049</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Stepper -->
-    <div class="px-6 pt-6 flex justify-center">
+    <div class="px-6 pt-4 flex justify-center">
         <nav class="vision-stepper flex gap-1 overflow-x-auto" role="tablist" aria-label="Demo steps">
             <button onclick="switchStep(1)" id="step-btn-1" class="vision-step-btn vision-step-active" role="tab"><span class="num text-neutral-300">1</span>Baseline</button>
             <button onclick="switchStep(2)" id="step-btn-2" class="vision-step-btn" role="tab"><span class="num text-neutral-400">2</span>Disruption</button>
@@ -54,106 +80,168 @@
         </nav>
     </div>
 
-    <main class="max-w-6xl mx-auto w-full px-6 py-8 flex-grow">
+    <main class="max-w-6xl mx-auto w-full px-6 py-6 flex-grow">
 
         <!-- STEP 1: BASELINE -->
-        <section id="step-1-content" class="tab-content space-y-8">
+        <section id="step-1-content" class="tab-content space-y-6">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
-                    <p class="eyebrow text-emerald-400">Step 1 · Baseline</p>
+                    <div class="flex items-center gap-2">
+                        <p class="eyebrow text-emerald-400">Step 1 · Baseline Synchronized</p>
+                        <span id="step1-company-badge" class="px-2 py-0.5 rounded-full text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Ace Art Global Trading Ltd</span>
+                    </div>
                     <h2 class="text-4xl font-semibold apple-heading mt-2">Everything in sync.</h2>
-                    <p class="text-[17px] text-neutral-300 mt-3">Flex tracks Freight Batch #104 while its Akamai Cloud compute pipeline runs normally.</p>
+                    <p id="step1-narrative" class="text-[17px] text-neutral-300 mt-3">Flex monitors fine art consignment PO #402 while Akamai Connected Cloud 3D render clusters process incoming digital exhibits normally.</p>
                 </div>
-                <button onclick="switchStep(2)" class="vision-btn-primary px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
-                    Simulate tariff hold <i class="fa-solid fa-arrow-right text-[14px]"></i>
+                <button onclick="switchStep(2)" id="step1-cta-btn" class="vision-btn-primary px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
+                    Simulate customs hold <i class="fa-solid fa-arrow-right text-[14px]"></i>
                 </button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Flex Banking -->
+                <!-- Flex Commercial Banking Details -->
                 <article class="vision-glass p-7 space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="h-10 w-10 rounded-xl bg-flex/20 border border-flex/40 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-building-columns"></i></div>
                             <div>
-                                <h3 class="text-[18px] font-semibold text-white">Flex Banking</h3>
-                                <p class="label">Working capital & procurement</p>
+                                <div class="flex items-center gap-2">
+                                    <h3 id="flex-biz-name" class="text-[18px] font-semibold text-white">Ace Art Global Trading Ltd</h3>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-white/10 font-mono text-emerald-300" id="flex-acct-num">FLX-8842-9104</span>
+                                </div>
+                                <p id="flex-industry-label" class="label">Art Trading & High-Res Online Gallery · aceart.gallery</p>
                             </div>
                         </div>
-                        <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Healthy</span>
+                        <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Verified API</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="vision-card p-5">
-                            <p class="label">Working capital</p>
-                            <p class="num text-[30px] font-semibold text-white mt-1">$248,500</p>
+                            <p class="label">Flex Treasury Working Capital</p>
+                            <p id="flex-treasury-balance" class="num text-[30px] font-semibold text-white mt-1">$342,800</p>
+                            <p class="text-[12px] text-neutral-400 mt-1">Liquid operating reserves</p>
                         </div>
                         <div class="vision-card p-5">
-                            <p class="label">Projected 30-day burn</p>
-                            <p class="num text-[30px] font-semibold text-white mt-1">$14,200</p>
+                            <p class="label">Monthly Operating Burn</p>
+                            <p id="flex-monthly-burn" class="num text-[30px] font-semibold text-white mt-1">$22,500</p>
+                            <p id="flex-annual-exp-sub" class="text-[12px] text-neutral-400 mt-1">$270,000/yr total budget</p>
                         </div>
                     </div>
 
+                    <!-- Active Shipment / Consignment Card -->
                     <div class="vision-card p-5 space-y-4">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="label">PO #104 · Shenzhen → Los Angeles</p>
-                                <h4 class="text-[17px] font-semibold text-white mt-1">Electronics freight batch</h4>
+                                <p id="shipment-po-route" class="label">PO #402 · Venice & Basel → New York Auction</p>
+                                <h4 id="shipment-title" class="text-[17px] font-semibold text-white mt-1">Venice & Basel Contemporary Masterpieces Consignment</h4>
                             </div>
-                            <p class="num text-[17px] font-semibold text-white">$82,400</p>
+                            <p id="shipment-value" class="num text-[17px] font-semibold text-white">$145,000</p>
                         </div>
                         <div class="space-y-2">
                             <div class="flex justify-between text-[15px]">
-                                <span class="text-emerald-400">Ocean transit</span>
-                                <span class="text-neutral-300">ETA <span class="num text-white">Oct 18</span></span>
+                                <span id="shipment-mode" class="text-emerald-400">Climate-Controlled Air Cargo</span>
+                                <span class="text-neutral-300">Normal ETA <span id="shipment-eta" class="num text-white">Oct 24</span></span>
                             </div>
                             <div class="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                                 <div class="h-full w-[65%] rounded-full bg-gradient-to-r from-flex to-emerald-400"></div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Live Flex Corporate Ledger Transaction Feed -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="label uppercase tracking-wider text-[11px] font-mono text-emerald-400">Flex Corporate Financial Ledger</span>
+                            <span class="text-neutral-400 font-mono">Live API Feed</span>
+                        </div>
+                        <div id="flex-ledger-list" class="space-y-2 font-mono text-xs">
+                            <div class="vision-card p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="h-7 w-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-xs"><i class="fa-solid fa-cloud"></i></div>
+                                    <div>
+                                        <p class="text-white font-medium">Akamai Connected Cloud - Daily Linode Compute</p>
+                                        <p class="text-[11px] text-neutral-400">Oct 10, 2026 · Flex Corporate Card (*4492)</p>
+                                    </div>
+                                </div>
+                                <span class="text-red-400 font-bold">-$210.00</span>
+                            </div>
+                            <div class="vision-card p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="h-7 w-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs"><i class="fa-solid fa-arrow-down-left"></i></div>
+                                    <div>
+                                        <p class="text-white font-medium">Christie's Contemporary Provenance Escrow</p>
+                                        <p class="text-[11px] text-neutral-400">Oct 09, 2026 · Flex Wire Transfer</p>
+                                    </div>
+                                </div>
+                                <span class="text-emerald-400 font-bold">+$145,000.00</span>
+                            </div>
+                            <div class="vision-card p-3 flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="h-7 w-7 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center text-xs"><i class="fa-solid fa-bolt"></i></div>
+                                    <div>
+                                        <p class="text-white font-medium">Akamai Global Edge CDN & Image Acceleration</p>
+                                        <p class="text-[11px] text-neutral-400">Oct 08, 2026 · Flex Corporate Card (*4492)</p>
+                                    </div>
+                                </div>
+                                <span class="text-red-400 font-bold">-$42.50</span>
+                            </div>
+                        </div>
+                    </div>
                 </article>
 
-                <!-- Akamai Connected Cloud -->
+                <!-- Akamai Connected Cloud Compute Expenditure -->
                 <article class="vision-glass p-7 space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="h-10 w-10 rounded-xl bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400"><i class="fa-solid fa-cloud text-xl"></i></div>
                             <div>
                                 <h3 class="text-[18px] font-semibold text-white">Akamai Connected Cloud</h3>
-                                <p class="label">Linodes tagged <code class="font-mono text-neutral-300">Batch-104</code></p>
+                                <p id="akamai-tag-label" class="label">Linodes tagged <code class="font-mono text-neutral-300">AceArt-402</code></p>
                             </div>
                         </div>
-                        <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Running</span>
+                        <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Active Instances</span>
                     </div>
 
-                    <div class="space-y-3">
+                    <!-- Linode Resource List Container -->
+                    <div id="linode-resource-list" class="space-y-3">
                         <div class="vision-card p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-sky-400"><i class="fa-solid fa-server text-sm"></i></div>
                                 <div>
-                                    <h4 class="text-[16px] font-medium text-white">Freight-Sync-Worker</h4>
-                                    <p class="text-[14px] text-neutral-400">Akamai Linode 8GB · <span class="font-mono">linode-9842104</span></p>
+                                    <h4 class="text-[16px] font-medium text-white">AceArt-Render-Cluster</h4>
+                                    <p class="text-[14px] text-neutral-400">Dedicated 16GB · <span class="font-mono">linode-9842201</span></p>
+                                    <p class="text-[12px] text-neutral-400">3D canvas multi-angle render pipeline & digital provenance</p>
                                 </div>
                             </div>
-                            <p class="num text-[16px] text-white">$45<span class="text-neutral-400">/day</span></p>
+                            <p class="num text-[16px] text-white shrink-0">$145<span class="text-neutral-400">/day</span></p>
                         </div>
                         <div class="vision-card p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-emerald-400"><i class="fa-solid fa-database text-sm"></i></div>
                                 <div>
-                                    <h4 class="text-[16px] font-medium text-white">Staging-DB-Cluster</h4>
-                                    <p class="text-[14px] text-neutral-400">Dedicated 16GB · <span class="font-mono">linode-9842105</span></p>
+                                    <h4 class="text-[16px] font-medium text-white">AceArt-Auction-Sync-Worker</h4>
+                                    <p class="text-[14px] text-neutral-400">Linode 8GB · <span class="font-mono">linode-9842202</span></p>
+                                    <p class="text-[12px] text-neutral-400">Live WebSocket auction bidding sync & catalogue staging DB</p>
                                 </div>
                             </div>
-                            <p class="num text-[16px] text-white">$135<span class="text-neutral-400">/day</span></p>
+                            <p class="num text-[16px] text-white shrink-0">$65<span class="text-neutral-400">/day</span></p>
                         </div>
                     </div>
 
                     <div class="hairline"></div>
-                    <div class="flex justify-between text-[15px]">
-                        <span class="text-neutral-300">Total Akamai compute</span>
-                        <span class="num font-semibold text-white">$180/day</span>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-[15px]">
+                            <span class="text-neutral-300">Total Akamai daily compute</span>
+                            <span id="akamai-daily-total" class="num font-semibold text-white">$210/day</span>
+                        </div>
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-neutral-400">Monthly cloud expenditure</span>
+                            <span id="akamai-monthly-total" class="num font-medium text-sky-300">$6,300/mo</span>
+                        </div>
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-neutral-400">Cloud expense ratio of operating burn</span>
+                            <span id="akamai-ratio-total" class="num font-medium text-emerald-400 font-mono">28.0%</span>
+                        </div>
                     </div>
                 </article>
             </div>
@@ -164,8 +252,8 @@
             <div class="vision-glass-alert p-7 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
                     <p class="eyebrow text-red-400">Step 2 · Disruption detected</p>
-                    <h2 class="text-4xl font-semibold text-white mt-2">Customs hold on Batch #104.</h2>
-                    <p id="step2-narrative" class="text-[17px] text-red-100/90 mt-3">A Section 301 tariff review adds <span id="step2-narrative-days" class="font-semibold text-white">14 days</span>. The Akamai pipeline will sit idle the whole time.</p>
+                    <h2 id="step2-heading" class="text-4xl font-semibold text-white mt-2">Customs & Provenance hold on PO #402.</h2>
+                    <p id="step2-narrative" class="text-[17px] text-red-100/90 mt-3">A CITES Provenance and customs clearance audit adds <span id="step2-narrative-days" class="font-semibold text-white">18 days</span>. Ace Art's Akamai render pipeline will sit idle the whole time.</p>
                 </div>
                 <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-500 hover:bg-red-400 text-white text-[16px] font-semibold transition shrink-0 flex items-center gap-2">
                     See agent decision <i class="fa-solid fa-arrow-right text-[14px]"></i>
@@ -175,18 +263,18 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="vision-glass p-7">
                     <p class="label">Projected idle waste</p>
-                    <p id="step2-idle-waste" class="num text-[38px] font-semibold text-amber-300 mt-1">$2,520</p>
-                    <p id="step2-waste-math" class="text-[15px] text-neutral-400 mt-1">$180/day × 14 days</p>
+                    <p id="step2-idle-waste" class="num text-[38px] font-semibold text-amber-300 mt-1">$3,780</p>
+                    <p id="step2-waste-math" class="text-[15px] text-neutral-400 mt-1">$210/day × 18 days</p>
                 </div>
                 <div class="vision-glass p-7">
                     <p class="label">Added lead time</p>
-                    <p id="step2-lead-time" class="num text-[38px] font-semibold text-red-400 mt-1">+14 days</p>
-                    <p class="text-[15px] text-neutral-400 mt-1">Customs quarantine duration</p>
+                    <p id="step2-lead-time" class="num text-[38px] font-semibold text-red-400 mt-1">+18 days</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">CITES & Customs audit delay</p>
                 </div>
                 <div class="vision-glass p-7">
                     <p class="label">Expected utilization</p>
                     <p class="num text-[38px] font-semibold text-white mt-1">0%</p>
-                    <p class="text-[15px] text-neutral-400 mt-1">No cargo to process</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">Art consignment in audit hold</p>
                 </div>
             </div>
 
@@ -200,13 +288,13 @@
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="text-[18px] font-semibold text-white">Compute Budget & Expense Estimation Model</h3>
-                                <span id="model-business-badge" class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/[0.08] text-neutral-300 border border-white/15">Flex Logistics</span>
+                                <span id="model-business-badge" class="px-2 py-0.5 rounded-full text-[11px] font-mono bg-white/[0.08] text-neutral-300 border border-white/15">Ace Art Global Trading</span>
                             </div>
-                            <p id="model-business-sub" class="text-[13px] text-neutral-400">Customized baseline: <span id="model-annual-expense" class="text-white font-mono font-medium">$170,400/yr</span> operating burn</p>
+                            <p id="model-business-sub" class="text-[13px] text-neutral-400">Customized baseline: <span id="model-annual-expense" class="text-white font-mono font-medium">$270,000/yr</span> operating burn</p>
                         </div>
                     </div>
                     <span id="model-recommendation-chip" class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 w-fit">
-                        Recommendation: Shield 32% Reserve
+                        Recommendation: Shield 32% Reserve ($2,016)
                     </span>
                 </div>
 
@@ -218,10 +306,10 @@
                         </div>
                         <div>
                             <p id="ai-banner-headline" class="text-xs font-semibold text-white">
-                                Linka AI Model Advises: <span id="ai-banner-pct" class="text-sky-300 font-mono font-bold">68.0%</span> Compute Capacity (<span id="ai-banner-conf" class="text-emerald-400 font-mono">95.4%</span> confidence)
+                                Linka AI Model Advises: <span id="ai-banner-pct" class="text-sky-300 font-mono font-bold">64.4%</span> Compute Capacity (<span id="ai-banner-conf" class="text-emerald-400 font-mono">95.8%</span> confidence)
                             </p>
                             <p id="ai-banner-reasoning" class="text-[11px] text-neutral-300">
-                                AI calibrated against historical Linode compute and 14-day tariff quarantine hold.
+                                AI calibrated against Ace Art's 3D render workloads and 18-day CITES provenance quarantine.
                             </p>
                         </div>
                     </div>
@@ -233,8 +321,8 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="vision-card p-4">
                         <p class="label text-xs">Allocated Compute Budget</p>
-                        <p id="model-budget-display" class="num text-[22px] font-semibold text-white mt-1">$5,400</p>
-                        <p id="model-period-sub" class="text-[12px] text-neutral-400 mt-0.5"><span id="model-ratio-display" class="font-mono text-sky-300 font-semibold">38.0%</span> of burn · <span id="model-annual-proj" class="font-mono text-neutral-300">$64.8k/yr</span></p>
+                        <p id="model-budget-display" class="num text-[22px] font-semibold text-white mt-1">$6,300</p>
+                        <p id="model-period-sub" class="text-[12px] text-neutral-400 mt-0.5"><span id="model-ratio-display" class="font-mono text-sky-300 font-semibold">28.0%</span> of burn · <span id="model-annual-proj" class="font-mono text-neutral-300">$75.6k/yr</span></p>
                     </div>
                     <div class="vision-card p-4">
                         <div class="flex items-center justify-between">
@@ -246,12 +334,12 @@
                     </div>
                     <div class="vision-card p-4">
                         <p class="label text-xs">Predicted Protected Expense</p>
-                        <p id="model-predicted-expense" class="num text-[22px] font-semibold text-emerald-400 mt-1">$2,880</p>
-                        <p id="model-savings-sub" class="text-[12px] text-neutral-400 mt-0.5">Saves 46.7% of budget</p>
+                        <p id="model-predicted-expense" class="num text-[22px] font-semibold text-emerald-400 mt-1">$3,528</p>
+                        <p id="model-savings-sub" class="text-[12px] text-neutral-400 mt-0.5">Saves 44.0% of budget</p>
                     </div>
                     <div class="vision-card p-4">
                         <p class="label text-xs">Recommended Reserve Buffer</p>
-                        <p id="model-reserve-buffer" class="num text-[22px] font-semibold text-amber-300 mt-1">$1,728</p>
+                        <p id="model-reserve-buffer" class="num text-[22px] font-semibold text-amber-300 mt-1">$2,016</p>
                         <p id="model-reserve-sub" class="text-[12px] text-neutral-400 mt-0.5">32% capital shield</p>
                     </div>
                 </div>
@@ -265,23 +353,23 @@
                 </div>
                 <pre id="step2-json-preview" class="font-mono text-[13px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/60 border border-white/[0.08] overflow-x-auto">{
   <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
-  <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"Batch-104"</span>,
-  <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
-  <span class="text-emerald-400">"businessProfile"</span>: <span id="json-business" class="text-white">"Flex Logistics"</span>,
-  <span class="text-emerald-400">"annualOperatingBurn"</span>: <span id="json-annual-expense" class="text-sky-300">170400.00</span>,
-  <span class="text-emerald-400">"delayDays"</span>: <span id="json-delay-days" class="text-amber-300">14</span>,
-  <span class="text-emerald-400">"delayLabel"</span>: <span id="json-delay-label" class="text-amber-300">"14 days"</span>,
+  <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"AceArt-402"</span>,
+  <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"CITES Provenance & Customs Clearance Audit"</span>,
+  <span class="text-emerald-400">"businessProfile"</span>: <span id="json-business" class="text-white">"Ace Art Global Trading Ltd"</span>,
+  <span class="text-emerald-400">"annualOperatingBurn"</span>: <span id="json-annual-expense" class="text-sky-300">270000.00</span>,
+  <span class="text-emerald-400">"delayDays"</span>: <span id="json-delay-days" class="text-amber-300">18</span>,
+  <span class="text-emerald-400">"delayLabel"</span>: <span id="json-delay-label" class="text-amber-300">"18 days"</span>,
   <span class="text-emerald-400">"provider"</span>: <span class="text-sky-300">"Akamai Connected Cloud"</span>,
-  <span class="text-emerald-400">"projectedWaste"</span>: <span id="json-waste" class="text-red-400">2520.00</span>,
+  <span class="text-emerald-400">"projectedWaste"</span>: <span id="json-waste" class="text-red-400">3780.00</span>,
   <span class="text-emerald-400">"budgetModel"</span>: {
-    <span class="text-emerald-400">"monthlyBudget"</span>: <span id="json-budget" class="text-sky-300">5400.00</span>,
-    <span class="text-emerald-400">"annualComputeProjection"</span>: <span id="json-annual-compute" class="text-sky-300">64800.00</span>,
-    <span class="text-emerald-400">"clientExpenseRatio"</span>: <span id="json-ratio" class="text-sky-300">"38.0%"</span>,
+    <span class="text-emerald-400">"monthlyBudget"</span>: <span id="json-budget" class="text-sky-300">6300.00</span>,
+    <span class="text-emerald-400">"annualComputeProjection"</span>: <span id="json-annual-compute" class="text-sky-300">75600.00</span>,
+    <span class="text-emerald-400">"clientExpenseRatio"</span>: <span id="json-ratio" class="text-sky-300">"28.0%"</span>,
     <span class="text-emerald-400">"operationRate"</span>: <span id="json-usage" class="text-sky-300">72.0</span>,
     <span class="text-emerald-400">"isHighOperationRate"</span>: <span id="json-high-op" class="text-amber-300">false</span>,
     <span class="text-emerald-400">"aiAdvisor"</span>: {
-      <span class="text-emerald-400">"advisedUsagePct"</span>: <span id="json-ai-pct" class="text-sky-300">68.0</span>,
-      <span class="text-emerald-400">"confidence"</span>: <span id="json-ai-conf" class="text-emerald-400">"95.4%"</span>,
+      <span class="text-emerald-400">"advisedUsagePct"</span>: <span id="json-ai-pct" class="text-sky-300">64.4</span>,
+      <span class="text-emerald-400">"confidence"</span>: <span id="json-ai-conf" class="text-emerald-400">"95.8%"</span>,
       <span class="text-emerald-400">"mode"</span>: <span id="json-ai-mode" class="text-emerald-400">"ELASTIC_FINOPS"</span>
     }
   }
@@ -295,7 +383,7 @@
                 <div class="max-w-2xl">
                     <p class="eyebrow text-sky-400">Step 3 · Agent</p>
                     <h2 class="text-4xl font-semibold apple-heading mt-2">Linka connects the dots.</h2>
-                    <p class="text-[17px] text-neutral-300 mt-3">The shipment delay is matched to tagged Akamai Linode instances, and a safe action is proposed.</p>
+                    <p class="text-[17px] text-neutral-300 mt-3">The fine art consignment delay is matched to tagged Akamai Linode instances, and a safe action is proposed.</p>
                 </div>
                 <button onclick="switchStep(4)" class="vision-btn-emerald px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
                     Review action <i class="fa-solid fa-arrow-right text-[14px]"></i>
@@ -304,32 +392,32 @@
 
             <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
                 <div class="vision-glass p-6 h-full">
-                    <div class="h-9 w-9 rounded-xl bg-flex/20 text-emerald-400 flex items-center justify-center mb-4"><i class="fa-solid fa-ship text-sm"></i></div>
+                    <div class="h-9 w-9 rounded-xl bg-flex/20 text-emerald-400 flex items-center justify-center mb-4"><i class="fa-solid fa-palette text-sm"></i></div>
                     <h4 class="text-[17px] font-semibold text-white">Flex event</h4>
-                    <p class="text-[15px] text-neutral-300 mt-1">Batch #104 delayed 14 days.</p>
+                    <p id="step3-flex-event" class="text-[15px] text-neutral-300 mt-1">PO #402 delayed 18 days.</p>
                 </div>
                 <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
                 <div class="vision-glass p-6 h-full border-emerald-400/30 shadow-[0_0_40px_rgba(67,126,91,0.25)]">
                     <div class="h-9 w-9 rounded-xl bg-flex/30 text-emerald-300 flex items-center justify-center mb-4"><i class="fa-solid fa-brain text-sm"></i></div>
                     <h4 class="text-[17px] font-semibold text-emerald-300">Linka agent</h4>
-                    <p class="text-[15px] text-neutral-300 mt-1">Matches the <code class="font-mono">Batch-104</code> tag and computes $2,520 at risk.</p>
+                    <p id="step3-agent-text" class="text-[15px] text-neutral-300 mt-1">Matches the <code class="font-mono">AceArt-402</code> tag and computes $3,780 at risk.</p>
                 </div>
                 <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
                 <div class="vision-glass p-6 h-full">
                     <div class="h-9 w-9 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center mb-4"><i class="fa-solid fa-power-off text-sm"></i></div>
                     <h4 class="text-[17px] font-semibold text-white">Akamai action</h4>
-                    <p class="text-[15px] text-neutral-300 mt-1">Hibernate Linode instances until customs clears.</p>
+                    <p class="text-[15px] text-neutral-300 mt-1">Hibernate Linode instances until fine art clears customs.</p>
                 </div>
             </div>
 
             <div class="vision-glass p-7 space-y-3">
                 <h3 class="text-[17px] font-semibold text-white mb-1">Policy checks</h3>
                 <div class="vision-card p-4 flex items-center justify-between text-[15px]">
-                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Logistics delay over 3 days and CPU under 10%</span>
+                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Logistics delay over 3 days and render GPU/CPU idle under 10%</span>
                     <span class="text-emerald-400">Passed</span>
                 </div>
                 <div class="vision-card p-4 flex items-center justify-between text-[15px]">
-                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Flex credit reserve active, protect working capital</span>
+                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Flex API Capital Shield escrow lock active, protect $3,780 treasury liquidity</span>
                     <span class="text-emerald-400">Passed</span>
                 </div>
             </div>
@@ -340,8 +428,8 @@
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
                     <p class="eyebrow text-emerald-400">Step 4 · Protect</p>
-                    <h2 class="text-4xl font-semibold apple-heading mt-2">One click. $2,520 saved.</h2>
-                    <p class="text-[17px] text-neutral-300 mt-3">Hibernate the tagged Akamai Linodes and keep that cash in your Flex account.</p>
+                    <h2 id="step4-headline" class="text-4xl font-semibold apple-heading mt-2">One click. $3,780 saved.</h2>
+                    <p class="text-[17px] text-neutral-300 mt-3">Hibernate the tagged Akamai Linodes and preserve working capital in Ace Art's Flex account.</p>
                 </div>
                 <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0">
                     <i class="fa-solid fa-shield-halved"></i> Protect capital
@@ -366,7 +454,7 @@
                         <div class="hairline"></div>
                         <div class="flex justify-between text-[16px]">
                             <span class="text-neutral-300">Akamai burn rate</span>
-                            <span id="cloud-burn-display" class="num font-medium text-red-400">$180/day</span>
+                            <span id="cloud-burn-display" class="num font-medium text-red-400">$210/day</span>
                         </div>
                         <div class="flex justify-between text-[16px]">
                             <span class="text-neutral-300">Linode cluster</span>

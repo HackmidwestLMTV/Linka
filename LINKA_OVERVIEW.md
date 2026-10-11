@@ -1,10 +1,10 @@
-# Linka — Logistics-Aware FinOps Bridge
+# Linka — Logistics-Aware FinOps Bridge (Flex Commercial Banking API + Akamai Connected Cloud)
 
-> **When a physical shipment gets stuck, stop paying for the digital cloud servers that are waiting on it.**
+> **When physical shipments get stuck, stop paying for the digital cloud servers waiting on them.**
 
-Linka is an agentic FinOps bridge that harmonizes **Flex business banking and supply chain logistics** with **cloud compute infrastructure on Akamai Connected Cloud (Linode)**. 
+Linka is an agentic FinOps bridge that harmonizes **Flex commercial banking and supply chain logistics** with **cloud compute infrastructure on Akamai Connected Cloud (Linode)**. 
 
-When international freight shipments encounter customs tariff holds, port congestion, or supply chain bottlenecks, Linka intercepts the disruption in real time, correlates the physical shipment with its tagged cloud workloads, calculates the working capital at risk, and allows businesses to hibernate idle cloud compute with a single click.
+When international art consignments or ocean freight encounter customs audits, port congestion, or regulatory bottlenecks, Linka intercepts the disruption in real time via the **Flex Commercial Banking API**, correlates the physical shipment with its tagged cloud workloads, calculates the working capital at risk, and allows businesses to allocate an escrow Capital Shield reserve in Flex while hibernating idle cloud compute with a single click.
 
 ---
 
@@ -13,208 +13,153 @@ When international freight shipments encounter customs tariff holds, port conges
 ### The Silent Capital Leak
 Modern global enterprises operate with two mission-critical backbones that remain completely blind to each other:
 
-| Operational Dimension | Flex (Business Banking & Supply Chain) | Cloud Infrastructure (Akamai Connected Cloud) |
+| Operational Dimension | Flex (Commercial Banking & Supply Chain) | Cloud Infrastructure (Akamai Connected Cloud) |
 |---|---|---|
 | **Core Visibility** | Purchase Orders, bill of lading, customs clearance, ETA revisions, working capital | CPU metrics, memory utilization, cluster nodes, per-second billing |
 | **System Blindspot** | Zero insight into what servers or staging pipelines are active | Zero insight into whether physical inventory has actually arrived |
 | **Organizational Owner** | VP of Supply Chain / Head of Logistics | Cloud Architect / DevOps Engineering Lead |
 
-When an international ocean container faces an unexpected **14-day Section 301 customs tariff compliance review**:
-1. The **Logistics Manager** knows the cargo cannot enter the domestic distribution network for two weeks, but has no access or mandate to manage cloud servers.
-2. The **Cloud Engineer** sees provisioned microservices and database clusters running at low utilization, but assumes downstream batch jobs or automated syncs are pending.
-3. **The Result:** Cloud clusters run at 0% effective throughput while draining **$180/day ($2,520 over 14 days)** of irreplaceable working capital.
+When an international art consignment faces an unexpected **18-day CITES Provenance & customs clearance audit**:
+1. The **Logistics Manager** knows the artwork cannot enter the domestic gallery network for over two weeks, but has no access or mandate to manage cloud servers.
+2. The **Cloud Engineer** sees provisioned 3D rendering clusters and sync workers running at low utilization, but assumes digital catalog uploads are pending.
+3. **The Result:** Cloud clusters run at 0% effective throughput while draining **$210/day ($3,780 over 18 days)** of irreplaceable working capital.
 
 Traditional reactive tools only diagnose idle waste **retroactively** after days or weeks of accumulated bills. **Linka operates proactively at the moment of supply chain disruption**, converting logistics lead-time changes into immediate cloud capital defense.
 
 ---
 
-## 2. How Linka Works (The 4-Stage Operational Loop)
+## 2. Featured Case Study: Ace Art Global Trading Ltd (`aceart.gallery`)
 
-Linka operates as an autonomous event-driven bridge across four distinct stages:
+Linka directly incorporates the **Flex Commercial Banking API** with **Ace Art Global Trading Ltd**, an international art trading house using Akamai Connected Cloud to host high-resolution 3D artwork multi-angle rendering engines and real-time live auction bidding relays:
+
+* **Company:** Ace Art Global Trading Ltd (`aceart.gallery`)
+* **Flex Corporate Account:** `FLX-8842-9104` (Routing: `071000288`)
+* **Flex Treasury Working Capital:** `$342,800.00`
+* **Monthly Operating Burn:** `$22,500.00` ($270,000.00/yr operating baseline)
+* **Akamai Linode Compute Instances:**
+  * `AceArt-Render-Cluster`: Dedicated 16GB (`linode-9842201`, `$145/day`) — 3D canvas rendering & provenance pipeline.
+  * `AceArt-Auction-Sync-Worker`: Linode 8GB (`linode-9842202`, `$65/day`) — Live auction WebSocket sync & catalogue staging DB.
+  * **Daily Cloud Burn:** `$210.00/day` (`$6,300.00/month`, **28.0%** of total monthly burn).
+* **Disruption Event:**
+  * **Consignment:** PO #402 — *Venice & Basel Contemporary Masterpieces Consignment* ($145,000.00 value).
+  * **Transit Mode:** Climate-Controlled Fine Art Air Cargo.
+  * **Quarantine Reason:** CITES Provenance & Customs Clearance Audit.
+  * **Downtime Horizon:** **18 days**.
+  * **Capital at Risk:** `$210/day × 18 days = $3,780.00`.
+* **Capital Shield Preservation:**
+  * Linka locks an escrow Capital Shield reserve of `$2,016.00` in Ace Art's Flex treasury account.
+  * Pauses the tagged Linode instances on Akamai Connected Cloud, dropping compute burn to `$0/day` and preserving **$3,780.00** in cash runway.
+
+---
+
+## 3. Flex Commercial Banking API Architecture
+
+Linka exposes and interacts with modern corporate banking endpoints:
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/flex/businesses` | `GET` | Returns registered commercial enterprises with live cloud expenditure summaries. |
+| `/api/flex/accounts/:businessId` | `GET` | Returns corporate treasury balances, operating burns, active consignments, and verified ledger transactions. |
+| `/api/flex/expenditure/:businessId` | `GET` | Provides deep FinOps analytics on cloud compute expense ratios against operating burn. |
+| `/api/flex/capital-shield` | `POST` | Allocates or releases Capital Shield reserves in treasury escrow. |
+| `/api/flex/switch-business` | `POST` | Switches between registered enterprises (`ace-art` vs `flex-logistics`) with live broadcast. |
+
+### Verified Flex Corporate Ledger Transactions
+Linka displays live transaction events verified through the Flex Commercial API:
+* **Oct 10, 2026:** Akamai Connected Cloud - Daily Linode Compute (`-$210.00`, Flex Corporate Card `*4492`)
+* **Oct 09, 2026:** Christie's Contemporary Provenance Escrow (`+$145,000.00`, Flex Wire Transfer)
+* **Oct 08, 2026:** Akamai Global Edge CDN & Image Acceleration (`-$42.50`, Flex Corporate Card `*4492`)
+* **Oct 07, 2026:** DHL Global Fine Art Secured Air Transport Transit (`-$8,450.00`, Flex Treasury ACH)
+* **Oct 05, 2026:** Art Basel Zurich Catalog Licensing Fee (`-$4,200.00`, Flex Commercial Card)
+
+---
+
+## 4. How Linka Works (The 4-Stage Operational Loop)
 
 ```
 ┌─────────────────────────────────┐
-│  STAGE 1: Baseline Operational  │  ► Flex Banking tracks Freight Batch #104
-│           Synchronization       │  ► Akamai Cloud cluster runs normal sync pipeline ($180/day)
+│  STAGE 1: Baseline Operational  │  ► Flex Banking tracks Ace Art PO #402 ($145k consignment)
+│           Synchronization       │  ► Akamai Cloud 3D render cluster runs normally ($210/day)
 └────────────────┬────────────────┘
                  │
-                 ▼ (Disruption Occurs: Customs Tariff Hold)
+                 ▼ (Disruption Occurs: CITES Provenance & Customs Audit)
 ┌─────────────────────────────────┐
-│  STAGE 2: Telemetry & Event     │  ► Linka Webhook intercepts lead-time extension (+14 days)
-│           Interception          │  ► Identifies zero-throughput condition across freight pipeline
+│  STAGE 2: Telemetry & Event     │  ► Linka intercepts lead-time extension (+18 days)
+│           Interception          │  ► Detects zero-throughput condition across art pipeline
 └────────────────┬────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────┐
-│  STAGE 3: Agentic Policy &      │  ► Correlates PO #104 metadata with Cloud Tag: "Batch-104"
-│           FinOps Correlation    │  ► Quantifies capital exposure: $180/day × 14 days = $2,520
-│                                 │  ► Passes automated safety checks (CPU < 10%, Reserve Active)
+│  STAGE 3: Agentic Policy &      │  ► Correlates PO #402 metadata with Cloud Tag: "AceArt-402"
+│           FinOps Correlation    │  ► Quantifies capital exposure: $210/day × 18 days = $3,780
+│                                 │  ► Passes automated safety checks (GPU/CPU < 10%, Reserve Active)
 └────────────────┬────────────────┘
                  │
                  ▼ (One-Click User Approval)
 ┌─────────────────────────────────┐
 │  STAGE 4: Capital Shield &      │  ► Issues Linode REST shutdown to pause idle compute nodes
-│           Live Cloud Hibernation│  ► Working capital preserved in Flex account ($2,520 saved)
+│           Live Cloud Hibernation│  ► Working capital preserved in Flex account ($3,780 saved)
 │                                 │  ► Dynamic forecast locks in cash preservation curve
 └─────────────────────────────────┘
 ```
 
-### Detailed Breakdown of the Steps:
-
-#### Step 1: Baseline Sync
-* **Flex Perspective:** Displays operating working capital ($248,500), 30-day projected burn ($14,200), and purchase order details (`PO #104`, Shenzhen ➔ Los Angeles, $82,400 ocean freight batch).
-* **Cloud Perspective:** Monitors provisioned Akamai Linode instances tagged `Batch-104` (`Freight-Sync-Worker` @ $45/day and `Staging-DB-Cluster` @ $135/day), totaling $180/day in compute spend.
-
-#### Step 2: Disruption Detection
-* An external customs or carrier alert is ingested:
-  ```json
-  {
-    "event": "LOGISTICS_LEAD_TIME_EXTENSION",
-    "batchId": "Batch-104",
-    "reason": "Section 301 Tariff Compliance Review",
-    "delayDays": 14,
-    "provider": "Akamai Connected Cloud",
-    "taggedLinodes": ["linode-9842104", "linode-9842105"],
-    "projectedWaste": 2520.00
-  }
-  ```
-* Linka instantly calculates that the compute cluster will operate at **0% effective utilization** for 14 days, exposing **$2,520 in idle burn**.
-
-#### Step 3: Agentic Policy Verification
-Before making any recommendation, the Linka agent runs strict policy guardrails:
-1. **Delay Threshold Policy:** Confirms that the logistics lead-time delay exceeds 3 days and CPU utilization remains under 10%.
-2. **Capital Protection Policy:** Confirms that Flex banking reserves are active and that pausing staging workloads introduces zero production risk.
-3. **Idempotency Guarantee:** Prepares automated restart hooks so instances seamlessly revive the moment customs status updates to "Cleared".
-
-#### Step 4: One-Click Protection
-* With a single click on the dashboard (or via automated policy rule), Linka dispatches an API command to pause or hibernate the targeted cloud workloads.
-* Daily burn drops instantly from **$180/day to $0/day**.
-* The interactive 30-day cash flow projection chart dynamically reflects the saved working capital, ensuring the business retains its capital runway within Flex.
-
 ---
 
-## 3. Dynamic Downtime & Predictive FinOps Modeling
+## 5. Dynamic Downtime & Predictive FinOps Modeling
 
 Linka provides handheld fine-grained control and predictive intelligence directly from the mobile remote controller (`/trigger.html`):
 
 ### ⏱️ Customizable Downtime Duration
-Users can customize the exact downtime horizon across flexible time units:
-* **Hours:** (1 to 72 hours) — e.g., brief staging pipeline outages or port gate inspections.
-* **Days:** (1 to 60 days) — e.g., standard Section 301 customs holds (+14 days).
-* **Weeks:** (1 to 12 weeks) — e.g., extended maritime shipping delays or canal blockages.
-* **Months:** (1 to 6 months) — e.g., seasonal procurement embargoes or factory retooling.
+* **Hours:** (1 to 72 hours) — Port gate re-inspections or sudden customs scans.
+* **Days:** (1 to 60 days) — CITES provenance audits (+18 days), tariff holds (+14 days).
+* **Weeks:** (1 to 12 weeks) — International maritime shipping rerouting.
+* **Months:** (1 to 6 months) — Seasonal gallery scheduling shifts or factory retooling.
 
 ### 💰 Compute Budget Allocation & Granular Estimation
-Users can adjust their available compute budget across custom time horizons:
-* **Granular Time Units:** Hours ($7.50/hr), Days ($180/day), 30-Day Baselines ($5,400), and Annual Projections ($64,800).
-* **Dynamic Bleed Calculation:** Multiplies active workloads ($180/day) by the exact normalized downtime duration to isolate the precise dollar amount at risk.
+* **Granular Time Units:** Hours ($8.75/hr), Days ($210/day), 30-Day Baselines ($6,300), and Annual Projections ($75,600).
+* **Dynamic Bleed Calculation:** Multiplies active workloads ($210/day) by normalized downtime duration to isolate the exact dollar amount at risk.
 
-### 🏢 Customizable Annual Expense Projections for Different Businesses
-Linka is not limited to a single cost structure. Presenters can tailor annual operating expenses to any enterprise profile:
-* **Preconfigured Profiles:**
-  - **Flex Private Banking & Logistics:** $170,400/yr operating burn ($14,200/mo baseline).
-  - **Mid-Market Global E-Commerce:** $540,000/yr operating burn ($45,000/mo baseline).
-  - **High-Speed Supply SaaS:** $1,440,000/yr operating burn ($120,000/mo baseline).
-  - **Custom Business Profile:** Freeform annual input allowing any business to establish its custom operating expense baseline and compute ratio.
+### 🏢 Multi-Business Directory Switcher
+Linka adapts to multiple business industries and operating structures:
+* **🎨 Ace Art Global Trading Ltd:** $270,000/yr operating burn ($22,500/mo baseline · $6,300/mo compute · 28.0% ratio).
+* **📦 Flex Logistics & Private Banking:** $170,400/yr operating burn ($14,200/mo baseline · $5,400/mo compute · 38.0% ratio).
+* **Mid-Market Global E-Commerce:** $540,000/yr operating burn ($45,000/mo baseline · $12,500/mo compute).
+* **High-Speed Supply SaaS:** $1,440,000/yr operating burn ($120,000/mo baseline · $32,000/mo compute).
 
 ### 🤖 Small AI FinOps Advisory Model
 Linka incorporates a lightweight neural-heuristic AI model (`runFinOpsPredictiveAIModel`) running both on the backend and directly on edge devices:
 * **Historical Pattern Analysis:** Evaluates previous cycle efficiency, downtime duration, and client expense ratio pressure.
-* **Predictive Compute Advice:** Recommends the optimal future compute allocation percentage (e.g. 66.1% active allocation) with quantified model confidence (95%+).
-* **One-Click Application:** A single tap on "Apply AI Recommendation" automatically rebalances the compute budget, operational efficiency, and capital reserve buffer.
+* **Predictive Compute Advice:** Recommends optimal future compute allocation percentage (e.g., 64.4% active allocation for Ace Art) with quantified model confidence (95.8%).
+* **One-Click Application:** Instantly synchronizes compute budget, operational efficiency, and capital reserve buffer.
 
 ### ⚡ Unique Circumstances: High Operation Mode (>95% Saturation)
-For enterprises facing unique, high-volume scenarios (holiday freight surges, flash clearance sales, or critical sovereign trade blockades), Linka supports sustained operation rates beyond 95% (up to 100%):
-* **Near-Zero Idle Tolerance:** Calibrates compute allocation for maximum throughput without pipeline interruption.
-* **Specialized High-Availability Shield:** Shifts the capital shield reserve from idle shutdown toward API failover and bandwidth burst buffers.
-* **Quick Critical Presets:** 96% High Availability, 98% Peak Freight Surge, and 99.5% Mission-Critical Sovereign Flow.
+For enterprises facing unique, high-volume scenarios (live auction spikes, holiday freight surges, flash clearance):
+* **Presets:** `96% HA` (High Availability), `98% ⚡` (Peak Surge), `99.5%` (Mission-Critical Sovereign Flow).
+* **Saturation Logic:** Prioritizes continuous 0-latency clearance over hibernation, shifting the capital shield toward failover and bandwidth burst reserves.
 
-## 4. Design Philosophy: Fluidity, Ease, and Cognitive Clarity
+---
 
-To appeal to non-technical financial executives, supply chain directors, and technical judges alike, Linka is built with an **Apple VisionOS spatial glassmorphism design system**.
+## 6. Design Philosophy: Apple VisionOS Spatial Aesthetics
 
-### 🎨 Spatial Aesthetics & Visual Tokens
-* **True Pitch-Black Foundation (`#000000`):** Creates extreme contrast, eliminates interface clutter, and maximizes battery efficiency on OLED displays.
-* **Frosted Glass Panels (`backdrop-filter: blur(40px) saturate(190%)`):** Multi-layered glass cards with subtle 1px specular highlights (`rgba(255, 255, 255, 0.12)`) and inner ambient shadows.
+To appeal to non-technical financial executives, supply chain directors, and technical judges alike, Linka is built with an **Apple VisionOS spatial glassmorphism design system**:
+
+* **True Pitch-Black Foundation (`#000000`):** Creates extreme contrast and eliminates interface clutter.
+* **Frosted Glass Panels (`backdrop-filter: blur(40px) saturate(190%)`):** Multi-layered glass cards with subtle 1px specular highlights (`rgba(255, 255, 255, 0.12)`).
 * **Dual Ambient Aura:**
   - **Flex Green (`rgba(67, 126, 91, 0.18)`):** Grounded financial health and capital safety.
-  - **Akamai Electric Blue (`rgba(0, 153, 255, 0.16)`):** Agile, high-performance cloud compute.
-* **Apple Typography Stack:** Prioritizes native **SF Pro Display** with automatic optical fallback to **Inter**. Monospaced telemetry renders in **JetBrains Mono** with tabular numerals (`font-variant-numeric: tabular-nums`) so financial amounts and server IDs never shift or jitter during real-time updates.
-
-### 🕹️ Cognitive Ergonomics & "Zero-Friction" Navigation
-* **VisionOS Capsule Stepper:** A streamlined, pill-shaped step switcher (`1 Baseline` ➔ `2 Disruption` ➔ `3 Agent` ➔ `4 Protect`) allows viewers to grasp the narrative progression within 10 seconds.
-* **Keyboard-First Pitching:** Presenters can step forward and backward through the entire presentation using the keyboard arrow keys (`←` and `→`), ensuring a smooth, seamless narrative delivery without awkward mouse hunting.
-* **Dual-Channel Mobile Synchronization & Expense Ratio Bridge:**
-  - The presenter opens the dashboard on their laptop or projector screen (`/`).
-  - The presenter opens the remote controller on their smartphone (`/trigger.html`).
-  - **Dynamic FinOps Synchronization:** Presenters can manually key in any compute budget or adjust their usage efficiency rate (e.g. 72%). With the built-in **Auto-Sync Bridge**, the compute budget automatically scales in lockstep with the client's monthly operating expense ratio ($14,200 baseline Flex burn), keeping budget, efficiency rate, and idle waste risk in mutual harmony. A single tap on **"Read & Apply Flex Ratio"** immediately applies the 38.0% baseline profile with zero manual arithmetic.
-  - When the presenter taps **"Broadcast Hold"** on their phone, the phone triggers haptic vibration feedback, dispatches dual WebSocket + HTTP REST payloads, and the laptop screen jumps to Step 2 live in front of the judges' eyes.
-
----
-
-## 5. Technical Architecture & Implementation
-
-```
- ┌────────────────────────────────────────────────────────────┐
- │                  Client Presentation Layer                 │
- │  - VisionOS Dashboard (HTML5, Vanilla CSS, Chart.js)       │
- │  - Mobile Remote Controller (/trigger.html) with Haptics   │
- └──────────────┬───────────────────────────────▲─────────────┘
-                │ HTTP REST / WebSocket         │ Live State Broadcast
-                ▼                               │ (Socket.IO)
- ┌──────────────────────────────────────────────┴─────────────┐
- │                    Linka Node.js Engine                    │
- │  - Express 4.18 REST Server & Static Asset Pipeline        │
- │  - Socket.IO Bi-Directional Event Broker                   │
- │  - Correlation Matrix (Batch-104 ➔ Linode Instance IDs)    │
- └──────────────┬─────────────────────────────────────────────┘
-                │
-                │ Akamai Linode REST API v4
-                │ Authorization: Bearer <AKAMAI_API_TOKEN>
-                ▼
- ┌────────────────────────────────────────────────────────────┐
- │           Akamai Connected Cloud (Linode Compute)          │
- │  - Freight-Sync-Worker (Linode 8GB, tag: Batch-104)        │
- │  - Staging-DB-Cluster  (Dedicated 16GB, tag: Batch-104)    │
- │  - Actions: POST /instances/{id}/shutdown                  │
- │             POST /instances/{id}/boot                      │
- └────────────────────────────────────────────────────────────┘
-```
-
-### Key Technical Characteristics:
-1. **Lightweight & Dependency-Free Core:**
-   - Powered by Node.js native `fetch` — no heavy SDK overhead.
-   - Real-time event broadcasting using WebSocket protocol with automatic HTTP polling fallback.
-2. **Akamai Linode API v4 Integration:**
-   - Real-time instance discovery filtered by tags (`Batch-104`).
-   - Clean shutdown endpoints (`POST https://api.linode.com/v4/linode/instances/{id}/shutdown`).
-   - Automatic restart hooks on demo reset (`POST https://api.linode.com/v4/linode/instances/{id}/boot`).
-3. **Resilient Failover (Demo Mode vs. Live Mode):**
-   - In Live Mode (when `AKAMAI_API_TOKEN` is supplied), Linka executes real hardware state changes against the cloud provider.
-   - In Demo Mode (default), Linka simulates hardware state changes locally with 100% deterministic fidelity, guaranteeing that network interruptions or API rate limits never compromise a live hackathon pitch.
-
----
-
-## 6. Hack Midwest 2026 Pitch Strategy (3-Minute Live Demo)
-
-Linka is engineered to strictly satisfy Hack Midwest rules (**Strictly Live Working Prototype MVP, Zero Slide Decks**):
-
-| Time | Story Beat | Action on Screen |
-|---|---|---|
-| **0:00 - 0:40** | **The Disconnect** | Presenter shows **Step 1 (Baseline)**. Points out Flex Banking on the left ($248k capital) and Akamai Cloud on the right ($180/day). Highlights that neither system knows what the other is doing. |
-| **0:40 - 1:20** | **The Disruption** | Presenter taps **"Trigger Tariff Hold"** on their mobile phone. Over live WebSockets, the laptop screen automatically transitions to **Step 2 (Disruption)**. Explains that a 14-day customs hold means $2,520 of pure idle burn. |
-| **1:20 - 2:10** | **The Linka Agent** | Transitions to **Step 3 (Agent)**. Shows how Linka matched the PO `#104` to cloud tag `Batch-104`, evaluated safety guardrails (CPU < 10%), and prepared a safe action. |
-| **2:10 - 2:45** | **The Protection** | Clicks **"Protect Capital"** on **Step 4 (Protect)**. Burn rate drops to $0/day. The Chart.js cash flow curve splits, locking in the $2,520 preserved in Flex. |
-| **2:45 - 3:00** | **Summary & Vision** | Re-emphasizes: "Linka turns supply chain disruptions into immediate cloud cost defense." One-click reset resets the demo for judge Q&A. |
+  - **Akamai Electric Blue (`rgba(0, 153, 255, 0.16)`):** High-performance cloud compute.
+* **Apple Typography Stack:** Native **SF Pro Display** with automatic optical fallback to **Inter**. Monospaced telemetry renders in **JetBrains Mono** with tabular numerals (`font-variant-numeric: tabular-nums`).
+* **Keyboard-First Pitching:** Step forward and backward seamlessly using `←` and `→` arrow keys.
+* **Dual-Channel Mobile Synchronization:** Remote controller at `/trigger.html` controls presentations over WebSockets with haptic vibration feedback.
 
 ---
 
 ## 7. Project Directory & File Reference
 
-- **[`server.js`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/server.js):** Express backend, Socket.IO gateway, Akamai Linode REST API integration, and dual-channel REST endpoints (`/api/trigger`, `/api/reset`).
-- **[`public/index.html`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/index.html):** 4-step VisionOS presentation dashboard with responsive glassmorphism layout and live metric cards.
+- **[`server.js`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/server.js):** Express backend, Flex Commercial Banking API endpoints, Socket.IO gateway, Akamai Linode REST API integration, and FinOps predictive AI model.
+- **[`public/index.html`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/index.html):** 4-step VisionOS presentation dashboard with Flex Commercial Banking directory switcher and live Ace Art financial ledger.
 - **[`public/styles.css`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/styles.css):** Spatial design tokens, frosted glass filters, typography styling, and ambient lighting gradients.
-- **[`public/app.js`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/app.js):** Client state machine, keyboard navigation (`←`/`→`), Chart.js 30-day forecast, and WebSocket listeners.
-- **[`public/trigger.html`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/trigger.html):** Mobile remote controller optimized for handheld demonstration with haptic vibration feedback.
+- **[`public/app.js`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/app.js):** Client state machine, Flex API integration, business switching logic, Chart.js 30-day forecast, and WebSocket listeners.
+- **[`public/trigger.html`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/public/trigger.html):** Mobile remote controller optimized for handheld demonstration with haptic vibration feedback and FinOps customizers.
 - **[`DEPLOY.md`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/DEPLOY.md):** Complete, step-by-step Akamai Cloud (Linode) deployment and hosting guide.
 - **[`README.md`](file:///Users/john.vianney.ssennono-1/Desktop/Linka/README.md):** Concise, judge-friendly overview and quick-start instructions.
