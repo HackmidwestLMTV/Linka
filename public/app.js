@@ -138,6 +138,7 @@ function resetWholeDemo() {
 
     setState('normal');
     switchStep(1);
+    socket.emit('RESET_DEMO');
 }
 
 // Arrow keys step through the demo during the live pitch
