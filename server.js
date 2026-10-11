@@ -170,12 +170,13 @@ app.post('/api/reset', async (req, res) => {
       }
     }
     currentResources.forEach(r => r.status = "RUNNING");
+    io.emit('RESET_DEMO_BROADCAST');
     io.emit('INIT_STATE', { 
       resources: currentResources, 
       provider: "Akamai", 
       mode: isLiveAkamai ? "live" : "demo" 
     });
-    res.json({ success: true });
+    res.json({ success: true, message: "System recovered to normal baseline" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -245,6 +246,7 @@ io.on('connection', async (socket) => {
         }
       }
       currentResources.forEach(r => r.status = "RUNNING");
+      io.emit('RESET_DEMO_BROADCAST');
       io.emit('INIT_STATE', { 
         resources: currentResources, 
         provider: "Akamai", 

@@ -148,7 +148,7 @@ function executeProtectionNow() {
     socket.emit('EXECUTE_PROTECTION', { projectedSavings: 2520 });
 }
 
-function resetWholeDemo() {
+function resetWholeDemo(emitEvent = true) {
     isExecuted = false;
 
     const savedEl = $('saved-amount-display');
@@ -188,7 +188,9 @@ function resetWholeDemo() {
 
     setState('normal');
     switchStep(1);
-    socket.emit('RESET_DEMO');
+    if (emitEvent && socket && socket.connected) {
+        socket.emit('RESET_DEMO');
+    }
 }
 
 // Arrow keys step through the demo during the live pitch
@@ -200,5 +202,11 @@ document.addEventListener('keydown', (e) => {
 // Live events from the server / mobile trigger
 socket.on('LOGISTICS_DISRUPTION_ALERT', () => switchStep(2));
 socket.on('PROTECTION_CONFIRMED', () => { if (!isExecuted) executeProtectionNow(); });
+socket.on('RESET_DEMO_BROADCAST', () => resetWholeDemo(false));
+socket.on('INIT_STATE', (data) => {
+    if (data && data.resources && data.resources.every(r => r.status === 'RUNNING')) {
+        resetWholeDemo(false);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', initChart);
