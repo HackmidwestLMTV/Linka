@@ -2,7 +2,7 @@
 
 > **When a physical shipment gets stuck, stop paying for the digital cloud servers that are waiting on it.**
 
-Linka is an agentic FinOps bridge that harmonizes **Flex business banking and supply chain logistics** with **cloud compute infrastructure (Akamai Connected Cloud & AWS)**. 
+Linka is an agentic FinOps bridge that harmonizes **Flex business banking and supply chain logistics** with **cloud compute infrastructure on Akamai Connected Cloud (Linode)**. 
 
 When international freight shipments encounter customs tariff holds, port congestion, or supply chain bottlenecks, Linka intercepts the disruption in real time, correlates the physical shipment with its tagged cloud workloads, calculates the working capital at risk, and allows businesses to hibernate idle cloud compute with a single click.
 
@@ -13,7 +13,7 @@ When international freight shipments encounter customs tariff holds, port conges
 ### The Silent Capital Leak
 Modern global enterprises operate with two mission-critical backbones that remain completely blind to each other:
 
-| Operational Dimension | Flex (Business Banking & Supply Chain) | Cloud Infrastructure (Akamai / AWS) |
+| Operational Dimension | Flex (Business Banking & Supply Chain) | Cloud Infrastructure (Akamai Connected Cloud) |
 |---|---|---|
 | **Core Visibility** | Purchase Orders, bill of lading, customs clearance, ETA revisions, working capital | CPU metrics, memory utilization, cluster nodes, per-second billing |
 | **System Blindspot** | Zero insight into what servers or staging pipelines are active | Zero insight into whether physical inventory has actually arrived |
@@ -24,7 +24,7 @@ When an international ocean container faces an unexpected **14-day Section 301 c
 2. The **Cloud Engineer** sees provisioned microservices and database clusters running at low utilization, but assumes downstream batch jobs or automated syncs are pending.
 3. **The Result:** Cloud clusters run at 0% effective throughput while draining **$180/day ($2,520 over 14 days)** of irreplaceable working capital.
 
-Traditional FinOps tools (AWS Cost Explorer, Datadog, CloudHealth) only diagnose idle waste **retroactively** after days or weeks of accumulated bills. **Linka operates proactively at the moment of supply chain disruption**, converting logistics lead-time changes into immediate cloud capital defense.
+Traditional reactive tools only diagnose idle waste **retroactively** after days or weeks of accumulated bills. **Linka operates proactively at the moment of supply chain disruption**, converting logistics lead-time changes into immediate cloud capital defense.
 
 ---
 

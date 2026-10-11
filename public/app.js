@@ -41,7 +41,7 @@ function setState(name) {
     if (dot) dot.className = s.dot;
     if (statusText) statusText.textContent = s.text;
 
-    const cloud = getEl('header-cloud-status', 'header-aws-status');
+    const cloud = getEl('header-cloud-status', 'header-akamai-status');
     if (cloud) {
         cloud.textContent = s.cloud;
         cloud.className = `num font-medium ${s.cloudColor}`;
@@ -159,13 +159,13 @@ function executeProtectionNow() {
         savedEl.className = 'num text-[38px] font-semibold text-emerald-400 mt-1';
     }
 
-    const burnEl = getEl('cloud-burn-display', 'aws-burn-display');
+    const burnEl = getEl('cloud-burn-display', 'akamai-burn-display');
     if (burnEl) {
         burnEl.textContent = '$0/day';
         burnEl.className = 'num font-medium text-emerald-400';
     }
 
-    const clusterEl = getEl('cloud-cluster-status', 'aws-cluster-status');
+    const clusterEl = getEl('cloud-cluster-status', 'akamai-cluster-status');
     if (clusterEl) {
         clusterEl.textContent = 'Hibernated';
         clusterEl.className = 'font-medium text-sky-400';
@@ -204,13 +204,13 @@ function resetWholeDemo(emitEvent = true) {
         savedEl.className = 'num text-[38px] font-semibold text-neutral-400 mt-1';
     }
 
-    const burnEl = getEl('cloud-burn-display', 'aws-burn-display');
+    const burnEl = getEl('cloud-burn-display', 'akamai-burn-display');
     if (burnEl) {
         burnEl.textContent = '$180/day';
         burnEl.className = 'num font-medium text-red-400';
     }
 
-    const clusterEl = getEl('cloud-cluster-status', 'aws-cluster-status');
+    const clusterEl = getEl('cloud-cluster-status', 'akamai-cluster-status');
     if (clusterEl) {
         clusterEl.textContent = 'Running';
         clusterEl.className = 'font-medium text-emerald-400';
