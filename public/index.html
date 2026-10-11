@@ -1,807 +1,308 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en" class="dark">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
-<title>Linka — Logistics-Aware FinOps Bridge</title>
-<!-- Material Symbols Outlined -->
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Typography Fonts -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;family=Sora:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<!-- Socket.IO Engine -->
-<script src="/socket.io/socket.io.js"></script>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Tailwind Configuration verbatim -->
-<script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          "colors": {
-            "on-secondary-container": "#92c18a",
-            "outline": "#8c9387",
-            "on-primary-fixed": "#002202",
-            "surface-container-low": "#191c18",
-            "surface-container-high": "#282b26",
-            "on-primary": "#09390b",
-            "outline-variant": "#42493f",
-            "tertiary-container": "#741715",
-            "on-secondary-fixed-variant": "#265024",
-            "error-container": "#93000a",
-            "secondary-fixed": "#beefb4",
-            "on-surface-variant": "#c2c9bc",
-            "secondary-container": "#265024",
-            "inverse-surface": "#e1e3dc",
-            "surface-variant": "#323631",
-            "surface-container": "#1d201c",
-            "on-secondary-fixed": "#002203",
-            "on-primary-container": "#80b276",
-            "surface-container-highest": "#323631",
-            "primary-container": "#164415",
-            "primary-fixed-dim": "#a0d495",
-            "error": "#ffb4ab",
-            "tertiary": "#ffb4ab",
-            "surface-container-lowest": "#0c0f0b",
-            "inverse-on-surface": "#2e312c",
-            "background": "#111410",
-            "on-tertiary-container": "#ff7f74",
-            "surface-dim": "#111410",
-            "primary-fixed": "#bbf0af",
-            "surface-bright": "#373a35",
-            "tertiary-fixed": "#ffdad6",
-            "on-background": "#e1e3dc",
-            "on-tertiary-fixed": "#410002",
-            "secondary": "#a3d39a",
-            "on-surface": "#e1e3dc",
-            "tertiary-fixed-dim": "#ffb4ab",
-            "on-error": "#690005",
-            "surface": "#111410",
-            "on-error-container": "#ffdad6",
-            "inverse-primary": "#3a6935",
-            "on-tertiary": "#640b0b",
-            "on-tertiary-fixed-variant": "#84231f",
-            "on-secondary": "#0e380f",
-            "surface-tint": "#a0d495",
-            "secondary-fixed-dim": "#a3d39a",
-            "primary": "#a0d495",
-            "on-primary-fixed-variant": "#235020",
-            /* Accent overrides for operational telemetry cues */
-            "brand-akamai": "#0099FF",
-            "brand-burn": "#FF7900",
-            "brand-disrupt": "#EF4444"
-          },
-          "borderRadius": {
-            "DEFAULT": "0.25rem",
-            "lg": "0.5rem",
-            "xl": "0.75rem",
-            "full": "9999px"
-          },
-          "spacing": {
-            "gutter": "1rem",
-            "space-xl": "2rem",
-            "margin-mobile": "0.75rem",
-            "margin": "1rem",
-            "space-lg": "1.5rem",
-            "margin-desktop": "2.5rem",
-            "gutter-mobile": "0.75rem",
-            "gutter-desktop": "1.5rem",
-            "space-xs": "0.25rem",
-            "space-sm": "0.5rem",
-            "space-md": "1rem",
-            "margin-tablet": "1.5rem"
-          },
-          "fontFamily": {
-            "body-md": ["Sora", "sans-serif"],
-            "telemetry-sm": ["Be Vietnam Pro", "sans-serif"],
-            "headline-xl": ["Be Vietnam Pro", "sans-serif"],
-            "body-sm": ["Sora", "sans-serif"],
-            "headline-lg": ["Be Vietnam Pro", "sans-serif"],
-            "body-lg": ["Sora", "sans-serif"],
-            "headline-md": ["Be Vietnam Pro", "sans-serif"],
-            "label-md": ["Sora", "sans-serif"],
-            "headline-xl-mobile": ["Be Vietnam Pro", "sans-serif"],
-            "telemetry-lg": ["Be Vietnam Pro", "sans-serif"],
-            "label-sm": ["Be Vietnam Pro", "sans-serif"],
-            "telemetry-md": ["Be Vietnam Pro", "sans-serif"],
-            "mono": ["JetBrains Mono", "monospace"]
-          },
-          "fontSize": {
-            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
-            "telemetry-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0em", "fontWeight": "400" }],
-            "headline-xl": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
-            "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
-            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "500" }],
-            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
-            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
-            "headline-xl-mobile": ["28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
-            "telemetry-lg": ["20px", { "lineHeight": "26px", "letterSpacing": "-0.02em", "fontWeight": "500" }],
-            "label-sm": ["10px", { "lineHeight": "12px", "letterSpacing": "0.06em", "fontWeight": "600" }],
-            "telemetry-md": ["13px", { "lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "400" }]
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linka — Logistics-Aware FinOps for Flex + Akamai Cloud</title>
+    <meta name="description" content="Linka connects Flex logistics disruptions to Akamai Connected Cloud infrastructure, hibernating idle compute resources to protect working capital.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { flex: '#437E5B', akamai: '#0099FF' } } }
         }
-      }
-    }
-  </script>
-<style>
-    .material-symbols-outlined {
-      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      display: inline-block;
-      vertical-align: middle;
-      line-height: 1;
-    }
-    .glass-panel {
-      background: rgba(15, 18, 28, 0.72);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .glass-card-interactive {
-      background: rgba(22, 27, 38, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .pulse-glow-green {
-      box-shadow: 0 0 20px rgba(160, 212, 149, 0.25);
-    }
-    .pulse-glow-red {
-      box-shadow: 0 0 16px rgba(239, 68, 68, 0.25);
-    }
-    /* Hide scrollbar for tabs */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-  </style>
+    </script>
+    <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-surface-container-lowest text-on-surface antialiased font-body-md min-h-screen selection:bg-primary-container selection:text-primary pb-28">
-<!-- ================= TOP APP BAR (Shared Component Anchor) ================= -->
-<header class="bg-surface/80 backdrop-blur-md text-primary docked full-width top-0 sticky z-40 flex justify-between items-center w-full px-gutter-mobile py-space-sm border-b border-outline-variant/30">
-<div class="flex items-center space-x-2">
-<div class="w-8 h-8 rounded-lg bg-surface-container-high border border-outline-variant/40 flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-[20px]" data-icon="hub">hub</span>
-</div>
-<div>
-<div class="flex items-center space-x-1.5">
-<span class="text-headline-md font-headline-md font-bold tracking-tight text-on-surface">Linka</span>
-<span class="text-label-sm font-label-sm text-outline px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/30 font-mono">FINOPS⇄LOGISTICS</span>
-</div>
-<div class="flex items-center space-x-1.5">
-<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-ping" id="socketPulse"></span>
-<span class="text-label-sm font-label-sm text-primary tracking-wide uppercase font-semibold" id="socketStatusText">SOCKET LIVE</span>
-<span class="text-outline text-label-sm font-mono">LAX-GATEWAY #B104</span>
-</div>
-</div>
-</div>
-<div class="flex items-center space-x-2">
-<button class="w-8 h-8 rounded-lg bg-surface-container-high/80 border border-outline-variant/40 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors active:opacity-80" id="syncBtn" title="Reset Demo / Sync Engine">
-<span class="material-symbols-outlined text-[18px]" data-icon="sync" id="syncIcon">sync</span>
-</button>
-<div class="w-8 h-8 rounded-full border border-primary/40 bg-primary-container/40 flex items-center justify-center text-primary text-label-sm font-mono font-bold">
-        OP4
-      </div>
-</div>
-</header>
-<!-- ================= SUB-HEADER VIEW SELECTOR ================= -->
-<div class="px-gutter-mobile pt-space-sm pb-space-xs">
-<div class="p-1 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between text-label-sm font-label-sm">
-<button class="flex-1 py-1.5 rounded-lg font-medium transition-all duration-150 bg-primary-container text-primary shadow-sm flex items-center justify-center space-x-1" id="tabExecutive">
-<span class="material-symbols-outlined text-[14px]" data-icon="shield">shield</span>
-<span>Executive Summary</span>
-</button>
-<button class="flex-1 py-1.5 rounded-lg font-medium transition-all duration-150 text-on-surface-variant hover:text-on-surface flex items-center justify-center space-x-1" id="tabTelemetry">
-<span class="material-symbols-outlined text-[14px]" data-icon="terminal">terminal</span>
-<span>Telemetry &amp; Logs</span>
-</button>
-</div>
-</div>
-<!-- MAIN CANVAS -->
-<main class="px-gutter-mobile space-y-space-md mt-space-xs">
-<!-- ================= 4-STAGE OPERATIONAL STEPPER (VisionOS Style Capsule) ================= -->
-<section class="glass-panel rounded-2xl p-space-sm">
-<div class="flex items-center justify-between pb-space-xs border-b border-outline-variant/20 mb-space-xs">
-<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline font-mono">AUTONOMOUS BRIDGE PIPELINE</span>
-<span class="text-label-sm font-label-sm text-primary font-mono flex items-center space-x-1" id="pipelineStatusBadge">
-<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span>
-<span>STAGE 4 READY</span>
-</span>
-</div>
-<div class="grid grid-cols-4 gap-1.5">
-<!-- Step 1: Baseline -->
-<div class="p-2 rounded-xl bg-surface-container-low/60 border border-primary/30 flex flex-col items-center text-center relative overflow-hidden" id="step1Pill">
-<div class="text-[9px] font-mono text-primary font-semibold">STAGE 1</div>
-<span class="material-symbols-outlined text-[16px] text-primary my-0.5" data-icon="check_circle">check_circle</span>
-<span class="text-label-sm font-label-sm text-on-surface leading-tight font-medium">Baseline</span>
-<span class="text-[9px] font-mono text-outline">00:00 OK</span>
-</div>
-<!-- Step 2: Disruption -->
-<div class="p-2 rounded-xl bg-tertiary-container/30 border border-brand-disrupt/50 flex flex-col items-center text-center relative overflow-hidden pulse-glow-red" id="step2Pill">
-<div class="text-[9px] font-mono text-tertiary font-semibold">STAGE 2</div>
-<span class="material-symbols-outlined text-[16px] text-tertiary my-0.5" data-icon="warning">warning</span>
-<span class="text-label-sm font-label-sm text-tertiary font-bold leading-tight">Disruption</span>
-<span class="text-[9px] font-mono text-error font-medium">+14d HOLD</span>
-</div>
-<!-- Step 3: Agent Matched -->
-<div class="p-2 rounded-xl bg-surface-container-high/40 border border-brand-akamai/40 flex flex-col items-center text-center relative overflow-hidden" id="step3Pill">
-<div class="text-[9px] font-mono text-brand-akamai font-semibold">STAGE 3</div>
-<span class="material-symbols-outlined text-[16px] text-brand-akamai my-0.5" data-icon="hub">hub</span>
-<span class="text-label-sm font-label-sm text-on-surface leading-tight font-medium">FinOps Match</span>
-<span class="text-[9px] font-mono text-outline">BATCH-104</span>
-</div>
-<!-- Step 4: Shield Protect -->
-<div class="p-2 rounded-xl bg-primary-container/20 border border-primary/40 flex flex-col items-center text-center relative overflow-hidden pulse-glow-green" id="step4Pill">
-<div class="text-[9px] font-mono text-primary font-semibold">STAGE 4</div>
-<span class="material-symbols-outlined text-[16px] text-primary my-0.5" data-icon="verified_user">verified_user</span>
-<span class="text-label-sm font-label-sm text-primary font-bold leading-tight">Shield</span>
-<span class="text-[9px] font-mono text-on-primary-container">READY</span>
-</div>
-</div>
-</section>
-<!-- ================= DISRUPTION BANNER: SEC 301 CUSTOMS HOLD ================= -->
-<section class="glass-panel rounded-2xl p-space-md border-l-4 border-l-brand-disrupt relative overflow-hidden" id="disruptionBanner">
-<div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-disrupt/10 rounded-full blur-2xl pointer-events-none"></div>
-<div class="flex items-start justify-between mb-space-xs">
-<div class="flex items-center space-x-2">
-<span class="px-2 py-0.5 rounded text-label-sm font-mono font-bold bg-error-container/60 text-error border border-brand-disrupt/40 uppercase tracking-wider flex items-center space-x-1">
-<span class="w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
-<span>SEC 301 CUSTOMS HOLD</span>
-</span>
-<span class="px-2 py-0.5 rounded text-label-sm font-mono text-outline bg-surface-container border border-outline-variant/30">
-            PORT OF LA (USLAX)
-          </span>
-</div>
-<span class="text-telemetry-sm font-mono text-outline">+14 DAYS</span>
-</div>
-<h2 class="text-headline-md font-headline-md text-on-surface font-semibold tracking-tight mt-1">
-        Vessel 82 Quarantine Triggered
-      </h2>
-<p class="text-body-sm font-body-sm text-on-surface-variant mt-1 leading-relaxed">
-        Container delay confirmed at Port of Los Angeles. Linked staging databases and real-time freight sync workers are burning cloud budget with <strong class="text-on-surface font-medium">0% useful throughput</strong>.
-      </p>
-<div class="mt-space-sm pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-telemetry-sm font-mono">
-<span class="text-outline">MANIFEST REF: <span class="text-on-surface">C-89240-B104</span></span>
-<span class="text-error font-medium">DEMURRAGE RISK: ELEVATED</span>
-</div>
-</section>
-<!-- ================= DUAL BIFURCATED KEY METRICS ================= -->
-<section class="grid grid-cols-2 gap-space-sm">
-<!-- Left Card: Idle Burn Bleed -->
-<div class="glass-panel rounded-2xl p-space-md border border-outline-variant/30 flex flex-col justify-between relative overflow-hidden group">
-<div class="flex items-center justify-between">
-<span class="text-label-sm font-label-sm text-outline uppercase font-mono tracking-wider">AT-RISK BLEED</span>
-<span class="w-2 h-2 rounded-full bg-brand-disrupt" id="bleedDot"></span>
-</div>
-<div class="my-space-xs">
-<div class="text-headline-lg font-headline-lg font-bold text-tertiary tracking-tight font-mono" id="metricBleed">
-            $2,520.00
-          </div>
-<div class="text-telemetry-sm font-mono text-outline-variant mt-0.5">
-            $180/day × 14d delay
-          </div>
-</div>
-<div class="pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-label-sm font-mono">
-<span class="text-tertiary flex items-center text-[10px]" id="bleedTag">
-<span class="material-symbols-outlined text-[12px] mr-0.5" data-icon="trending_up">trending_up</span>
-            UNBOUND
-          </span>
-<span class="text-outline">2 Linodes</span>
-</div>
-</div>
-<!-- Right Card: Flex Bank Reserve -->
-<div class="glass-panel rounded-2xl p-space-md border border-outline-variant/30 flex flex-col justify-between relative overflow-hidden group">
-<div class="flex items-center justify-between">
-<span class="text-label-sm font-label-sm text-outline uppercase font-mono tracking-wider">BANK RESERVE</span>
-<span class="w-2 h-2 rounded-full bg-primary"></span>
-</div>
-<div class="my-space-xs">
-<div class="text-headline-lg font-headline-lg font-bold text-primary tracking-tight font-mono">
-            $248,500
-          </div>
-<div class="text-telemetry-sm font-mono text-outline-variant mt-0.5">
-            Liquidity Escrow Safe
-          </div>
-</div>
-<div class="pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-label-sm font-mono">
-<span class="text-primary flex items-center text-[10px]">
-<span class="material-symbols-outlined text-[12px] mr-0.5" data-icon="shield">shield</span>
-            SOLVENT
-          </span>
-<span class="text-outline">0.98% Risk</span>
-</div>
-</div>
-</section>
-<!-- ================= ONE-CLICK PRIMARY ACTION & RESTART TRIGGER ================= -->
-<section class="space-y-space-xs">
-<button class="w-full relative overflow-hidden py-3.5 px-4 rounded-xl bg-gradient-to-r from-primary-container via-primary-container to-secondary-container text-on-surface border border-primary/40 font-headline-md font-medium text-body-lg flex items-center justify-center space-x-2 transition-all duration-200 active:scale-[0.98] shadow-lg pulse-glow-green group" id="hibernateActionBtn">
-<span class="material-symbols-outlined text-primary text-[22px] group-hover:scale-110 transition-transform" data-icon="lock_clock">lock_clock</span>
-<span class="font-bold tracking-tight text-on-surface" id="hibernateBtnText">Hibernate Idle Compute • SAVE $2,520</span>
-</button>
-<!-- Secondary Trigger Button -->
-<button class="w-full py-2.5 px-3 rounded-xl bg-surface-container-low border border-brand-akamai/40 text-on-surface hover:border-brand-akamai/80 transition-all text-body-sm font-medium flex items-center justify-between" id="inspectTriggerBtn">
-<div class="flex items-center space-x-2">
-<span class="material-symbols-outlined text-brand-akamai text-[18px]" data-icon="autorenew">autorenew</span>
-<span class="text-on-surface">Inspect Automated Restart Trigger</span>
-</div>
-<span class="text-label-sm font-mono text-brand-akamai bg-surface-container px-2 py-0.5 rounded border border-brand-akamai/30">CUSTOMS CLEAR HOOK</span>
-</button>
-<!-- Telemetry API Substring -->
-<div class="flex items-center justify-between px-1 text-[10px] font-mono text-outline">
-<span class="flex items-center space-x-1">
-<span class="w-1.5 h-1.5 rounded-full bg-brand-akamai inline-block"></span>
-<span>Akamai Linode REST API v4</span>
-</span>
-<span class="text-on-surface-variant">Idempotent Hook: <strong class="text-on-surface">#ID-89240-SEC301</strong></span>
-</div>
-</section>
-<!-- ================= CORRELATED ASSET PAIR: PHYSICAL CARGO & CLOUD WORKLOADS ================= -->
-<section class="glass-panel rounded-2xl p-space-md space-y-space-sm">
-<div class="flex items-center justify-between border-b border-outline-variant/20 pb-space-xs">
-<div class="flex items-center space-x-2">
-<span class="text-label-sm font-label-sm text-primary uppercase font-mono tracking-wider font-semibold">BATCH-104</span>
-<span class="text-label-sm font-label-sm text-outline">|</span>
-<span class="text-label-sm font-label-sm text-outline font-mono">CORRELATED ASSET PAIR</span>
-</div>
-<span class="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-high border border-outline-variant/30 text-outline">
-          BRIDGE CONF: 99.4%
-        </span>
-</div>
-<!-- Asset 1: Physical Cargo Module -->
-<div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-2">
-<div class="flex items-center justify-between">
-<div class="flex items-center space-x-2">
-<span class="material-symbols-outlined text-outline text-[18px]" data-icon="directions_boat">directions_boat</span>
-<span class="font-mono text-body-sm text-on-surface font-semibold">PO #104 • Ocean Master V.82</span>
-</div>
-<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-tertiary-container/40 text-tertiary border border-brand-disrupt/30 font-semibold">
-            CUSTOMS QUARANTINE
-          </span>
-</div>
-<div class="grid grid-cols-3 gap-2 text-telemetry-sm font-mono pt-1">
-<div>
-<div class="text-[10px] text-outline">ROUTE</div>
-<div class="text-on-surface font-medium">SZX ➔ LAX</div>
-</div>
-<div>
-<div class="text-[10px] text-outline">CARGO VALUE</div>
-<div class="text-primary font-medium">$82,400.00</div>
-</div>
-<div>
-<div class="text-[10px] text-outline">ACTIVE DELAY</div>
-<div class="text-tertiary font-medium">+14 DAYS</div>
-</div>
-</div>
-</div>
-<!-- Bridging Link Connector -->
-<div class="flex items-center justify-center my-1">
-<div class="px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant/40 flex items-center space-x-1.5 shadow-sm">
-<span class="material-symbols-outlined text-[14px] text-brand-akamai" data-icon="sync_alt">sync_alt</span>
-<span class="text-[10px] font-mono text-on-surface font-medium uppercase tracking-wider">Freight Delay ➔ Cloud Throttle</span>
-<span class="w-1.5 h-1.5 rounded-full bg-brand-burn animate-pulse"></span>
-</div>
-</div>
-<!-- Asset 2: Cloud Workloads Module (Akamai Linode) -->
-<div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-2.5">
-<div class="flex items-center justify-between">
-<div class="flex items-center space-x-2">
-<span class="material-symbols-outlined text-brand-akamai text-[18px]" data-icon="cloud">cloud</span>
-<span class="font-mono text-body-sm text-on-surface font-semibold">Akamai Linode Staging Workloads</span>
-</div>
-<span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface-container text-brand-burn border border-brand-burn/40 font-semibold" id="burnRateBadge">
-            $180.00/DAY CURRENT BURN
-          </span>
-</div>
-<!-- Instance 1 -->
-<div class="p-2 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between text-telemetry-sm font-mono" id="instance1Card">
-<div>
-<div class="flex items-center space-x-1.5">
-<span class="text-brand-akamai font-semibold">linode-9842104</span>
-<span class="text-[10px] text-outline">8GB Freight-Sync</span>
-</div>
-<div class="text-[10px] text-outline-variant mt-0.5">CPU Load: <span class="text-brand-burn font-medium" id="inst1Cpu">2.1% (Idle)</span> • US-West (Fremont)</div>
-</div>
-<div class="text-right">
-<div class="text-on-surface font-semibold">$45.00/d</div>
-<span class="inline-block text-[9px] px-1.5 py-0.2 rounded bg-tertiary-container/30 text-tertiary font-mono" id="inst1Status">RUNNING</span>
-</div>
-</div>
-<!-- Instance 2 -->
-<div class="p-2 rounded-lg bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between text-telemetry-sm font-mono" id="instance2Card">
-<div>
-<div class="flex items-center space-x-1.5">
-<span class="text-brand-akamai font-semibold">linode-9842105</span>
-<span class="text-[10px] text-outline">16GB Staging-DB-Cluster</span>
-</div>
-<div class="text-[10px] text-outline-variant mt-0.5">CPU Load: <span class="text-brand-burn font-medium" id="inst2Cpu">0.8% (Idle)</span> • US-West (Fremont)</div>
-</div>
-<div class="text-right">
-<div class="text-on-surface font-semibold">$135.00/d</div>
-<span class="inline-block text-[9px] px-1.5 py-0.2 rounded bg-tertiary-container/30 text-tertiary font-mono" id="inst2Status">RUNNING</span>
-</div>
-</div>
-</div>
-</section>
-<!-- ================= WORKING CAPITAL PRESERVATION TRAJECTORY (High Contrast SVG Chart) ================= -->
-<section class="glass-panel rounded-2xl p-space-md space-y-space-sm">
-<div class="flex items-center justify-between">
-<div>
-<h3 class="text-body-md font-headline-md font-semibold text-on-surface">Working Capital Preservation</h3>
-<p class="text-telemetry-sm font-telemetry-sm text-outline">Trajectory: Liquidity Shield vs. Cloud Bleed</p>
-</div>
-<span class="px-2 py-0.5 rounded bg-primary-container text-primary text-label-sm font-mono font-semibold border border-primary/30" id="chartSavingsBadge">
-          +$2,520 PROJECTED SAFE
-        </span>
-</div>
-<!-- Interactive SVG Chart Canvas -->
-<div class="relative w-full h-44 bg-surface-container-lowest/80 rounded-xl p-2 border border-outline-variant/20 overflow-hidden">
-<!-- SVG Grid & Curves -->
-<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 340 140">
-<defs>
-<lineargradient id="shieldGrad" x1="0" x2="0" y1="0" y2="1">
-<stop offset="0%" stop-color="#a0d495" stop-opacity="0.25"></stop>
-<stop offset="100%" stop-color="#a0d495" stop-opacity="0.0"></stop>
-</lineargradient>
-<lineargradient id="bleedGrad" x1="0" x2="0" y1="0" y2="1">
-<stop offset="0%" stop-color="#EF4444" stop-opacity="0.15"></stop>
-<stop offset="100%" stop-color="#EF4444" stop-opacity="0.0"></stop>
-</lineargradient>
-</defs>
-<!-- Horizontal reference lines -->
-<line stroke="rgba(255,255,255,0.05)" stroke-dasharray="2,2" x1="10" x2="330" y1="20" y2="20"></line>
-<line stroke="rgba(255,255,255,0.05)" stroke-dasharray="2,2" x1="10" x2="330" y1="65" y2="65"></line>
-<line stroke="rgba(255,255,255,0.05)" stroke-dasharray="2,2" x1="10" x2="330" y1="110" y2="110"></line>
-<!-- Vertical Day 14 Line -->
-<line stroke="rgba(239, 68, 68, 0.4)" stroke-dasharray="3,3" stroke-width="1.5" x1="170" x2="170" y1="10" y2="125"></line>
-<!-- Bleed Area & Line (Descending) -->
-<path d="M 20 70 L 170 100 L 320 120 L 320 130 L 20 130 Z" fill="url(#bleedGrad)"></path>
-<path d="M 20 70 Q 150 95 320 120" fill="none" stroke="#EF4444" stroke-dasharray="4,4" stroke-width="2"></path>
-<!-- Shield Area & Curve (Ascending Capital Reserve Protection) -->
-<path d="M 20 70 L 170 35 L 320 22 L 320 130 L 20 130 Z" fill="url(#shieldGrad)"></path>
-<path d="M 20 70 Q 160 40 320 22" fill="none" id="shieldPath" stroke="#a0d495" stroke-width="2.5"></path>
-<!-- Data Points -->
-<!-- Day 0 Point -->
-<circle cx="20" cy="70" fill="#a0d495" r="4" stroke="#0c0f0b" stroke-width="2"></circle>
-<!-- Day 14 Quarantine Point -->
-<circle class="cursor-pointer" cx="170" cy="35" fill="#a0d495" r="5" stroke="#0c0f0b" stroke-width="2"></circle>
-<circle cx="170" cy="100" fill="#EF4444" r="4" stroke="#0c0f0b" stroke-width="2"></circle>
-<!-- Day 30 Point -->
-<circle cx="320" cy="22" fill="#a0d495" r="4" stroke="#0c0f0b" stroke-width="2"></circle>
-</svg>
-<!-- Dynamic Milestone Marker Overlay for Day 14 (Interactive) -->
-<div class="absolute top-2 left-1/2 -translate-x-1/2 bg-surface-container-highest/90 border border-primary/40 px-2.5 py-1 rounded-lg backdrop-blur-md text-center pointer-events-none transition-all" id="chartTooltip">
-<div class="text-[9px] font-mono text-outline">DAY 14 RELEASE FORECAST</div>
-<div class="text-label-sm font-mono text-primary font-bold">+1.01% Solvency (+$2,520 Protected)</div>
-</div>
-<!-- Axis Labels -->
-<div class="absolute bottom-1 inset-x-4 flex justify-between text-[9px] font-mono text-outline">
-<span>DAY 0 (NOW)</span>
-<span class="text-tertiary font-semibold">DAY 14 (RELEASE)</span>
-<span>DAY 30</span>
-</div>
-</div>
-<!-- Legend -->
-<div class="flex items-center justify-between text-[11px] font-mono pt-1 text-outline">
-<div class="flex items-center space-x-1.5">
-<span class="w-2.5 h-1 rounded-full bg-primary inline-block"></span>
-<span class="text-on-surface">Flex Capital Shield</span>
-</div>
-<div class="flex items-center space-x-1.5">
-<span class="w-2.5 h-0.5 bg-brand-disrupt inline-block"></span>
-<span class="text-outline">Uncontrolled Cloud Bleed</span>
-</div>
-</div>
-</section>
-<!-- ================= AUTOMATED SAFEGUARDS CHECKLIST (4/4 PASS) ================= -->
-<section class="glass-panel rounded-2xl p-space-md space-y-space-xs">
-<div class="flex items-center justify-between pb-space-xs border-b border-outline-variant/20">
-<span class="text-label-sm font-label-sm uppercase tracking-wider text-outline font-mono">AUTOMATED FINOPS SAFEGUARDS</span>
-<span class="text-label-sm font-label-sm font-mono text-primary font-bold bg-primary-container/40 px-2 py-0.5 rounded border border-primary/30">
-          4 OF 4 CHECKS OK
-        </span>
-</div>
-<div class="divide-y divide-outline-variant/10 text-body-sm font-body-sm">
-<!-- Check 1 -->
-<div class="py-2 flex items-center justify-between">
-<div class="flex items-center space-x-2.5">
-<div class="w-5 h-5 rounded-full bg-primary-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
-</div>
-<div>
-<div class="text-on-surface text-telemetry-sm font-medium">Delay Threshold Policy (&gt; 3 Days)</div>
-<div class="text-outline text-[10px] font-mono">Active Port of LA Hold = 14 Days elapsed</div>
-</div>
-</div>
-<span class="text-primary text-label-sm font-mono font-semibold">PASSED</span>
-</div>
-<!-- Check 2 -->
-<div class="py-2 flex items-center justify-between">
-<div class="flex items-center space-x-2.5">
-<div class="w-5 h-5 rounded-full bg-primary-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
-</div>
-<div>
-<div class="text-on-surface text-telemetry-sm font-medium">Idle CPU Workload Confirmation (&lt; 10%)</div>
-<div class="text-outline text-[10px] font-mono">Telemetry aggregate load: 1.45% Avg</div>
-</div>
-</div>
-<span class="text-primary text-label-sm font-mono font-semibold">PASSED</span>
-</div>
-<!-- Check 3 -->
-<div class="py-2 flex items-center justify-between">
-<div class="flex items-center space-x-2.5">
-<div class="w-5 h-5 rounded-full bg-primary-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
-</div>
-<div>
-<div class="text-on-surface text-telemetry-sm font-medium">Working Capital Sanity Check</div>
-<div class="text-outline text-[10px] font-mono">Bank reserve $248,500 maintains &gt; 98% coverage</div>
-</div>
-</div>
-<span class="text-primary text-label-sm font-mono font-semibold">PASSED</span>
-</div>
-<!-- Check 4 -->
-<div class="py-2 flex items-center justify-between">
-<div class="flex items-center space-x-2.5">
-<div class="w-5 h-5 rounded-full bg-primary-container text-primary flex items-center justify-center">
-<span class="material-symbols-outlined text-[13px]" data-icon="check">check</span>
-</div>
-<div>
-<div class="text-on-surface text-telemetry-sm font-medium">Autonomous Resume Webhook Verified</div>
-<div class="text-outline text-[10px] font-mono">CBP status change trigger listener registered</div>
-</div>
-</div>
-<span class="text-primary text-label-sm font-mono font-semibold">PASSED</span>
-</div>
-</div>
-</section>
-<!-- ================= LOG DRILLDOWN MODAL / DRAWER (Triggered by Secondary inspect button) ================= -->
-<div class="hidden glass-panel rounded-2xl p-space-md border border-brand-akamai/40 space-y-space-xs transition-all" id="telemetryDrawer">
-<div class="flex items-center justify-between">
-<span class="text-label-sm font-mono text-brand-akamai font-bold">AKAMAI LINODE REST HOOK #ID-89240</span>
-<button class="text-outline hover:text-on-surface" id="closeDrawerBtn">
-<span class="material-symbols-outlined text-[16px]" data-icon="close">close</span>
-</button>
-</div>
-<div class="p-2.5 rounded-lg bg-surface-container-lowest font-mono text-[11px] text-on-surface-variant overflow-x-auto space-y-1">
-<div class="text-outline">// Event listener configuration</div>
-<div>POST /v4/linode/instances/hibernate-batch</div>
-<div class="text-primary">"instances": ["9842104", "9842105"],</div>
-<div class="text-brand-akamai">"resume_on_event": "CUSTOMS_CLEARED_USLAX",</div>
-<div class="text-outline">"idempotency_key": "sec301-b104-la-2025"</div>
-</div>
-<div class="text-[10px] font-mono text-outline">Callback verified: ping response 14ms from Akamai Edge Node LAX-01.</div>
-</div>
-</main>
-<!-- ================= BOTTOM NAVIGATION BAR (Shared Component Anchor) ================= -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-gutter-mobile py-space-xs bg-surface-container-lowest/90 backdrop-blur-lg shadow-2xl">
-<!-- Tab 1: Overview (ACTIVE) -->
-<a class="flex flex-col items-center justify-center text-primary font-medium p-1 transition-transform active:scale-95" href="#">
-<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
-<span class="text-label-sm font-label-sm mt-0.5">Overview</span>
-</a>
-<!-- Tab 2: Shipments (INACTIVE) -->
-<a class="flex flex-col items-center justify-center text-on-surface-variant/70 p-1 hover:text-primary transition-colors active:scale-95" href="/trigger">
-<span class="material-symbols-outlined text-[20px]" data-icon="local_shipping">local_shipping</span>
-<span class="text-label-sm font-label-sm mt-0.5">Remote Trigger</span>
-</a>
-<!-- Tab 3: Clusters (INACTIVE) -->
-<a class="flex flex-col items-center justify-center text-on-surface-variant/70 p-1 hover:text-primary transition-colors active:scale-95" href="#telemetryDrawer" onclick="document.getElementById('inspectTriggerBtn').click();">
-<span class="material-symbols-outlined text-[20px]" data-icon="dns">dns</span>
-<span class="text-label-sm font-label-sm mt-0.5">Akamai Clusters</span>
-</a>
-<!-- Tab 4: Policies (INACTIVE) -->
-<a class="flex flex-col items-center justify-center text-on-surface-variant/70 p-1 hover:text-primary transition-colors active:scale-95" href="#step4Pill">
-<span class="material-symbols-outlined text-[20px]" data-icon="shield">shield</span>
-<span class="text-label-sm font-label-sm mt-0.5">Safeguards</span>
-</a>
-</nav>
-<!-- ================= INTERACTIVE LOGIC (VANILLA JS + SOCKET.IO SYNC) ================= -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const socket = typeof io === 'function' ? io() : null;
+<body class="min-h-screen flex flex-col vision-bg selection:bg-white/20">
 
-      // 1. Primary Action: Hibernate Compute Simulation
-      const hibernateBtn = document.getElementById('hibernateActionBtn');
-      const hibernateBtnText = document.getElementById('hibernateBtnText');
-      const metricBleed = document.getElementById('metricBleed');
-      const bleedTag = document.getElementById('bleedTag');
-      const bleedDot = document.getElementById('bleedDot');
-      const burnBadge = document.getElementById('burnRateBadge');
-      const inst1Status = document.getElementById('inst1Status');
-      const inst2Status = document.getElementById('inst2Status');
-      const inst1Cpu = document.getElementById('inst1Cpu');
-      const inst2Cpu = document.getElementById('inst2Cpu');
-      const step4Pill = document.getElementById('step4Pill');
-      const syncBtn = document.getElementById('syncBtn');
-      const syncIcon = document.getElementById('syncIcon');
-      const pipelineStatusBadge = document.getElementById('pipelineStatusBadge');
-      
-      let isHibernated = false;
+    <!-- Header -->
+    <header class="sticky top-0 z-50 px-6 pt-5">
+        <div class="max-w-6xl mx-auto vision-glass px-5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-flex to-emerald-500 flex items-center justify-center text-white font-bold border border-white/20">L</div>
+                <div class="leading-tight">
+                    <h1 class="text-[19px] font-semibold text-white">Linka</h1>
+                    <p class="text-[14px] text-neutral-300">Flex + Akamai Cloud capital shield</p>
+                </div>
+            </div>
 
-      function applyProtectedState() {
-        isHibernated = true;
-        hibernateBtn.classList.remove('pulse-glow-green');
-        hibernateBtn.classList.add('bg-surface-container', 'border-primary');
-        
-        hibernateBtnText.innerHTML = "COMPUTE HIBERNATED • $2,520 SECURED";
-        metricBleed.innerHTML = "$0.00";
-        metricBleed.classList.remove('text-tertiary');
-        metricBleed.classList.add('text-primary');
+            <div class="flex items-center gap-2 text-[15px]">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
+                    <span id="global-pulse-dot" class="dot dot-green"></span>
+                    <span id="global-status-text" class="text-neutral-200">Operating normally</span>
+                </div>
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
+                    <i class="fa-solid fa-cloud text-sky-400"></i>
+                    <span id="header-cloud-status" class="num font-medium text-emerald-400">Running · $180/day</span>
+                </div>
+            </div>
+        </div>
+    </header>
 
-        if (bleedTag) {
-          bleedTag.className = "text-primary flex items-center text-[10px]";
-          bleedTag.innerHTML = '<span class="material-symbols-outlined text-[12px] mr-0.5">shield</span>SHIELDED';
-        }
-        if (bleedDot) {
-          bleedDot.className = "w-2 h-2 rounded-full bg-primary";
-        }
+    <!-- Stepper -->
+    <div class="px-6 pt-6 flex justify-center">
+        <nav class="vision-stepper flex gap-1 overflow-x-auto" role="tablist" aria-label="Demo steps">
+            <button onclick="switchStep(1)" id="step-btn-1" class="vision-step-btn vision-step-active" role="tab"><span class="num text-neutral-300">1</span>Baseline</button>
+            <button onclick="switchStep(2)" id="step-btn-2" class="vision-step-btn" role="tab"><span class="num text-neutral-400">2</span>Disruption</button>
+            <button onclick="switchStep(3)" id="step-btn-3" class="vision-step-btn" role="tab"><span class="num text-neutral-400">3</span>Agent</button>
+            <button onclick="switchStep(4)" id="step-btn-4" class="vision-step-btn" role="tab"><span class="num text-neutral-400">4</span>Protect</button>
+        </nav>
+    </div>
 
-        burnBadge.innerHTML = "$0.00/DAY (HIBERNATED)";
-        burnBadge.classList.remove('text-brand-burn', 'border-brand-burn/40');
-        burnBadge.classList.add('text-primary', 'border-primary/40');
+    <main class="max-w-6xl mx-auto w-full px-6 py-8 flex-grow">
 
-        inst1Status.textContent = "HIBERNATED";
-        inst1Status.className = "inline-block text-[9px] px-1.5 py-0.2 rounded bg-primary-container text-primary font-mono";
-        inst1Cpu.textContent = "0.0% (Standby)";
-        inst1Cpu.className = "text-primary font-medium";
+        <!-- STEP 1: BASELINE -->
+        <section id="step-1-content" class="tab-content space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-emerald-400">Step 1 · Baseline</p>
+                    <h2 class="text-4xl font-semibold apple-heading mt-2">Everything in sync.</h2>
+                    <p class="text-[17px] text-neutral-300 mt-3">Flex tracks Freight Batch #104 while its Akamai Cloud compute pipeline runs normally.</p>
+                </div>
+                <button onclick="switchStep(2)" class="vision-btn-primary px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
+                    Simulate tariff hold <i class="fa-solid fa-arrow-right text-[14px]"></i>
+                </button>
+            </div>
 
-        inst2Status.textContent = "HIBERNATED";
-        inst2Status.className = "inline-block text-[9px] px-1.5 py-0.2 rounded bg-primary-container text-primary font-mono";
-        inst2Cpu.textContent = "0.0% (Standby)";
-        inst2Cpu.className = "text-primary font-medium";
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Flex Banking -->
+                <article class="vision-glass p-7 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-flex/20 border border-flex/40 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-building-columns"></i></div>
+                            <div>
+                                <h3 class="text-[18px] font-semibold text-white">Flex Banking</h3>
+                                <p class="label">Working capital & procurement</p>
+                            </div>
+                        </div>
+                        <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Healthy</span>
+                    </div>
 
-        // Change Step 4 to Secured
-        step4Pill.classList.add('bg-primary-container/50');
-        const pillText = step4Pill.querySelector('span:nth-child(4)');
-        if (pillText) pillText.textContent = "PROTECTED";
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="vision-card p-5">
+                            <p class="label">Working capital</p>
+                            <p class="num text-[30px] font-semibold text-white mt-1">$248,500</p>
+                        </div>
+                        <div class="vision-card p-5">
+                            <p class="label">Projected 30-day burn</p>
+                            <p class="num text-[30px] font-semibold text-white mt-1">$14,200</p>
+                        </div>
+                    </div>
 
-        if (pipelineStatusBadge) {
-          pipelineStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span><span>CAPITAL PROTECTED</span>';
-        }
-      }
+                    <div class="vision-card p-5 space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="label">PO #104 · Shenzhen → Los Angeles</p>
+                                <h4 class="text-[17px] font-semibold text-white mt-1">Electronics freight batch</h4>
+                            </div>
+                            <p class="num text-[17px] font-semibold text-white">$82,400</p>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[15px]">
+                                <span class="text-emerald-400">Ocean transit</span>
+                                <span class="text-neutral-300">ETA <span class="num text-white">Oct 18</span></span>
+                            </div>
+                            <div class="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                                <div class="h-full w-[65%] rounded-full bg-gradient-to-r from-flex to-emerald-400"></div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
 
-      function applyRunningState() {
-        isHibernated = false;
-        hibernateBtn.classList.add('pulse-glow-green');
-        hibernateBtn.classList.remove('bg-surface-container', 'border-primary');
-        hibernateBtnText.innerHTML = "Hibernate Idle Compute • SAVE $2,520";
-        metricBleed.innerHTML = "$2,520.00";
-        metricBleed.classList.add('text-tertiary');
-        metricBleed.classList.remove('text-primary');
+                <!-- Akamai Connected Cloud -->
+                <article class="vision-glass p-7 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-sky-500/10 border border-sky-400/30 flex items-center justify-center text-sky-400"><i class="fa-solid fa-cloud text-xl"></i></div>
+                            <div>
+                                <h3 class="text-[18px] font-semibold text-white">Akamai Connected Cloud</h3>
+                                <p class="label">Linodes tagged <code class="font-mono text-neutral-300">Batch-104</code></p>
+                            </div>
+                        </div>
+                        <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Running</span>
+                    </div>
 
-        if (bleedTag) {
-          bleedTag.className = "text-tertiary flex items-center text-[10px]";
-          bleedTag.innerHTML = '<span class="material-symbols-outlined text-[12px] mr-0.5">trending_up</span>UNBOUND';
-        }
-        if (bleedDot) {
-          bleedDot.className = "w-2 h-2 rounded-full bg-brand-disrupt";
-        }
+                    <div class="space-y-3">
+                        <div class="vision-card p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-sky-400"><i class="fa-solid fa-server text-sm"></i></div>
+                                <div>
+                                    <h4 class="text-[16px] font-medium text-white">Freight-Sync-Worker</h4>
+                                    <p class="text-[14px] text-neutral-400">Akamai Linode 8GB · <span class="font-mono">linode-9842104</span></p>
+                                </div>
+                            </div>
+                            <p class="num text-[16px] text-white">$45<span class="text-neutral-400">/day</span></p>
+                        </div>
+                        <div class="vision-card p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-emerald-400"><i class="fa-solid fa-database text-sm"></i></div>
+                                <div>
+                                    <h4 class="text-[16px] font-medium text-white">Staging-DB-Cluster</h4>
+                                    <p class="text-[14px] text-neutral-400">Dedicated 16GB · <span class="font-mono">linode-9842105</span></p>
+                                </div>
+                            </div>
+                            <p class="num text-[16px] text-white">$135<span class="text-neutral-400">/day</span></p>
+                        </div>
+                    </div>
 
-        burnBadge.innerHTML = "$180.00/DAY CURRENT BURN";
-        burnBadge.classList.add('text-brand-burn', 'border-brand-burn/40');
-        burnBadge.classList.remove('text-primary', 'border-primary/40');
+                    <div class="hairline"></div>
+                    <div class="flex justify-between text-[15px]">
+                        <span class="text-neutral-300">Total Akamai compute</span>
+                        <span class="num font-semibold text-white">$180/day</span>
+                    </div>
+                </article>
+            </div>
+        </section>
 
-        inst1Status.textContent = "RUNNING";
-        inst1Status.className = "inline-block text-[9px] px-1.5 py-0.2 rounded bg-tertiary-container/30 text-tertiary font-mono";
-        inst1Cpu.textContent = "2.1% (Idle)";
-        inst1Cpu.className = "text-brand-burn font-medium";
+        <!-- STEP 2: DISRUPTION -->
+        <section id="step-2-content" class="tab-content hidden space-y-8">
+            <div class="vision-glass-alert p-7 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-red-400">Step 2 · Disruption detected</p>
+                    <h2 class="text-4xl font-semibold text-white mt-2">Customs hold on Batch #104.</h2>
+                    <p class="text-[17px] text-red-100/90 mt-3">A Section 301 tariff review adds 14 days. The Akamai pipeline will sit idle the whole time.</p>
+                </div>
+                <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-500 hover:bg-red-400 text-white text-[16px] font-semibold transition shrink-0 flex items-center gap-2">
+                    See agent decision <i class="fa-solid fa-arrow-right text-[14px]"></i>
+                </button>
+            </div>
 
-        inst2Status.textContent = "RUNNING";
-        inst2Status.className = "inline-block text-[9px] px-1.5 py-0.2 rounded bg-tertiary-container/30 text-tertiary font-mono";
-        inst2Cpu.textContent = "0.8% (Idle)";
-        inst2Cpu.className = "text-brand-burn font-medium";
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="vision-glass p-7">
+                    <p class="label">Projected idle waste</p>
+                    <p class="num text-[38px] font-semibold text-amber-300 mt-1">$2,520</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">$180/day × 14 days</p>
+                </div>
+                <div class="vision-glass p-7">
+                    <p class="label">Added lead time</p>
+                    <p class="num text-[38px] font-semibold text-red-400 mt-1">+14 days</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">Tariff compliance review</p>
+                </div>
+                <div class="vision-glass p-7">
+                    <p class="label">Expected utilization</p>
+                    <p class="num text-[38px] font-semibold text-white mt-1">0%</p>
+                    <p class="text-[15px] text-neutral-400 mt-1">No inventory to sync</p>
+                </div>
+            </div>
 
-        step4Pill.classList.remove('bg-primary-container/50');
-        const pillText = step4Pill.querySelector('span:nth-child(4)');
-        if (pillText) pillText.textContent = "READY";
+            <div class="vision-glass p-7 space-y-4">
+                <h3 class="text-[17px] font-semibold text-white">Intercepted logistics event</h3>
+                <pre class="font-mono text-[14px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/50 border border-white/[0.06] overflow-x-auto">{
+  <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
+  <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"Batch-104"</span>,
+  <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
+  <span class="text-emerald-400">"delayDays"</span>: <span class="text-amber-300">14</span>,
+  <span class="text-emerald-400">"provider"</span>: <span class="text-sky-300">"Akamai Connected Cloud"</span>,
+  <span class="text-emerald-400">"taggedLinodes"</span>: [<span class="text-sky-300">"linode-9842104"</span>, <span class="text-sky-300">"linode-9842105"</span>],
+  <span class="text-emerald-400">"projectedWaste"</span>: <span class="text-red-400">2520.00</span>
+}</pre>
+            </div>
+        </section>
 
-        if (pipelineStatusBadge) {
-          pipelineStatusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span><span>STAGE 4 READY</span>';
-        }
-      }
+        <!-- STEP 3: AGENT -->
+        <section id="step-3-content" class="tab-content hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-sky-400">Step 3 · Agent</p>
+                    <h2 class="text-4xl font-semibold apple-heading mt-2">Linka connects the dots.</h2>
+                    <p class="text-[17px] text-neutral-300 mt-3">The shipment delay is matched to tagged Akamai Linode instances, and a safe action is proposed.</p>
+                </div>
+                <button onclick="switchStep(4)" class="vision-btn-emerald px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
+                    Review action <i class="fa-solid fa-arrow-right text-[14px]"></i>
+                </button>
+            </div>
 
-      hibernateBtn.addEventListener('click', () => {
-        if (!isHibernated) {
-          applyProtectedState();
-          if (socket && socket.connected) {
-            socket.emit('EXECUTE_PROTECTION', { projectedSavings: 2520, batchId: "Batch-104" });
-          }
-        } else {
-          applyRunningState();
-          if (socket && socket.connected) {
-            socket.emit('RESET_DEMO');
-          }
-        }
-      });
+            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
+                <div class="vision-glass p-6 h-full">
+                    <div class="h-9 w-9 rounded-xl bg-flex/20 text-emerald-400 flex items-center justify-center mb-4"><i class="fa-solid fa-ship text-sm"></i></div>
+                    <h4 class="text-[17px] font-semibold text-white">Flex event</h4>
+                    <p class="text-[15px] text-neutral-300 mt-1">Batch #104 delayed 14 days.</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
+                <div class="vision-glass p-6 h-full border-emerald-400/30 shadow-[0_0_40px_rgba(67,126,91,0.25)]">
+                    <div class="h-9 w-9 rounded-xl bg-flex/30 text-emerald-300 flex items-center justify-center mb-4"><i class="fa-solid fa-brain text-sm"></i></div>
+                    <h4 class="text-[17px] font-semibold text-emerald-300">Linka agent</h4>
+                    <p class="text-[15px] text-neutral-300 mt-1">Matches the <code class="font-mono">Batch-104</code> tag and computes $2,520 at risk.</p>
+                </div>
+                <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
+                <div class="vision-glass p-6 h-full">
+                    <div class="h-9 w-9 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center mb-4"><i class="fa-solid fa-power-off text-sm"></i></div>
+                    <h4 class="text-[17px] font-semibold text-white">Akamai action</h4>
+                    <p class="text-[15px] text-neutral-300 mt-1">Hibernate Linode instances until customs clears.</p>
+                </div>
+            </div>
 
-      // 2. Secondary Button: Inspect Trigger Drawer
-      const inspectBtn = document.getElementById('inspectTriggerBtn');
-      const telemetryDrawer = document.getElementById('telemetryDrawer');
-      const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+            <div class="vision-glass p-7 space-y-3">
+                <h3 class="text-[17px] font-semibold text-white mb-1">Policy checks</h3>
+                <div class="vision-card p-4 flex items-center justify-between text-[15px]">
+                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Logistics delay over 3 days and CPU under 10%</span>
+                    <span class="text-emerald-400">Passed</span>
+                </div>
+                <div class="vision-card p-4 flex items-center justify-between text-[15px]">
+                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Flex credit reserve active, protect working capital</span>
+                    <span class="text-emerald-400">Passed</span>
+                </div>
+            </div>
+        </section>
 
-      inspectBtn.addEventListener('click', () => {
-        telemetryDrawer.classList.toggle('hidden');
-        telemetryDrawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
+        <!-- STEP 4: PROTECT -->
+        <section id="step-4-content" class="tab-content hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-emerald-400">Step 4 · Protect</p>
+                    <h2 class="text-4xl font-semibold apple-heading mt-2">One click. $2,520 saved.</h2>
+                    <p class="text-[17px] text-neutral-300 mt-3">Hibernate the tagged Akamai Linodes and keep that cash in your Flex account.</p>
+                </div>
+                <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-shield-halved"></i> Protect capital
+                </button>
+            </div>
 
-      closeDrawerBtn.addEventListener('click', () => {
-        telemetryDrawer.classList.add('hidden');
-      });
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 vision-glass p-7 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-[17px] font-semibold text-white">Working capital, next 30 days</h3>
+                        <span id="chart-status-badge" class="text-[14px] text-red-400">Unprotected</span>
+                    </div>
+                    <div class="h-64"><canvas id="cashFlowChart"></canvas></div>
+                </div>
 
-      // 3. Top Tab Executive vs Telemetry View Switching
-      const tabExecutive = document.getElementById('tabExecutive');
-      const tabTelemetry = document.getElementById('tabTelemetry');
+                <div class="vision-glass p-7 flex flex-col justify-between gap-6">
+                    <div class="space-y-5">
+                        <div>
+                            <p class="label">Capital preserved</p>
+                            <p id="saved-amount-display" class="num text-[38px] font-semibold text-neutral-400 mt-1">$0</p>
+                        </div>
+                        <div class="hairline"></div>
+                        <div class="flex justify-between text-[16px]">
+                            <span class="text-neutral-300">Akamai burn rate</span>
+                            <span id="cloud-burn-display" class="num font-medium text-red-400">$180/day</span>
+                        </div>
+                        <div class="flex justify-between text-[16px]">
+                            <span class="text-neutral-300">Linode cluster</span>
+                            <span id="cloud-cluster-status" class="font-medium text-emerald-400">Running</span>
+                        </div>
+                    </div>
+                    <button onclick="resetWholeDemo()" class="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-white/10 text-neutral-300 text-[15px] transition border border-white/10">
+                        <i class="fa-solid fa-rotate-right mr-1.5"></i>Reset demo
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
 
-      tabExecutive.addEventListener('click', () => {
-        tabExecutive.classList.add('bg-primary-container', 'text-primary');
-        tabExecutive.classList.remove('text-on-surface-variant');
-        tabTelemetry.classList.remove('bg-primary-container', 'text-primary');
-        tabTelemetry.classList.add('text-on-surface-variant');
-        telemetryDrawer.classList.add('hidden');
-      });
+    <footer class="px-6 pb-6">
+        <div class="max-w-6xl mx-auto flex justify-between text-[14px] text-neutral-400">
+            <span>Linka · Hack Midwest 2026</span>
+            <span class="hidden sm:inline">Use ← → to navigate steps</span>
+        </div>
+    </footer>
 
-      tabTelemetry.addEventListener('click', () => {
-        tabTelemetry.classList.add('bg-primary-container', 'text-primary');
-        tabTelemetry.classList.remove('text-on-surface-variant');
-        tabExecutive.classList.remove('bg-primary-container', 'text-primary');
-        tabExecutive.classList.add('text-on-surface-variant');
-        telemetryDrawer.classList.remove('hidden');
-      });
-
-      // 4. WebSocket Sync Spin Animation & Remote Reset
-      syncBtn.addEventListener('click', () => {
-        syncIcon.classList.add('animate-spin');
-        if (socket && socket.connected) {
-          socket.emit('RESET_DEMO');
-        }
-        applyRunningState();
-        setTimeout(() => {
-          syncIcon.classList.remove('animate-spin');
-        }, 800);
-      });
-
-      // Socket.IO event listeners for live multi-device interaction
-      if (socket) {
-        socket.on('connect', () => {
-          const statusText = document.getElementById('socketStatusText');
-          if (statusText) statusText.textContent = "SOCKET LIVE";
-        });
-
-        socket.on('disconnect', () => {
-          const statusText = document.getElementById('socketStatusText');
-          if (statusText) statusText.textContent = "SOCKET RECONNECTING";
-        });
-
-        socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
-          // Highlight Stage 2 Disruption dynamically
-          const step2 = document.getElementById('step2Pill');
-          if (step2) {
-            step2.classList.add('scale-105', 'shadow-lg');
-            setTimeout(() => step2.classList.remove('scale-105', 'shadow-lg'), 1200);
-          }
-          applyRunningState();
-        });
-
-        socket.on('PROTECTION_CONFIRMED', () => {
-          applyProtectedState();
-        });
-
-        socket.on('INIT_STATE', (data) => {
-          if (data && data.resources && data.resources.some(r => r.status === "HIBERNATED")) {
-            applyProtectedState();
-          } else {
-            applyRunningState();
-          }
-        });
-      }
-    });
-  </script>
+    <script src="app.js"></script>
 </body>
 </html>
