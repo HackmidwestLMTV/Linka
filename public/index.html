@@ -3,608 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINKA // Spatial FinOps Engine — Apple Vision Theme</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Linka — Logistics-Aware FinOps for Flex + AWS</title>
+    <meta name="description" content="Linka connects Flex logistics disruptions to AWS infrastructure, hibernating idle cloud resources to protect working capital.">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        slate: {
-                            850: '#111827',
-                            950: '#030712',
-                        },
-                        flex: {
-                            DEFAULT: '#437E5B',
-                            light: '#52966e',
-                            dark: '#2e563e'
-                        },
-                        aws: '#FF9900'
-                    },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'SF Mono', 'monospace']
-                    }
-                }
-            }
+            theme: { extend: { colors: { flex: '#437E5B', aws: '#FF9900' } } }
         }
     </script>
-    <!-- Apple SF Pro Font -->
     <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js CDN for live cash flow visualizer -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Socket.IO -->
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen flex flex-col justify-between vision-bg selection:bg-white/20 selection:text-white">
+<body class="min-h-screen flex flex-col vision-bg selection:bg-white/20">
 
-    <!-- FLOATING TOP NAVIGATION HEADER (visionOS Style) -->
-    <header class="sticky top-0 z-50 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 vision-glass px-6 py-3.5">
-            
-            <div class="flex items-center space-x-3.5">
-                <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-[#437E5B] to-emerald-500 flex items-center justify-center text-white font-black text-xl shadow-[0_4px_16px_rgba(67,126,91,0.4)] border border-white/20">
-                    L
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <h1 class="text-xl font-bold tracking-tight text-white font-sans">LINKA</h1>
-                        <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-white/10 text-white/90 border border-white/15 backdrop-blur-xl">Spatial FinOps</span>
-                    </div>
-                    <p class="text-xs text-neutral-400 font-mono">Autonomous Cloud Capital Shield // Flex + AWS</p>
+    <!-- Header -->
+    <header class="sticky top-0 z-50 px-6 pt-5">
+        <div class="max-w-6xl mx-auto vision-glass px-5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-flex to-emerald-500 flex items-center justify-center text-white font-bold border border-white/20">L</div>
+                <div class="leading-tight">
+                    <h1 class="text-[17px] font-semibold text-white">Linka</h1>
+                    <p class="text-[12px] text-neutral-400">Flex + AWS capital shield</p>
                 </div>
             </div>
 
-            <!-- Global Status Pills -->
-            <div class="flex items-center space-x-3 text-xs">
-                <div class="flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-xl text-neutral-300">
-                    <span id="global-pulse-dot" class="h-2 w-2 rounded-full bg-[#437E5B] shadow-[0_0_8px_#437E5B]"></span>
-                    <span id="global-status-text" class="font-medium">Live Normal Operations</span>
+            <div class="flex items-center gap-2 text-[13px]">
+                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
+                    <span id="global-pulse-dot" class="dot dot-green"></span>
+                    <span id="global-status-text" class="text-neutral-200">Operating normally</span>
                 </div>
-
-                <div class="hidden sm:flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-xl text-neutral-300">
-                    <i class="fa-brands fa-aws text-amber-500 text-sm"></i>
-                    <span>EC2: <strong id="header-aws-status" class="text-emerald-400 font-mono">RUNNING ($180/d)</strong></span>
-                </div>
-
-                <div class="hidden md:flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-white/[0.06] border border-white/10 backdrop-blur-xl text-neutral-300">
-                    <i class="fa-solid fa-building-columns text-emerald-400 text-xs"></i>
-                    <span>Flex Credit: <strong class="text-white font-mono">$248.5K</strong></span>
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
+                    <i class="fa-brands fa-aws text-aws"></i>
+                    <span id="header-aws-status" class="num font-medium text-emerald-400">Running · $180/day</span>
                 </div>
             </div>
-
         </div>
     </header>
 
-    <!-- FLOATING CAPSULE WORKFLOW STEPPER (visionOS Segmented Control) -->
-    <div class="px-6 py-2">
-        <div class="max-w-4xl mx-auto flex justify-center">
-            <nav class="vision-stepper flex items-center justify-between gap-1 overflow-x-auto w-full md:w-auto">
-                
-                <button onclick="switchStep(1)" id="step-btn-1" class="vision-step-btn vision-step-active">
-                    <span class="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">1</span>
-                    <span class="whitespace-nowrap">Baseline State</span>
-                </button>
-
-                <button onclick="switchStep(2)" id="step-btn-2" class="vision-step-btn">
-                    <span class="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold">2</span>
-                    <span class="whitespace-nowrap">Logistics Hold</span>
-                </button>
-
-                <button onclick="switchStep(3)" id="step-btn-3" class="vision-step-btn">
-                    <span class="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold">3</span>
-                    <span class="whitespace-nowrap">Agent Matrix</span>
-                </button>
-
-                <button onclick="switchStep(4)" id="step-btn-4" class="vision-step-btn">
-                    <span class="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold">4</span>
-                    <span class="whitespace-nowrap">One-Click Action</span>
-                </button>
-
-            </nav>
-        </div>
+    <!-- Stepper -->
+    <div class="px-6 pt-6 flex justify-center">
+        <nav class="vision-stepper flex gap-1 overflow-x-auto" role="tablist" aria-label="Demo steps">
+            <button onclick="switchStep(1)" id="step-btn-1" class="vision-step-btn vision-step-active" role="tab"><span class="num text-neutral-400">1</span>Baseline</button>
+            <button onclick="switchStep(2)" id="step-btn-2" class="vision-step-btn" role="tab"><span class="num text-neutral-500">2</span>Disruption</button>
+            <button onclick="switchStep(3)" id="step-btn-3" class="vision-step-btn" role="tab"><span class="num text-neutral-500">3</span>Agent</button>
+            <button onclick="switchStep(4)" id="step-btn-4" class="vision-step-btn" role="tab"><span class="num text-neutral-500">4</span>Protect</button>
+        </nav>
     </div>
 
-    <!-- MAIN INTERACTIVE WORKSPACE -->
-    <main class="max-w-7xl mx-auto w-full px-6 py-4 flex-grow">
+    <main class="max-w-6xl mx-auto w-full px-6 py-8 flex-grow">
 
-        <!-- ========================================================= -->
-        <!-- STEP 1: LIVE OPERATING STATE                              -->
-        <!-- ========================================================= -->
-        <div id="step-1-content" class="tab-content space-y-6">
-            
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 vision-glass p-7">
-                <div>
-                    <span class="text-xs font-mono text-emerald-400 bg-[#437E5B]/20 px-3 py-1 rounded-full border border-[#437E5B]/30">STEP 1 // BASELINE ARCHITECTURE</span>
-                    <h2 class="text-2xl font-bold apple-heading mt-2">Dual-System Operational Baseline</h2>
-                    <p class="text-sm text-neutral-400 mt-1">Flex Private Banking and AWS Cloud Infrastructure executing normal synchronized pipelines for <strong>Freight Batch #104</strong>.</p>
+        <!-- STEP 1: BASELINE -->
+        <section id="step-1-content" class="tab-content space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-emerald-400">Step 1 · Baseline</p>
+                    <h2 class="text-4xl font-semibold apple-heading mt-2">Everything in sync.</h2>
+                    <p class="text-[15px] text-neutral-400 mt-3">Flex tracks Freight Batch #104 while its AWS pipeline runs normally.</p>
                 </div>
-                <button onclick="switchStep(2)" class="vision-btn-primary px-6 py-3 text-xs tracking-wider uppercase flex items-center space-x-2 shrink-0">
-                    <span>Simulate Tariff Event</span>
-                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                <button onclick="switchStep(2)" class="vision-btn-primary px-6 py-3 text-[14px] flex items-center gap-2 shrink-0">
+                    Simulate tariff hold <i class="fa-solid fa-arrow-right text-[12px]"></i>
                 </button>
             </div>
 
-            <!-- Two Pane Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                <!-- FLEX BANKING PANEL -->
-                <div class="vision-glass p-7 space-y-6 border-t-2 border-t-[#437E5B]/80">
-                    <div class="flex items-center justify-between border-b border-white/[0.08] pb-4">
-                        <div class="flex items-center space-x-3.5">
-                            <div class="h-11 w-11 rounded-2xl bg-[#437E5B]/20 border border-[#437E5B]/40 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(67,126,91,0.2)]">
-                                <i class="fa-solid fa-building-columns text-lg"></i>
-                            </div>
+                <!-- Flex -->
+                <article class="vision-glass p-7 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-flex/20 border border-flex/40 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-building-columns"></i></div>
                             <div>
-                                <h3 class="text-base font-bold text-white tracking-tight">Flex Banking & Working Capital</h3>
-                                <p class="text-xs text-neutral-400 font-mono">Net60 Capital & Ocean Procurement</p>
+                                <h3 class="text-[16px] font-semibold text-white">Flex Banking</h3>
+                                <p class="label">Working capital & procurement</p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-emerald-400 bg-[#437E5B]/20 px-3 py-1 rounded-full border border-[#437E5B]/30">HEALTHY</span>
+                        <span class="flex items-center gap-1.5 text-[12px] text-emerald-400"><span class="dot dot-green"></span>Healthy</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="p-5 vision-card">
-                            <span class="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">Flex Working Capital</span>
-                            <div class="text-2xl font-bold font-mono text-white mt-1.5">$248,500.00</div>
-                            <span class="text-[11px] text-emerald-400 font-mono mt-1.5 block">✓ Credit Reserve Healthy</span>
+                        <div class="vision-card p-5">
+                            <p class="label">Working capital</p>
+                            <p class="num text-[26px] font-semibold text-white mt-1">$248,500</p>
                         </div>
-
-                        <div class="p-5 vision-card">
-                            <span class="text-[11px] font-mono text-neutral-400 uppercase tracking-wider">Projected 30d Burn</span>
-                            <div class="text-2xl font-bold font-mono text-white mt-1.5">$14,200.00</div>
-                            <span class="text-[11px] text-neutral-400 font-mono mt-1.5 block">Includes Cloud + Freight</span>
+                        <div class="vision-card p-5">
+                            <p class="label">Projected 30-day burn</p>
+                            <p class="num text-[26px] font-semibold text-white mt-1">$14,200</p>
                         </div>
                     </div>
 
-                    <!-- Freight Batch Status -->
-                    <div class="p-5 vision-card space-y-3.5">
-                        <div class="flex justify-between items-center">
+                    <div class="vision-card p-5 space-y-4">
+                        <div class="flex justify-between items-start">
                             <div>
-                                <span class="text-[10px] font-mono text-emerald-400 bg-[#437E5B]/25 px-2.5 py-0.5 rounded-full border border-[#437E5B]/30">PROCUREMENT PO #104</span>
-                                <h4 class="text-sm font-bold text-white mt-1">Electronics Hardware Freight Batch</h4>
+                                <p class="label">PO #104 · Shenzhen → Los Angeles</p>
+                                <h4 class="text-[15px] font-semibold text-white mt-1">Electronics freight batch</h4>
                             </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-mono text-neutral-400">PO VALUE</span>
-                                <div class="text-sm font-bold font-mono text-white">$82,400.00</div>
-                            </div>
+                            <p class="num text-[15px] font-semibold text-white">$82,400</p>
                         </div>
-
-                        <div class="space-y-2 pt-2 border-t border-white/[0.08]">
-                            <div class="flex justify-between text-xs font-mono">
-                                <span class="text-neutral-400">Status: <strong class="text-emerald-400 font-semibold">Ocean Transit</strong></span>
-                                <span class="text-neutral-400">ETA: <strong class="text-white">Oct 18, 2026</strong></span>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-[13px]">
+                                <span class="text-emerald-400">Ocean transit</span>
+                                <span class="text-neutral-400">ETA <span class="num text-white">Oct 18</span></span>
                             </div>
-                            <div class="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden p-0.5">
-                                <div class="h-full bg-gradient-to-r from-[#437E5B] to-emerald-500 rounded-full w-[65%] shadow-[0_0_8px_#437E5B]"></div>
+                            <div class="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
+                                <div class="h-full w-[65%] rounded-full bg-gradient-to-r from-flex to-emerald-400"></div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </article>
 
-                <!-- AWS CLOUD INFRASTRUCTURE PANEL -->
-                <div class="vision-glass p-7 space-y-6 border-t-2 border-t-amber-500/80">
-                    <div class="flex items-center justify-between border-b border-white/[0.08] pb-4">
-                        <div class="flex items-center space-x-3.5">
-                            <div class="h-11 w-11 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-[0_0_15px_rgba(255,153,0,0.15)]">
-                                <i class="fa-brands fa-aws text-2xl"></i>
-                            </div>
+                <!-- AWS -->
+                <article class="vision-glass p-7 space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="h-10 w-10 rounded-xl bg-aws/10 border border-aws/30 flex items-center justify-center text-aws"><i class="fa-brands fa-aws text-xl"></i></div>
                             <div>
-                                <h3 class="text-base font-bold text-white tracking-tight">AWS Infrastructure Console</h3>
-                                <p class="text-xs text-neutral-400 font-mono">Tagged Resource Group: <code>Batch-104</code></p>
+                                <h3 class="text-[16px] font-semibold text-white">AWS Infrastructure</h3>
+                                <p class="label">Tag <code class="font-mono text-neutral-300">Project=Batch-104</code></p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">RUNNING ($180/d)</span>
+                        <span class="flex items-center gap-1.5 text-[12px] text-emerald-400"><span class="dot dot-green"></span>Running</span>
                     </div>
 
-                    <!-- AWS Resources list -->
                     <div class="space-y-3">
-                        <div class="p-4.5 vision-card flex items-center justify-between">
-                            <div class="flex items-center space-x-3.5">
-                                <div class="h-10 w-10 rounded-xl bg-white/[0.05] border border-white/10 text-amber-400 flex items-center justify-center">
-                                    <i class="fa-solid fa-server"></i>
-                                </div>
+                        <div class="vision-card p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-aws"><i class="fa-solid fa-server text-sm"></i></div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-white">Freight-Sync-Worker</h4>
-                                    <span class="text-[10px] font-mono text-neutral-500">i-0a123bc45 | EC2 t3.large</span>
+                                    <h4 class="text-[14px] font-medium text-white">Freight-Sync-Worker</h4>
+                                    <p class="text-[12px] text-neutral-500">EC2 t3.large · <span class="font-mono">i-0a123bc45</span></p>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-sm font-mono font-bold text-white">$45.00 / day</div>
-                                <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">RUNNING</span>
-                            </div>
+                            <p class="num text-[14px] text-white">$45<span class="text-neutral-500">/day</span></p>
                         </div>
-
-                        <div class="p-4.5 vision-card flex items-center justify-between">
-                            <div class="flex items-center space-x-3.5">
-                                <div class="h-10 w-10 rounded-xl bg-white/[0.05] border border-white/10 text-sky-400 flex items-center justify-center">
-                                    <i class="fa-solid fa-database"></i>
-                                </div>
+                        <div class="vision-card p-4 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-sky-400"><i class="fa-solid fa-database text-sm"></i></div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-white">Staging-DB-Cluster</h4>
-                                    <span class="text-[10px] font-mono text-neutral-500">i-0b678de90 | RDS r5.large</span>
+                                    <h4 class="text-[14px] font-medium text-white">Staging-DB-Cluster</h4>
+                                    <p class="text-[12px] text-neutral-500">RDS r5.large · <span class="font-mono">i-0b678de90</span></p>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-sm font-mono font-bold text-white">$135.00 / day</div>
-                                <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">RUNNING</span>
-                            </div>
+                            <p class="num text-[14px] text-white">$135<span class="text-neutral-500">/day</span></p>
                         </div>
                     </div>
 
-                    <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.08] text-xs font-mono text-neutral-400 flex justify-between">
-                        <span>Resource Tag: <code class="text-neutral-300">Project=Batch-104</code></span>
-                        <span>Daily Compute: <strong class="text-white">$180.00/day</strong></span>
+                    <div class="hairline"></div>
+                    <div class="flex justify-between text-[13px]">
+                        <span class="text-neutral-400">Total compute</span>
+                        <span class="num font-semibold text-white">$180/day</span>
                     </div>
-                </div>
-
+                </article>
             </div>
-        </div>
+        </section>
 
-        <!-- ========================================================= -->
-        <!-- STEP 2: LOGISTICS EVENT INTERCEPTION                      -->
-        <!-- ========================================================= -->
-        <div id="step-2-content" class="tab-content hidden space-y-6">
-            
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 vision-glass-alert p-7">
-                <div>
-                    <span class="text-xs font-mono text-red-400 bg-red-500/20 px-3 py-1 rounded-full border border-red-500/30">STEP 2 // REAL-TIME DISRUPTION DETECTED</span>
-                    <h2 class="text-2xl font-bold text-white mt-2">Tariff Regulatory Customs Hold Triggered</h2>
-                    <p class="text-sm text-red-200/80 mt-1">Freight Batch #104 extended by <strong>+14 Days Delay</strong>. Staging servers burning capital with zero traffic.</p>
+        <!-- STEP 2: DISRUPTION -->
+        <section id="step-2-content" class="tab-content hidden space-y-8">
+            <div class="vision-glass-alert p-7 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-red-400">Step 2 · Disruption detected</p>
+                    <h2 class="text-4xl font-semibold text-white mt-2">Customs hold on Batch #104.</h2>
+                    <p class="text-[15px] text-red-100/70 mt-3">A Section 301 tariff review adds 14 days. The AWS pipeline will sit idle the whole time.</p>
                 </div>
-                <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-600 hover:bg-red-500 text-white font-semibold text-xs tracking-wider uppercase transition-all shadow-[0_4px_20px_rgba(220,38,38,0.4)] shrink-0 flex items-center space-x-2">
-                    <span>Inspect AI Decision Matrix</span>
-                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-500 hover:bg-red-400 text-white text-[14px] font-semibold transition shrink-0 flex items-center gap-2">
+                    See agent decision <i class="fa-solid fa-arrow-right text-[12px]"></i>
                 </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <!-- Risk Metric 1 -->
-                <div class="vision-glass p-7 space-y-2 border-red-500/30">
-                    <span class="text-xs font-mono text-red-400 uppercase tracking-wider">Projected Idle Waste</span>
-                    <div class="text-3xl font-extrabold font-mono text-amber-300">$2,520.00</div>
-                    <p class="text-xs text-neutral-400 font-mono">14-day hold burn ($180/day × 14d)</p>
+                <div class="vision-glass p-7">
+                    <p class="label">Projected idle waste</p>
+                    <p class="num text-[34px] font-semibold text-amber-300 mt-1">$2,520</p>
+                    <p class="text-[13px] text-neutral-500 mt-1">$180/day × 14 days</p>
                 </div>
-
-                <!-- Risk Metric 2 -->
-                <div class="vision-glass p-7 space-y-2 border-red-500/30">
-                    <span class="text-xs font-mono text-red-400 uppercase tracking-wider">Supply Chain Delay</span>
-                    <div class="text-3xl font-extrabold font-mono text-red-400">+14 Days</div>
-                    <p class="text-xs text-neutral-400 font-mono">Section 301 Tariff Customs Review</p>
+                <div class="vision-glass p-7">
+                    <p class="label">Added lead time</p>
+                    <p class="num text-[34px] font-semibold text-red-400 mt-1">+14 days</p>
+                    <p class="text-[13px] text-neutral-500 mt-1">Tariff compliance review</p>
                 </div>
-
-                <!-- Risk Metric 3 -->
-                <div class="vision-glass p-7 space-y-2 border-red-500/30">
-                    <span class="text-xs font-mono text-red-400 uppercase tracking-wider">Cloud Compute Load</span>
-                    <div class="text-3xl font-extrabold font-mono text-white">0% Active</div>
-                    <p class="text-xs text-neutral-400 font-mono">No incoming payload ingestion</p>
+                <div class="vision-glass p-7">
+                    <p class="label">Expected utilization</p>
+                    <p class="num text-[34px] font-semibold text-white mt-1">0%</p>
+                    <p class="text-[13px] text-neutral-500 mt-1">No inventory to sync</p>
                 </div>
-
             </div>
 
-            <!-- Interception Breakdown -->
             <div class="vision-glass p-7 space-y-4">
-                <h3 class="text-base font-bold text-white flex items-center space-x-2">
-                    <i class="fa-solid fa-bolt text-amber-400"></i>
-                    <span>Real-Time Interception Payload Details</span>
-                </h3>
-
-                <div class="p-5 rounded-2xl bg-black/60 font-mono text-xs text-neutral-300 border border-white/[0.08] overflow-x-auto">
-<pre id="json-payload-display">
-{
+                <h3 class="text-[15px] font-semibold text-white">Intercepted event</h3>
+                <pre class="font-mono text-[12px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/50 border border-white/[0.06] overflow-x-auto">{
   <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
   <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"Batch-104"</span>,
-  <span class="text-emerald-400">"source"</span>: <span class="text-sky-300">"Flex Procurement & Customs Gateway"</span>,
-  <span class="text-emerald-400">"regulatoryReason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
+  <span class="text-emerald-400">"reason"</span>: <span class="text-red-400">"Section 301 Tariff Compliance Review"</span>,
   <span class="text-emerald-400">"delayDays"</span>: <span class="text-amber-300">14</span>,
-  <span class="text-emerald-400">"taggedAwsResources"</span>: [<span class="text-sky-300">"i-0a123bc45"</span>, <span class="text-sky-300">"i-0b678de90"</span>],
-  <span class="text-emerald-400">"dailyIdleBurn"</span>: <span class="text-amber-300">180.00</span>,
+  <span class="text-emerald-400">"taggedResources"</span>: [<span class="text-sky-300">"i-0a123bc45"</span>, <span class="text-sky-300">"i-0b678de90"</span>],
   <span class="text-emerald-400">"projectedWaste"</span>: <span class="text-red-400">2520.00</span>
-}
-</pre>
-                </div>
+}</pre>
             </div>
+        </section>
 
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- STEP 3: AI AGENT DECISION MATRIX                          -->
-        <!-- ========================================================= -->
-        <div id="step-3-content" class="tab-content hidden space-y-6">
-            
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 vision-glass p-7">
-                <div>
-                    <span class="text-xs font-mono text-sky-400 bg-sky-500/10 px-3 py-1 rounded-full border border-sky-500/20">STEP 3 // CROSS-DOMAIN MAPPER</span>
-                    <h2 class="text-2xl font-bold apple-heading mt-2">Spatial Agentic Mapping Engine</h2>
-                    <p class="text-sm text-neutral-400 mt-1">Cross-referencing Flex physical logistics status with tagged AWS cloud infrastructure.</p>
+        <!-- STEP 3: AGENT -->
+        <section id="step-3-content" class="tab-content hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-sky-400">Step 3 · Agent</p>
+                    <h2 class="text-4xl font-semibold apple-heading mt-2">Linka connects the dots.</h2>
+                    <p class="text-[15px] text-neutral-400 mt-3">The shipment delay is matched to its tagged cloud resources, and a safe action is proposed.</p>
                 </div>
-                <button onclick="switchStep(4)" class="vision-btn-emerald px-6 py-3 text-xs tracking-wider uppercase flex items-center space-x-2 shrink-0">
-                    <span>Proceed to Execution</span>
-                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                <button onclick="switchStep(4)" class="vision-btn-emerald px-6 py-3 text-[14px] flex items-center gap-2 shrink-0">
+                    Review action <i class="fa-solid fa-arrow-right text-[12px]"></i>
                 </button>
             </div>
 
-            <!-- Decision Diagram -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-                
-                <!-- Left: Flex Event -->
-                <div class="vision-glass p-7 space-y-3 border-[#437E5B]/40">
-                    <div class="h-9 w-9 rounded-xl bg-[#437E5B]/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-[#437E5B]/30">A</div>
-                    <h4 class="text-sm font-bold text-white">Flex Logistics Event</h4>
-                    <p class="text-xs text-neutral-400 font-mono">Customs Hold on Freight Batch #104 (+14 Days Delay)</p>
+            <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
+                <div class="vision-glass p-6 h-full">
+                    <div class="h-9 w-9 rounded-xl bg-flex/20 text-emerald-400 flex items-center justify-center mb-4"><i class="fa-solid fa-ship text-sm"></i></div>
+                    <h4 class="text-[15px] font-semibold text-white">Flex event</h4>
+                    <p class="text-[13px] text-neutral-400 mt-1">Batch #104 delayed 14 days.</p>
                 </div>
-
-                <!-- Middle: Linka Agent -->
-                <div class="vision-glass p-7 space-y-3 text-center border-white/20 shadow-[0_0_40px_rgba(67,126,91,0.2)]">
-                    <div class="h-10 w-10 rounded-2xl bg-[#437E5B]/20 text-emerald-400 flex items-center justify-center font-bold text-base mx-auto border border-[#437E5B]/30 shadow-[0_0_15px_rgba(67,126,91,0.3)]">
-                        <i class="fa-solid fa-brain"></i>
-                    </div>
-                    <h4 class="text-sm font-bold text-emerald-300">Linka FinOps Engine</h4>
-                    <p class="text-xs text-neutral-300 font-mono">Matches <code>Batch-104</code> tag to EC2/RDS. Computes $2,520 idle burn.</p>
+                <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
+                <div class="vision-glass p-6 h-full border-emerald-400/30 shadow-[0_0_40px_rgba(67,126,91,0.25)]">
+                    <div class="h-9 w-9 rounded-xl bg-flex/30 text-emerald-300 flex items-center justify-center mb-4"><i class="fa-solid fa-brain text-sm"></i></div>
+                    <h4 class="text-[15px] font-semibold text-emerald-300">Linka agent</h4>
+                    <p class="text-[13px] text-neutral-300 mt-1">Matches the <code class="font-mono">Batch-104</code> tag and computes $2,520 at risk.</p>
                 </div>
-
-                <!-- Right: AWS Policy -->
-                <div class="vision-glass p-7 space-y-3 border-amber-500/30">
-                    <div class="h-9 w-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs border border-amber-500/30">B</div>
-                    <h4 class="text-sm font-bold text-white">AWS Action Plan</h4>
-                    <p class="text-xs text-neutral-400 font-mono">Hibernate EC2 & RDS nodes until port customs clearance event.</p>
-                </div>
-
-            </div>
-
-            <!-- Agent Rules List -->
-            <div class="vision-glass p-7 space-y-4">
-                <h3 class="text-xs font-bold text-neutral-300 font-mono uppercase tracking-wider">Automated Policy Rules Active</h3>
-
-                <div class="space-y-3 text-xs font-mono">
-                    <div class="p-4 vision-card flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fa-solid fa-check-circle text-emerald-400 text-sm"></i>
-                            <span>IF <code>Logistics_Delay &gt; 3 Days</code> AND <code>CPU_Utilization &lt; 10%</code></span>
-                        </div>
-                        <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">MATCHED</span>
-                    </div>
-
-                    <div class="p-4 vision-card flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <i class="fa-solid fa-check-circle text-emerald-400 text-sm"></i>
-                            <span>IF <code>Flex_Credit_Reserve == Active</code> THEN <code>Protect Working Capital</code></span>
-                        </div>
-                        <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">MATCHED</span>
-                    </div>
+                <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
+                <div class="vision-glass p-6 h-full">
+                    <div class="h-9 w-9 rounded-xl bg-aws/10 text-aws flex items-center justify-center mb-4"><i class="fa-solid fa-power-off text-sm"></i></div>
+                    <h4 class="text-[15px] font-semibold text-white">AWS action</h4>
+                    <p class="text-[13px] text-neutral-400 mt-1">Hibernate EC2 and RDS until customs clears.</p>
                 </div>
             </div>
 
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- STEP 4: ONE-CLICK EXECUTION & CASH PROTECTION            -->
-        <!-- ========================================================= -->
-        <div id="step-4-content" class="tab-content hidden space-y-6">
-            
-            <div id="execution-header" class="flex flex-col md:flex-row md:items-center justify-between gap-4 vision-glass p-7 transition-all">
-                <div>
-                    <span class="text-xs font-mono text-emerald-400 bg-[#437E5B]/20 px-3 py-1 rounded-full border border-[#437E5B]/30">STEP 4 // ACTIONABLE SAFEGUARD</span>
-                    <h2 class="text-2xl font-bold apple-heading mt-2">One-Click Capital Protection</h2>
-                    <p class="text-sm text-neutral-400 mt-1">Execute automated hibernate command on AWS infrastructure to preserve Flex working capital.</p>
+            <div class="vision-glass p-7 space-y-3">
+                <h3 class="text-[15px] font-semibold text-white mb-1">Policy checks</h3>
+                <div class="vision-card p-4 flex items-center justify-between text-[13px]">
+                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Logistics delay over 3 days and CPU under 10%</span>
+                    <span class="text-emerald-400">Passed</span>
                 </div>
-                <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-4 text-xs font-mono uppercase tracking-wider flex items-center space-x-3 shadow-[0_10px_30px_rgba(16,185,129,0.4)]">
-                    <i class="fa-solid fa-shield-halved text-base"></i>
-                    <span>EXECUTE PROTECTION NOW</span>
+                <div class="vision-card p-4 flex items-center justify-between text-[13px]">
+                    <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Flex credit reserve active, protect working capital</span>
+                    <span class="text-emerald-400">Passed</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 4: PROTECT -->
+        <section id="step-4-content" class="tab-content hidden space-y-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div class="max-w-2xl">
+                    <p class="eyebrow text-emerald-400">Step 4 · Protect</p>
+                    <h2 class="text-4xl font-semibold apple-heading mt-2">One click. $2,520 saved.</h2>
+                    <p class="text-[15px] text-neutral-400 mt-3">Hibernate the tagged resources and keep that cash in your Flex account.</p>
+                </div>
+                <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-3.5 text-[14px] flex items-center gap-2 shrink-0">
+                    <i class="fa-solid fa-shield-halved"></i> Protect capital
                 </button>
             </div>
 
-            <!-- Live Chart & Results Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                <!-- Left 2 Cols: Cash Flow Chart -->
-                <div class="lg:col-span-2 vision-glass p-7 space-y-4">
-                    <div class="flex items-center justify-between border-b border-white/[0.08] pb-3.5">
-                        <h3 class="text-xs font-bold text-white font-mono uppercase tracking-wider">FLEX WORKING CAPITAL FORECAST (30 DAYS)</h3>
-                        <span id="chart-status-badge" class="text-xs font-mono text-red-400 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20">UNPROTECTED ($2,520 BURN RISK)</span>
+                <div class="lg:col-span-2 vision-glass p-7 space-y-5">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-[15px] font-semibold text-white">Working capital, next 30 days</h3>
+                        <span id="chart-status-badge" class="text-[12px] text-red-400">Unprotected</span>
                     </div>
-                    <div class="h-64 w-full">
-                        <canvas id="cashFlowChart"></canvas>
-                    </div>
+                    <div class="h-64"><canvas id="cashFlowChart"></canvas></div>
                 </div>
 
-                <!-- Right Col: Impact Summary -->
-                <div class="vision-glass p-7 space-y-4 flex flex-col justify-between">
-                    <div class="space-y-4">
-                        <h3 class="text-xs font-bold text-white font-mono uppercase tracking-wider border-b border-white/[0.08] pb-3.5">PROTECTION METRICS</h3>
-
-                        <div class="space-y-3">
-                            <div class="p-4 vision-card">
-                                <span class="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">Working Capital Preserved</span>
-                                <div id="saved-amount-display" class="text-2xl font-bold font-mono text-neutral-500 mt-1">$0.00</div>
-                            </div>
-
-                            <div class="p-4 vision-card">
-                                <span class="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">AWS Active Burn Rate</span>
-                                <div id="aws-burn-display" class="text-xl font-bold font-mono text-red-400 mt-1">$180.00 / day</div>
-                            </div>
-
-                            <div class="p-4 vision-card">
-                                <span class="text-[10px] font-mono text-neutral-400 uppercase tracking-wider">Cloud Cluster Status</span>
-                                <div id="aws-cluster-status" class="text-sm font-bold font-mono text-emerald-400 mt-1">ACTIVE (100% BURN)</div>
-                            </div>
+                <div class="vision-glass p-7 flex flex-col justify-between gap-6">
+                    <div class="space-y-5">
+                        <div>
+                            <p class="label">Capital preserved</p>
+                            <p id="saved-amount-display" class="num text-[34px] font-semibold text-neutral-500 mt-1">$0</p>
+                        </div>
+                        <div class="hairline"></div>
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-neutral-400">AWS burn rate</span>
+                            <span id="aws-burn-display" class="num font-medium text-red-400">$180/day</span>
+                        </div>
+                        <div class="flex justify-between text-[14px]">
+                            <span class="text-neutral-400">Cluster</span>
+                            <span id="aws-cluster-status" class="font-medium text-emerald-400">Running</span>
                         </div>
                     </div>
-
-                    <button onclick="resetWholeDemo()" class="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-white/10 text-neutral-300 font-mono text-xs transition border border-white/10 mt-4">
-                        <i class="fa-solid fa-rotate-right mr-1.5"></i> Reset Demo Presentation
+                    <button onclick="resetWholeDemo()" class="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-white/10 text-neutral-300 text-[13px] transition border border-white/10">
+                        <i class="fa-solid fa-rotate-right mr-1.5"></i>Reset demo
                     </button>
                 </div>
-
             </div>
-
-        </div>
-
+        </section>
     </main>
 
-    <!-- FOOTER PRESENTATION BAR (Apple visionOS Pill Style) -->
-    <footer class="px-6 py-4">
-        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-400 vision-glass px-6 py-3">
-            <div class="flex items-center space-x-2.5">
-                <span class="h-2 w-2 rounded-full bg-[#437E5B] shadow-[0_0_8px_#437E5B]"></span>
-                <span>Hack Midwest Spatial Demo: <strong class="text-neutral-200">Flex + AWS Live Bridge Active</strong></span>
-            </div>
-
-            <div class="flex items-center space-x-4">
-                <span>No Slide Decks Required</span>
-                <span class="text-neutral-600">•</span>
-                <span>3-Minute Live Pitch Ready</span>
-            </div>
+    <footer class="px-6 pb-6">
+        <div class="max-w-6xl mx-auto flex justify-between text-[12px] text-neutral-500">
+            <span>Linka · Hack Midwest 2026</span>
+            <span class="hidden sm:inline">Use ← → to navigate steps</span>
         </div>
     </footer>
 
-    <script>
-        const socket = io();
-        let currentStep = 1;
-        let chartInstance = null;
-        let isExecuted = false;
-
-        window.onload = function() {
-            initChart();
-        }
-
-        function switchStep(stepNum) {
-            currentStep = stepNum;
-
-            for (let i = 1; i <= 4; i++) {
-                document.getElementById(`step-${i}-content`).classList.add('hidden');
-                
-                const btn = document.getElementById(`step-btn-${i}`);
-                btn.className = "vision-step-btn";
-            }
-
-            document.getElementById(`step-${stepNum}-content`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`step-btn-${stepNum}`);
-            activeBtn.className = "vision-step-btn vision-step-active";
-
-            if (stepNum === 2 && !isExecuted) {
-                document.getElementById('global-pulse-dot').className = 'h-2 w-2 rounded-full bg-red-500 shadow-[0_0_12px_#ef4444] animate-ping';
-                document.getElementById('global-status-text').innerText = 'Tariff Hold Alert';
-                document.getElementById('header-aws-status').innerText = 'IDLE BURN RISK ($180/d)';
-                document.getElementById('header-aws-status').className = 'text-red-400 font-mono';
-            }
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('cashFlowChart').getContext('2d');
-            
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Day 1', 'Day 5', 'Day 10', 'Day 14 (Delay)', 'Day 20', 'Day 25', 'Day 30'],
-                    datasets: [
-                        {
-                            label: 'Unprotected Cash Flow ($)',
-                            data: [248500, 245000, 241000, 237000, 233000, 229000, 225000],
-                            borderColor: '#ef4444',
-                            borderDash: [5, 5],
-                            tension: 0.35,
-                            fill: false
-                        },
-                        {
-                            label: 'Linka Protected Cash Flow ($)',
-                            data: [248500, 245000, 241000, 241000, 240500, 240000, 239800],
-                            borderColor: '#437E5B',
-                            borderWidth: 3,
-                            tension: 0.35,
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#a1a1aa', font: { family: 'JetBrains Mono', size: 11 } }
-                        }
-                    },
-                    scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#a1a1aa' } },
-                        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#a1a1aa' } }
-                    }
-                }
-            });
-        }
-
-        function executeProtectionNow() {
-            if (isExecuted) return;
-            isExecuted = true;
-
-            document.getElementById('saved-amount-display').innerText = '$2,520.00';
-            document.getElementById('saved-amount-display').className = 'text-2xl font-bold font-mono text-emerald-400';
-            
-            document.getElementById('aws-burn-display').innerText = '$0.00 / day';
-            document.getElementById('aws-burn-display').className = 'text-xl font-bold font-mono text-emerald-400';
-
-            document.getElementById('aws-cluster-status').innerText = 'HIBERNATED / PAUSED';
-            document.getElementById('aws-cluster-status').className = 'text-sm font-bold font-mono text-sky-400';
-
-            document.getElementById('chart-status-badge').innerText = 'PROTECTED ($2,520 SAVED)';
-            document.getElementById('chart-status-badge').className = 'text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20 font-bold';
-
-            const btn = document.getElementById('execute-now-btn');
-            btn.className = "px-7 py-4 rounded-full bg-white/10 text-emerald-400 font-bold text-xs font-mono uppercase tracking-wider cursor-default flex items-center space-x-3 border border-emerald-500/30 backdrop-blur-xl";
-            btn.innerHTML = `<i class="fa-solid fa-circle-check text-base"></i><span>CASH FLOW PROTECTED</span>`;
-
-            document.getElementById('global-pulse-dot').className = 'h-2 w-2 rounded-full bg-[#437E5B] shadow-[0_0_8px_#437E5B]';
-            document.getElementById('global-status-text').innerText = 'Capital Protected';
-            document.getElementById('header-aws-status').innerText = 'HIBERNATED ($0/d)';
-            document.getElementById('header-aws-status').className = 'text-sky-400 font-mono';
-
-            socket.emit('EXECUTE_PROTECTION', { projectedSavings: 2520 });
-        }
-
-        function resetWholeDemo() {
-            isExecuted = false;
-            switchStep(1);
-
-            document.getElementById('global-pulse-dot').className = 'h-2 w-2 rounded-full bg-[#437E5B] shadow-[0_0_8px_#437E5B]';
-            document.getElementById('global-status-text').innerText = 'Live Normal Operations';
-            document.getElementById('header-aws-status').innerText = 'RUNNING ($180/d)';
-            document.getElementById('header-aws-status').className = 'text-emerald-400 font-mono';
-
-            document.getElementById('saved-amount-display').innerText = '$0.00';
-            document.getElementById('saved-amount-display').className = 'text-2xl font-bold font-mono text-neutral-500 mt-1';
-
-            document.getElementById('aws-burn-display').innerText = '$180.00 / day';
-            document.getElementById('aws-burn-display').className = 'text-xl font-bold font-mono text-red-400 mt-1';
-
-            document.getElementById('aws-cluster-status').innerText = 'ACTIVE (100% BURN)';
-            document.getElementById('aws-cluster-status').className = 'text-sm font-bold font-mono text-emerald-400 mt-1';
-
-            document.getElementById('chart-status-badge').innerText = 'UNPROTECTED ($2,520 BURN RISK)';
-            document.getElementById('chart-status-badge').className = 'text-xs font-mono text-red-400 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20';
-
-            const btn = document.getElementById('execute-now-btn');
-            btn.className = "vision-btn-emerald px-7 py-4 text-xs font-mono uppercase tracking-wider flex items-center space-x-3 shadow-[0_10px_30px_rgba(16,185,129,0.4)]";
-            btn.innerHTML = `<i class="fa-solid fa-shield-halved text-base"></i><span>EXECUTE PROTECTION NOW</span>`;
-        }
-
-        socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
-            switchStep(2);
-            document.getElementById('global-pulse-dot').className = 'h-2 w-2 rounded-full bg-red-500 shadow-[0_0_12px_#ef4444] animate-ping';
-            document.getElementById('global-status-text').innerText = 'Tariff Hold Alert';
-            document.getElementById('header-aws-status').innerText = 'IDLE BURN RISK ($180/d)';
-            document.getElementById('header-aws-status').className = 'text-red-400 font-mono';
-        });
-
-        socket.on('PROTECTION_CONFIRMED', (data) => {
-            if (!isExecuted) {
-                executeProtectionNow();
-            }
-        });
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>

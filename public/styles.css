@@ -23,6 +23,24 @@ h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.028em;
 }
 
+/* Clean Apple-style utilities */
+.num { font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+.label { font-size: 12px; font-weight: 500; color: #8e8e93; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+.hairline { height: 1px; background: rgba(255, 255, 255, 0.08); }
+
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 9999px; }
+.dot-green { background: #34c759; box-shadow: 0 0 8px rgba(52, 199, 89, 0.7); }
+.dot-red { background: #ff453a; box-shadow: 0 0 10px rgba(255, 69, 58, 0.8); animation: dotPulse 1.2s ease-in-out infinite; }
+@keyframes dotPulse { 50% { opacity: 0.35; } }
+
+/* Each step fades up when shown */
+.tab-content { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
 /* Tabular figures for Apple Wallet/FinOps alignment */
 .font-mono, [class*="font-mono"] {
     font-family: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace !important;

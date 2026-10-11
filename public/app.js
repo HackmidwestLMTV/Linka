@@ -1,175 +1,150 @@
+// Linka dashboard logic: step navigation, protection flow, and live socket sync.
 const socket = io();
-let currentResources = [];
-let chartInstance = null;
-let projectedSavings = 0;
+const $ = (id) => document.getElementById(id);
 
-// Initialize Chart
+const TOTAL_STEPS = 4;
+let currentStep = 1;
+let isExecuted = false;
+let chart = null;
+
+const EXECUTE_BTN_DEFAULT = {
+    className: 'vision-btn-emerald px-7 py-3.5 text-[14px] flex items-center gap-2 shrink-0',
+    html: '<i class="fa-solid fa-shield-halved"></i> Protect capital'
+};
+
+// Header status presets
+const STATES = {
+    normal:    { dot: 'dot dot-green', text: 'Operating normally',   aws: 'Running · $180/day',    awsColor: 'text-emerald-400' },
+    alert:     { dot: 'dot dot-red',   text: 'Tariff hold detected', aws: 'Idle burn · $180/day',  awsColor: 'text-red-400' },
+    protected: { dot: 'dot dot-green', text: 'Capital protected',    aws: 'Hibernated · $0/day',   awsColor: 'text-sky-400' }
+};
+
+function setState(name) {
+    const s = STATES[name];
+    $('global-pulse-dot').className = s.dot;
+    $('global-status-text').textContent = s.text;
+    const aws = $('header-aws-status');
+    aws.textContent = s.aws;
+    aws.className = `num font-medium ${s.awsColor}`;
+}
+
+function switchStep(step) {
+    currentStep = step;
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+        $(`step-${i}-content`).classList.toggle('hidden', i !== step);
+        const btn = $(`step-btn-${i}`);
+        btn.classList.toggle('vision-step-active', i === step);
+        btn.setAttribute('aria-selected', i === step);
+    }
+    if (step >= 2 && !isExecuted) setState('alert');
+}
+
 function initChart() {
-    const ctx = document.getElementById('cashflowChart').getContext('2d');
-    
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.font.family = "'Inter', sans-serif";
-
-    chartInstance = new Chart(ctx, {
+    const muted = '#8e8e93';
+    chart = new Chart($('cashFlowChart').getContext('2d'), {
         type: 'line',
         data: {
-            labels: ['Day 1', 'Day 3', 'Day 7', 'Day 10', 'Day 14'],
+            labels: ['Day 1', 'Day 5', 'Day 10', 'Day 14', 'Day 20', 'Day 25', 'Day 30'],
             datasets: [
                 {
-                    label: 'Projected Burn (Idle)',
-                    data: [180, 540, 1260, 1800, 2520],
-                    borderColor: '#ef4444',
-                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    label: 'Without Linka',
+                    data: [248500, 245000, 241000, 237000, 233000, 229000, 225000],
+                    borderColor: '#ff453a',
+                    borderDash: [5, 5],
                     borderWidth: 2,
-                    tension: 0.4,
-                    fill: true,
-                    borderDash: [5, 5]
+                    pointRadius: 0,
+                    tension: 0.35
                 },
                 {
-                    label: 'Optimized Burn',
-                    data: [180, 180, 180, 180, 180],
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.4,
+                    label: 'With Linka',
+                    data: [248500, 245000, 241000, 241000, 240500, 240000, 239800],
+                    borderColor: '#34c759',
+                    backgroundColor: 'rgba(52, 199, 89, 0.08)',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    tension: 0.35,
                     fill: true,
-                    hidden: true // hide until action taken
+                    hidden: true // revealed after protection executes
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6 } },
+                legend: { labels: { color: muted, usePointStyle: true, boxWidth: 6, font: { family: 'SF Pro Display', size: 12 } } },
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    titleColor: '#fff',
-                    bodyColor: '#cbd5e1',
+                    backgroundColor: 'rgba(28, 28, 30, 0.9)',
                     borderColor: 'rgba(255,255,255,0.1)',
                     borderWidth: 1,
-                    padding: 10
+                    padding: 10,
+                    callbacks: { label: (c) => ` ${c.dataset.label}: $${c.parsed.y.toLocaleString()}` }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                    ticks: { callback: (value) => '$' + value }
-                },
-                x: {
-                    grid: { display: false }
-                }
+                x: { grid: { display: false }, ticks: { color: muted } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: muted, callback: (v) => `$${v / 1000}k` } }
             }
         }
     });
 }
 
-function renderResources(resources) {
-    const list = document.getElementById('resource-list');
-    list.innerHTML = '';
-    
-    let totalBurn = 0;
+function executeProtectionNow() {
+    if (isExecuted) return;
+    isExecuted = true;
 
-    resources.forEach(res => {
-        if (res.status === 'RUNNING') totalBurn += res.dailyCost;
-        
-        const isHibernated = res.status !== 'RUNNING';
-        const statusColor = isHibernated ? 'text-slate-500' : 'text-emerald-400';
-        const statusBg = isHibernated ? 'bg-slate-500/20' : 'bg-emerald-500/20 border-emerald-500/30';
-        const statusDot = isHibernated ? '' : '<div class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>';
-        
-        const icon = res.type.includes('r5') ? 'fa-database' : 'fa-microchip';
-        
-        list.innerHTML += `
-            <div class="resource-card bg-slate-800/60 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between ${isHibernated ? 'hibernated' : ''}">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-slate-700/50 flex items-center justify-center text-slate-300">
-                        <i class="fa-solid ${icon}"></i>
-                    </div>
-                    <div>
-                        <div class="font-bold text-white flex items-center gap-2">
-                            ${res.name}
-                            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-700 text-slate-300">${res.type}</span>
-                        </div>
-                        <div class="text-xs text-slate-400 mt-1">${res.id}</div>
-                    </div>
-                </div>
-                <div class="text-right">
-                    <div class="font-bold text-white">$${res.dailyCost.toFixed(2)}<span class="text-xs text-slate-500 font-normal">/day</span></div>
-                    <div class="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded border ${statusBg} ${statusColor} text-[10px] font-bold uppercase tracking-wider">
-                        ${statusDot}
-                        ${res.status}
-                    </div>
-                </div>
-            </div>
-        `;
-    });
+    $('saved-amount-display').textContent = '$2,520';
+    $('saved-amount-display').className = 'num text-[34px] font-semibold text-emerald-400 mt-1';
+    $('aws-burn-display').textContent = '$0/day';
+    $('aws-burn-display').className = 'num font-medium text-emerald-400';
+    $('aws-cluster-status').textContent = 'Hibernated';
+    $('aws-cluster-status').className = 'font-medium text-sky-400';
+    $('chart-status-badge').textContent = 'Protected · $2,520 saved';
+    $('chart-status-badge').className = 'text-[12px] text-emerald-400';
 
-    document.getElementById('daily-burn').innerHTML = `$${totalBurn}<span class="text-lg text-slate-500">.00</span>`;
+    const btn = $('execute-now-btn');
+    btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[14px] flex items-center gap-2 shrink-0 cursor-default';
+    btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Protected';
+
+    chart.data.datasets[1].hidden = false;
+    chart.update();
+
+    setState('protected');
+    socket.emit('EXECUTE_PROTECTION', { projectedSavings: 2520 });
 }
 
-// Socket Events
-socket.on('INIT_STATE', (data) => {
-    currentResources = data.resources;
-    renderResources(currentResources);
-    initChart();
+function resetWholeDemo() {
+    isExecuted = false;
+
+    $('saved-amount-display').textContent = '$0';
+    $('saved-amount-display').className = 'num text-[34px] font-semibold text-neutral-500 mt-1';
+    $('aws-burn-display').textContent = '$180/day';
+    $('aws-burn-display').className = 'num font-medium text-red-400';
+    $('aws-cluster-status').textContent = 'Running';
+    $('aws-cluster-status').className = 'font-medium text-emerald-400';
+    $('chart-status-badge').textContent = 'Unprotected';
+    $('chart-status-badge').className = 'text-[12px] text-red-400';
+
+    const btn = $('execute-now-btn');
+    btn.className = EXECUTE_BTN_DEFAULT.className;
+    btn.innerHTML = EXECUTE_BTN_DEFAULT.html;
+
+    chart.data.datasets[1].hidden = true;
+    chart.update();
+
+    setState('normal');
+    switchStep(1);
+}
+
+// Arrow keys step through the demo during the live pitch
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' && currentStep < TOTAL_STEPS) switchStep(currentStep + 1);
+    if (e.key === 'ArrowLeft' && currentStep > 1) switchStep(currentStep - 1);
 });
 
-socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
-    projectedSavings = data.projectedSavings;
-    
-    // Update Left Pane (Flex)
-    document.getElementById('shipment-card').classList.add('border-red-500/50', 'bg-red-900/20', 'alert-flash');
-    const statusBadge = document.getElementById('shipment-status');
-    statusBadge.className = "px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-semibold border border-red-500/30 animate-pulse";
-    statusBadge.innerText = "CUSTOMS HOLD";
-    
-    document.getElementById('shipment-progress').classList.replace('bg-[#437E5B]', 'bg-red-500');
-    document.getElementById('shipment-eta').innerText = "Delayed (+14 Days)";
-    document.getElementById('disruption-alert').classList.remove('hidden');
+// Live events from the server / mobile trigger
+socket.on('LOGISTICS_DISRUPTION_ALERT', () => switchStep(2));
+socket.on('PROTECTION_CONFIRMED', () => { if (!isExecuted) executeProtectionNow(); });
 
-    // Update Right Pane (AWS Action)
-    const panel = document.getElementById('action-panel');
-    panel.className = "bg-red-900/20 rounded-xl p-5 border border-red-500/50 flex flex-col items-center justify-center text-center transition-all duration-300 opacity-100";
-    
-    document.getElementById('action-icon').className = "fa-solid fa-money-bill-trend-up text-4xl text-red-400 mb-3 animate-bounce";
-    document.getElementById('action-heading').className = "text-white font-bold text-lg mb-1";
-    document.getElementById('action-heading').innerText = `Projected Waste: $${data.projectedSavings.toLocaleString()}`;
-    document.getElementById('action-subtext').className = "text-red-300 text-sm";
-    document.getElementById('action-subtext').innerText = `${data.delayDays} days of idle compute burn on tagged resources.`;
-    
-    document.getElementById('execute-btn').classList.remove('hidden');
-});
-
-socket.on('PROTECTION_CONFIRMED', (data) => {
-    currentResources = data.resources;
-    renderResources(currentResources);
-
-    // Update Action Panel
-    const panel = document.getElementById('action-panel');
-    panel.className = "bg-emerald-900/20 rounded-xl p-5 border border-emerald-500/50 flex flex-col items-center justify-center text-center transition-all duration-300 opacity-100";
-    
-    document.getElementById('action-icon').className = "fa-solid fa-shield-check text-4xl text-emerald-400 mb-3";
-    document.getElementById('action-heading').className = "text-white font-bold text-lg mb-1";
-    document.getElementById('action-heading').innerText = "Capital Protected";
-    document.getElementById('action-subtext').className = "text-emerald-300 text-sm";
-    document.getElementById('action-subtext').innerText = `$${data.savedAmount.toLocaleString()} saved. Infrastructure hibernated until clearance.`;
-    
-    document.getElementById('execute-btn').classList.add('hidden');
-
-    // Update Chart
-    chartInstance.data.datasets[0].hidden = true;
-    chartInstance.data.datasets[1].hidden = false;
-    chartInstance.update();
-
-    // Update Liquidity
-    const liq = document.getElementById('liquidity-val');
-    liq.innerHTML = `<span class="text-emerald-400">$142,500</span><span class="text-lg text-emerald-500/50">.00</span>`;
-    liq.classList.add('animate-pulse-slow');
-});
-
-document.getElementById('execute-btn').addEventListener('click', () => {
-    document.getElementById('execute-btn').innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Executing...';
-    socket.emit('EXECUTE_PROTECTION', { projectedSavings });
-});
+document.addEventListener('DOMContentLoaded', initChart);
