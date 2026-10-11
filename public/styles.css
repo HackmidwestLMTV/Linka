@@ -10,7 +10,7 @@ body {
 
 /* Animated gradient background */
 .animated-bg {
-    background: radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.15), transparent 25%),
+    background: radial-gradient(circle at 15% 50%, rgba(67, 126, 91, 0.25), transparent 25%),
                 radial-gradient(circle at 85% 30%, rgba(255, 153, 0, 0.1), transparent 25%);
     background-size: 200% 200%;
     animation: backgroundShift 15s ease infinite;
