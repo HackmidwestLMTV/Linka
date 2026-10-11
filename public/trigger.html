@@ -2,57 +2,170 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linka // Remote Event Trigger</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Linka Remote Controller // Hack Midwest</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="/socket.io/socket.io.js"></script>
     <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { touch-action: manipulation; }
+    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6 vision-bg">
-    <div class="vision-glass p-8 max-w-sm w-full text-center relative overflow-hidden">
-        <!-- Ambient orb behind icon -->
-        <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-red-500/20 rounded-full blur-2xl pointer-events-none"></div>
+<body class="min-h-screen flex flex-col items-center justify-between p-6 vision-bg text-white selection:bg-white/20">
 
-        <div class="w-16 h-16 bg-red-500/10 border border-red-500/20 text-red-400 rounded-3xl flex items-center justify-center mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-            <i class="fa-solid fa-ship"></i>
+    <!-- Top Connection Pill -->
+    <header class="w-full max-w-sm flex items-center justify-between pt-2">
+        <div class="flex items-center gap-2">
+            <div class="h-7 w-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs">L</div>
+            <span class="text-sm font-semibold tracking-wide">Linka Remote</span>
         </div>
-        <h2 class="text-2xl font-bold mb-2 apple-heading">Simulate Disruption</h2>
-        <p class="text-neutral-300 text-sm mb-8">Trigger a live tariff customs hold on Freight Batch #104 over WebSocket to engage Linka's FinOps shield.</p>
-        
-        <button id="trigger-btn" class="w-full py-4 px-6 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-sm uppercase tracking-wider shadow-[0_10px_25px_rgba(220,38,38,0.4)] transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-white/20">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>Trigger Tariff Hold</span>
-        </button>
-        
-        <div id="status" class="mt-6 text-sm font-mono font-medium text-emerald-400 hidden">
-            <i class="fa-solid fa-check-circle mr-1"></i> Disruption event broadcasted
+        <div id="conn-pill" class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-xs">
+            <span id="conn-dot" class="dot dot-green"></span>
+            <span id="conn-text" class="text-neutral-300">Connected</span>
         </div>
-    </div>
+    </header>
+
+    <!-- Main Controller Card -->
+    <main class="w-full max-w-sm my-auto space-y-6">
+        <div class="vision-glass p-7 text-center relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+            <!-- Ambient glowing orb -->
+            <div class="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-red-500/25 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="w-16 h-16 bg-red-500/15 border border-red-500/30 text-red-400 rounded-2xl flex items-center justify-center mx-auto mb-5 text-2xl shadow-[0_0_25px_rgba(239,68,68,0.25)]">
+                <i class="fa-solid fa-ship"></i>
+            </div>
+
+            <h2 class="text-2xl font-bold apple-heading tracking-tight mb-2">Simulate Disruption</h2>
+            <p class="text-neutral-300 text-sm leading-relaxed mb-6">
+                Broadcasts a customs tariff hold on <span class="font-mono text-white font-medium">Batch #104</span> to the laptop presentation dashboard.
+            </p>
+
+            <!-- Big Action Button -->
+            <button id="trigger-btn" onclick="fireDisruption()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 active:scale-95 text-white font-bold text-[15px] uppercase tracking-wider shadow-[0_10px_30px_rgba(220,38,38,0.45)] transition-all flex items-center justify-center gap-2.5 border border-white/20">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="btn-text">Trigger Tariff Hold</span>
+            </button>
+
+            <!-- Real-time Status Badge -->
+            <div id="status-box" class="mt-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono font-medium hidden">
+                <i class="fa-solid fa-circle-check mr-1.5 text-emerald-400"></i>
+                <span id="status-msg">Event broadcasted to presentation screen!</span>
+            </div>
+        </div>
+
+        <!-- Secondary Controls -->
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="resetPresentation()" class="py-3 px-4 rounded-xl vision-card hover:bg-white/10 active:scale-95 text-neutral-300 text-xs font-medium transition border border-white/10 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-rotate-right text-neutral-400"></i>
+                <span>Reset Demo</span>
+            </button>
+            <a href="/" class="py-3 px-4 rounded-xl vision-card hover:bg-white/10 active:scale-95 text-neutral-300 text-xs font-medium transition border border-white/10 flex items-center justify-center gap-2 text-center">
+                <i class="fa-solid fa-desktop text-neutral-400"></i>
+                <span>View Dashboard</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full max-w-sm text-center text-xs text-neutral-500 pb-2">
+        <span>Akamai Connected Cloud · Flex Challenge</span>
+    </footer>
 
     <script>
-        const socket = io();
-        const btn = document.getElementById('trigger-btn');
-        const status = document.getElementById('status');
+        const $ = (id) => document.getElementById(id);
+        const socket = typeof io === 'function' ? io({ transports: ['websocket', 'polling'], timeout: 5000 }) : null;
 
-        btn.addEventListener('click', () => {
+        // Monitor socket connectivity
+        if (socket) {
+            socket.on('connect', () => {
+                $('conn-dot').className = 'dot dot-green';
+                $('conn-text').textContent = 'Connected';
+            });
+            socket.on('disconnect', () => {
+                $('conn-dot').className = 'dot dot-red';
+                $('conn-text').textContent = 'Offline (HTTP mode)';
+            });
+            socket.on('connect_error', () => {
+                $('conn-dot').className = 'dot dot-red';
+                $('conn-text').textContent = 'HTTP Fallback Active';
+            });
+        }
+
+        async function fireDisruption() {
+            const btn = $('trigger-btn');
+            const btnText = $('btn-text');
+            const statusBox = $('status-box');
+            const statusMsg = $('status-msg');
+
+            // Haptic feedback for smartphones
+            if (navigator.vibrate) {
+                try { navigator.vibrate([40, 60, 40]); } catch (e) {}
+            }
+
             btn.disabled = true;
-            btn.classList.add('opacity-50');
-            
-            socket.emit('TRIGGER_DISRUPTION', {
+            btn.classList.add('opacity-75');
+            btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Broadcasting...';
+
+            const payload = {
                 batchId: "Batch-104",
                 reason: "Section 301 Tariff Compliance Review",
                 delayDays: 14
-            });
+            };
 
-            status.classList.remove('hidden');
+            // 1. Emit via WebSocket if available
+            if (socket && socket.connected) {
+                socket.emit('TRIGGER_DISRUPTION', payload);
+            }
+
+            // 2. Dual-channel REST HTTP POST (guaranteed to reach server even over strict cellular networks)
+            try {
+                const res = await fetch('/api/trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    statusMsg.textContent = 'Disruption broadcasted to laptop!';
+                }
+            } catch (err) {
+                console.warn('HTTP fallback notice:', err);
+            }
+
+            statusBox.classList.remove('hidden');
+
             setTimeout(() => {
                 btn.disabled = false;
-                btn.classList.remove('opacity-50');
-                status.classList.add('hidden');
-            }, 3000);
-        });
+                btn.classList.remove('opacity-75');
+                btnText.innerHTML = 'Trigger Tariff Hold';
+            }, 2500);
+
+            setTimeout(() => {
+                statusBox.classList.add('hidden');
+            }, 6000);
+        }
+
+        async function resetPresentation() {
+            if (navigator.vibrate) {
+                try { navigator.vibrate(30); } catch (e) {}
+            }
+
+            if (socket && socket.connected) {
+                socket.emit('RESET_DEMO');
+            }
+
+            try {
+                await fetch('/api/reset', { method: 'POST' });
+            } catch (e) {}
+
+            const statusBox = $('status-box');
+            const statusMsg = $('status-msg');
+            statusMsg.textContent = 'Presentation reset to Baseline Step 1.';
+            statusBox.classList.remove('hidden');
+            setTimeout(() => statusBox.classList.add('hidden'), 3000);
+        }
     </script>
 </body>
 </html>

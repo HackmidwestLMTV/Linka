@@ -134,13 +134,51 @@ async function bootLinodeInstance(numericId) {
 app.use(express.static('public'));
 app.use(express.json());
 
-// Health & status endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: "healthy", 
-    provider: "Akamai Connected Cloud (Linode)", 
-    mode: isLiveAkamai ? "live" : "demo" 
-  });
+// Clean route for /trigger (works with or without .html)
+app.get('/trigger', (req, res) => {
+  res.sendFile('trigger.html', { root: 'public' });
+});
+
+// REST endpoint for mobile disruption trigger (guaranteed delivery over mobile carrier networks)
+app.post('/api/trigger', async (req, res) => {
+  const payload = req.body || {};
+  const delayDays = payload.delayDays || 14;
+  const resources = await getResourcesForBatch(payload.batchId || "Batch-104");
+  const dailyCost = resources.reduce((acc, item) => acc + item.dailyCost, 0);
+  const projectedSavings = dailyCost * delayDays;
+
+  const alertPayload = {
+    batchId: payload.batchId || "Batch-104",
+    reason: payload.reason || "Section 301 Tariff Compliance Review",
+    delayDays,
+    dailyCost,
+    projectedSavings,
+    affectedResources: resources
+  };
+
+  io.emit('LOGISTICS_DISRUPTION_ALERT', alertPayload);
+  res.json({ success: true, alert: alertPayload });
+});
+
+// REST endpoint for remote demo reset
+app.post('/api/reset', async (req, res) => {
+  try {
+    if (isLiveAkamai) {
+      const stopped = currentResources.filter(r => r.status === "HIBERNATED");
+      for (const item of stopped) {
+        await bootLinodeInstance(item.id);
+      }
+    }
+    currentResources.forEach(r => r.status = "RUNNING");
+    io.emit('INIT_STATE', { 
+      resources: currentResources, 
+      provider: "Akamai", 
+      mode: isLiveAkamai ? "live" : "demo" 
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 io.on('connection', async (socket) => {
