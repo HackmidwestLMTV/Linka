@@ -134,6 +134,15 @@ async function bootLinodeInstance(numericId) {
 app.use(express.static('public'));
 app.use(express.json());
 
+// Health & status endpoint
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: "healthy", 
+    provider: "Akamai Connected Cloud (Linode)", 
+    mode: isLiveAkamai ? "live" : "demo" 
+  });
+});
+
 // Clean route for /trigger (works with or without .html)
 app.get('/trigger', (req, res) => {
   res.sendFile('trigger.html', { root: 'public' });
