@@ -1,41 +1,94 @@
 <!DOCTYPE html>
+<!-- 
+  =============================================================================================
+  LINKA EXECUTIVE DASHBOARD — PUBLIC / INDEX.HTML
+  =============================================================================================
+  What this file is:
+  This is the primary presentation interface ("The Big Screen") for Linka, designed to run 
+  on a laptop, tablet, or Apple VisionOS display during a live pitch to hackathon judges.
+
+  The Real-World Business Problem it solves:
+  When supply chain disruptions strike (like customs inspections or shipping delays), physical 
+  cargo gets stuck at ports. Meanwhile, expensive cloud servers (like 3D render pipelines or 
+  inventory sync clusters) keep running at full cost in the cloud, burning thousands of dollars 
+  in idle energy and compute fees. 
+  
+  How Linka Solves it:
+  Linka acts as an autonomous financial bridge between Flex Commercial Banking APIs and Akamai 
+  Connected Cloud. The moment a shipment delay is detected, Linka automatically calculates 
+  the impending idle cloud waste, alerts executives, and offers a 1-click autonomous action to 
+  hibernate those servers—instantly freezing the cash bleed and locking the saved capital into 
+  a protected banking escrow account.
+  =============================================================================================
+-->
 <html lang="en" class="dark">
 <head>
+    <!-- Standard character encoding for universal text and emoji support -->
     <meta charset="UTF-8">
+
+    <!-- Responsive viewport settings to ensure crisp rendering on desktop and mobile screens -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Browser tab title and SEO search summary -->
     <title>Linka — Logistics-Aware FinOps for Flex + Akamai Cloud</title>
     <meta name="description" content="Linka connects Flex logistics disruptions to Akamai Connected Cloud infrastructure, hibernating idle compute resources to protect working capital.">
+
+    <!-- Tailwind CSS CDN: Rapid modern utility styling engine -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        /* Configure custom brand color tokens for Tailwind:
+           - 'flex': Flex's signature forest emerald green (#437E5B)
+           - 'akamai': Akamai's signature sky tech blue (#0099FF) */
         tailwind.config = {
             darkMode: 'class',
             theme: { extend: { colors: { flex: '#437E5B', akamai: '#0099FF' } } }
         }
     </script>
+
+    <!-- Typography: Apple SF Pro Display webfont for sleek, premium VisionOS aesthetics -->
     <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
+
+    <!-- Font Awesome: Vector icons for servers, clouds, banks, shields, and arrows -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js: Financial charting library used in Step 4 to plot 30-day treasury runway -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Socket.IO: Client library for bi-directional real-time communication with backend server.js -->
     <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Custom glassmorphism, blur, and lighting styles (inspired by Apple VisionOS) -->
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="min-h-screen flex flex-col vision-bg selection:bg-white/20">
 
-    <!-- Header -->
+    <!-- 
+      =========================================================================================
+      HEADER SECTION — Brand Identity & Live Cloud Health Badges
+      =========================================================================================
+      Provides an ambient, sticky top bar showing that Linka is actively connected and monitoring.
+    -->
     <header class="sticky top-0 z-50 px-6 pt-5">
         <div class="max-w-6xl mx-auto vision-glass px-5 py-3 flex items-center justify-between">
+            <!-- Left: Linka brand logo icon and sub-headline -->
             <div class="flex items-center gap-3">
-                <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-flex to-emerald-500 flex items-center justify-center text-white font-bold border border-white/20">L</div>
+                <!-- Glowing gradient logo badge -->
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-flex to-emerald-500 flex items-center justify-center text-white font-bold border border-white/20 shadow-md">L</div>
                 <div class="leading-tight">
-                    <h1 class="text-[19px] font-semibold text-white">Linka</h1>
+                    <h1 class="text-[19px] font-semibold text-white tracking-wide">Linka</h1>
                     <p class="text-[14px] text-neutral-300">Flex API + Akamai Cloud capital shield</p>
                 </div>
             </div>
 
+            <!-- Right: Real-time system pulse and live Akamai Cloud daily cost counter -->
             <div class="flex items-center gap-2 text-[15px]">
+                <!-- Pulse Dot: Green = Healthy normal operations; Red/Amber = Disruption detected -->
                 <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
                     <span id="global-pulse-dot" class="dot dot-green"></span>
                     <span id="global-status-text" class="text-neutral-200">Operating normally</span>
                 </div>
+                <!-- Cloud Status Pill: Shows active daily burn rate ($210/day normal -> $0/day hibernated) -->
                 <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.06] border border-white/10">
                     <i class="fa-solid fa-cloud text-sky-400"></i>
                     <span id="header-cloud-status" class="num font-medium text-emerald-400">Running · $210/day</span>
@@ -44,9 +97,16 @@
         </div>
     </header>
 
-    <!-- Flex Commercial Business Switcher & Directory Bar -->
+    <!-- 
+      =========================================================================================
+      BUSINESS SELECTOR BAR — Flex Commercial Banking Corporate Directory
+      =========================================================================================
+      Enables judges to toggle between different registered enterprise clients to prove that 
+      Linka's FinOps logic scales across different industries, budgets, and cloud workloads.
+    -->
     <div class="px-6 pt-4 flex justify-center">
         <div class="max-w-6xl w-full flex flex-col sm:flex-row items-center justify-between gap-3 p-3 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md">
+            <!-- API Verification Indicator -->
             <div class="flex items-center gap-2.5">
                 <div class="h-7 w-7 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xs">
                     <i class="fa-solid fa-building-columns"></i>
@@ -57,11 +117,14 @@
                 </div>
             </div>
             
+            <!-- Quick Client Toggle Buttons -->
             <div class="flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/[0.08] text-xs font-mono">
+                <!-- Business 1: Ace Art (Fine Art Trading & 3D Web Gallery) -->
                 <button type="button" onclick="selectBusiness('ace-art')" id="biz-btn-ace" class="px-3 py-1.5 rounded-lg transition font-semibold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
                     <span>🎨</span> <span>Ace Art (Art Trading)</span>
                     <span class="px-1.5 py-0.2 rounded text-[10px] bg-white/10 text-neutral-300">FLX-8842</span>
                 </button>
+                <!-- Business 2: Flex Logistics (Consumer Electronics Procurement) -->
                 <button type="button" onclick="selectBusiness('flex-logistics')" id="biz-btn-logistics" class="px-3 py-1.5 rounded-lg transition text-neutral-400 hover:text-white flex items-center gap-1.5">
                     <span>📦</span> <span>Flex Logistics</span>
                     <span class="px-1.5 py-0.2 rounded text-[10px] bg-white/10 text-neutral-300">FLX-1049</span>
@@ -70,7 +133,16 @@
         </div>
     </div>
 
-    <!-- Stepper -->
+    <!-- 
+      =========================================================================================
+      STEPPER NAVIGATION — 4-Stage Executive Pitch Workflow
+      =========================================================================================
+      Allows the presenter or judges to walk through the story in 4 distinct narrative steps:
+      1. Baseline: Show normal harmonious operations between banking and cloud compute.
+      2. Disruption: Introduce a customs delay and calculate the idle cash burn.
+      3. Agent: Show Linka's intelligent policy guardrails connecting the dots.
+      4. Protect: Click 1 button to hibernate servers, save cash, and update the financial runway.
+    -->
     <div class="px-6 pt-4 flex justify-center">
         <nav class="vision-stepper flex gap-1 overflow-x-auto" role="tablist" aria-label="Demo steps">
             <button onclick="switchStep(1)" id="step-btn-1" class="vision-step-btn vision-step-active" role="tab"><span class="num text-neutral-300">1</span>Baseline</button>
@@ -82,24 +154,35 @@
 
     <main class="max-w-6xl mx-auto w-full px-6 py-6 flex-grow">
 
-        <!-- STEP 1: BASELINE -->
+        <!-- 
+          =====================================================================================
+          STEP 1: BASELINE SYNCHRONIZED — The Status Quo
+          =====================================================================================
+          Here, the non-technical viewer sees two parallel systems working as intended:
+          1. The corporate treasury at Flex Commercial Banking.
+          2. The cloud servers running 24/7 on Akamai Connected Cloud.
+        -->
         <section id="step-1-content" class="tab-content space-y-6">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
                     <div class="flex items-center gap-2">
                         <p class="eyebrow text-emerald-400">Step 1 · Baseline Synchronized</p>
+                        <!-- Dynamic pill reflecting the currently selected business -->
                         <span id="step1-company-badge" class="px-2 py-0.5 rounded-full text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">Ace Art Global Trading Ltd</span>
                     </div>
                     <h2 class="text-4xl font-semibold apple-heading mt-2">Everything in sync.</h2>
                     <p id="step1-narrative" class="text-[17px] text-neutral-300 mt-3">Flex monitors fine art consignment PO #402 while Akamai Connected Cloud 3D render clusters process incoming digital exhibits normally.</p>
                 </div>
+                <!-- Call to Action button to advance to the disruption step -->
                 <button onclick="switchStep(2)" id="step1-cta-btn" class="vision-btn-primary px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
                     Simulate customs hold <i class="fa-solid fa-arrow-right text-[14px]"></i>
                 </button>
             </div>
 
+            <!-- Two-Column Side-by-Side Comparison: Flex Bank vs. Akamai Cloud -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Flex Commercial Banking Details -->
+                
+                <!-- CARD A: Flex Commercial Banking Details -->
                 <article class="vision-glass p-7 space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -115,14 +198,17 @@
                         <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Verified API</span>
                     </div>
 
+                    <!-- Treasury Balance & Monthly Operating Burn -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="vision-card p-5">
                             <p class="label">Flex Treasury Working Capital</p>
+                            <!-- Real cash reserves in the client's bank account -->
                             <p id="flex-treasury-balance" class="num text-[30px] font-semibold text-white mt-1">$342,800</p>
                             <p class="text-[12px] text-neutral-400 mt-1">Liquid operating reserves</p>
                         </div>
                         <div class="vision-card p-5">
                             <p class="label">Monthly Operating Burn</p>
+                            <!-- How much money the business spends each month on all operations -->
                             <p id="flex-monthly-burn" class="num text-[30px] font-semibold text-white mt-1">$22,500</p>
                             <p id="flex-annual-exp-sub" class="text-[12px] text-neutral-400 mt-1">$270,000/yr total budget</p>
                         </div>
@@ -135,6 +221,7 @@
                                 <p id="shipment-po-route" class="label">PO #402 · Venice & Basel → New York Auction</p>
                                 <h4 id="shipment-title" class="text-[17px] font-semibold text-white mt-1">Venice & Basel Contemporary Masterpieces Consignment</h4>
                             </div>
+                            <!-- Commercial invoice value of cargo -->
                             <p id="shipment-value" class="num text-[17px] font-semibold text-white">$145,000</p>
                         </div>
                         <div class="space-y-2">
@@ -142,6 +229,7 @@
                                 <span id="shipment-mode" class="text-emerald-400">Climate-Controlled Air Cargo</span>
                                 <span class="text-neutral-300">Normal ETA <span id="shipment-eta" class="num text-white">Oct 24</span></span>
                             </div>
+                            <!-- Visual delivery progress bar -->
                             <div class="h-1.5 rounded-full bg-white/[0.08] overflow-hidden">
                                 <div class="h-full w-[65%] rounded-full bg-gradient-to-r from-flex to-emerald-400"></div>
                             </div>
@@ -154,6 +242,7 @@
                             <span class="label uppercase tracking-wider text-[11px] font-mono text-emerald-400">Flex Corporate Financial Ledger</span>
                             <span class="text-neutral-400 font-mono">Live API Feed</span>
                         </div>
+                        <!-- Scrollable list of recent corporate expenditures (including daily cloud compute bills) -->
                         <div id="flex-ledger-list" class="space-y-2 font-mono text-xs">
                             <div class="vision-card p-3 flex items-center justify-between">
                                 <div class="flex items-center gap-2.5">
@@ -189,7 +278,7 @@
                     </div>
                 </article>
 
-                <!-- Akamai Connected Cloud Compute Expenditure -->
+                <!-- CARD B: Akamai Connected Cloud Compute Infrastructure -->
                 <article class="vision-glass p-7 space-y-6">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -202,8 +291,9 @@
                         <span class="flex items-center gap-1.5 text-[14px] text-emerald-400"><span class="dot dot-green"></span>Active Instances</span>
                     </div>
 
-                    <!-- Linode Resource List Container -->
+                    <!-- Linode Resource List: Shows the exact cloud servers provisioned for this cargo -->
                     <div id="linode-resource-list" class="space-y-3">
+                        <!-- Server 1: 3D Render Cluster -->
                         <div class="vision-card p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-sky-400"><i class="fa-solid fa-server text-sm"></i></div>
@@ -215,6 +305,7 @@
                             </div>
                             <p class="num text-[16px] text-white shrink-0">$145<span class="text-neutral-400">/day</span></p>
                         </div>
+                        <!-- Server 2: Auction Sync DB Worker -->
                         <div class="vision-card p-4 flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="h-9 w-9 rounded-lg bg-white/[0.05] flex items-center justify-center text-emerald-400"><i class="fa-solid fa-database text-sm"></i></div>
@@ -228,10 +319,12 @@
                         </div>
                     </div>
 
+                    <!-- Cloud Cost Breakdown and Ratio -->
                     <div class="hairline"></div>
                     <div class="space-y-2">
                         <div class="flex justify-between text-[15px]">
                             <span class="text-neutral-300">Total Akamai daily compute</span>
+                            <!-- $145 + $65 = $210/day -->
                             <span id="akamai-daily-total" class="num font-semibold text-white">$210/day</span>
                         </div>
                         <div class="flex justify-between text-[14px]">
@@ -240,6 +333,7 @@
                         </div>
                         <div class="flex justify-between text-[14px]">
                             <span class="text-neutral-400">Cloud expense ratio of operating burn</span>
+                            <!-- $6,300 / $22,500 = 28.0% of the entire corporate budget -->
                             <span id="akamai-ratio-total" class="num font-medium text-emerald-400 font-mono">28.0%</span>
                         </div>
                     </div>
@@ -247,30 +341,42 @@
             </div>
         </section>
 
-        <!-- STEP 2: DISRUPTION -->
+        <!-- 
+          =====================================================================================
+          STEP 2: DISRUPTION DETECTED — The Crisis Point
+          =====================================================================================
+          A real-world supply chain disruption happens: customs holds up the cargo for 18 days.
+          Without Linka, the cloud servers would sit idle and burn $3,780 for nothing.
+        -->
         <section id="step-2-content" class="tab-content hidden space-y-8">
+            <!-- Red Glass Alert Box -->
             <div class="vision-glass-alert p-7 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
                     <p class="eyebrow text-red-400">Step 2 · Disruption detected</p>
                     <h2 id="step2-heading" class="text-4xl font-semibold text-white mt-2">Customs & Provenance hold on PO #402.</h2>
                     <p id="step2-narrative" class="text-[17px] text-red-100/90 mt-3">A CITES Provenance and customs clearance audit adds <span id="step2-narrative-days" class="font-semibold text-white">18 days</span>. Ace Art's Akamai render pipeline will sit idle the whole time.</p>
                 </div>
+                <!-- Advance to Step 3 to review Linka's proposed resolution -->
                 <button onclick="switchStep(3)" class="px-6 py-3 rounded-full bg-red-500 hover:bg-red-400 text-white text-[16px] font-semibold transition shrink-0 flex items-center gap-2">
                     See agent decision <i class="fa-solid fa-arrow-right text-[14px]"></i>
                 </button>
             </div>
 
+            <!-- The 3 Big Impact Numbers -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- 1. Projected Idle Waste: $210/day * 18 days = $3,780 -->
                 <div class="vision-glass p-7">
                     <p class="label">Projected idle waste</p>
                     <p id="step2-idle-waste" class="num text-[38px] font-semibold text-amber-300 mt-1">$3,780</p>
                     <p id="step2-waste-math" class="text-[15px] text-neutral-400 mt-1">$210/day × 18 days</p>
                 </div>
+                <!-- 2. Delay Length -->
                 <div class="vision-glass p-7">
                     <p class="label">Added lead time</p>
                     <p id="step2-lead-time" class="num text-[38px] font-semibold text-red-400 mt-1">+18 days</p>
                     <p class="text-[15px] text-neutral-400 mt-1">CITES & Customs audit delay</p>
                 </div>
+                <!-- 3. Server Productivity Drop: 0% because no art is available to render -->
                 <div class="vision-glass p-7">
                     <p class="label">Expected utilization</p>
                     <p class="num text-[38px] font-semibold text-white mt-1">0%</p>
@@ -278,7 +384,7 @@
                 </div>
             </div>
 
-            <!-- Predictive Compute Budget & Expense Model -->
+            <!-- Predictive Compute Budget & Expense Model (AI Engine Card) -->
             <div class="vision-glass p-7 space-y-5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-4">
                     <div class="flex items-center gap-3">
@@ -293,6 +399,7 @@
                             <p id="model-business-sub" class="text-[13px] text-neutral-400">Customized baseline: <span id="model-annual-expense" class="text-white font-mono font-medium">$270,000/yr</span> operating burn</p>
                         </div>
                     </div>
+                    <!-- Real-time recommendation chip calculated from the FinOps formula -->
                     <span id="model-recommendation-chip" class="px-3 py-1 rounded-full text-xs font-mono font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 w-fit">
                         Recommendation: Shield 32% Reserve ($2,016)
                     </span>
@@ -305,6 +412,7 @@
                             <i class="fa-solid fa-brain"></i>
                         </div>
                         <div>
+                            <!-- AI Advice summary with statistical confidence score -->
                             <p id="ai-banner-headline" class="text-xs font-semibold text-white">
                                 Linka AI Model Advises: <span id="ai-banner-pct" class="text-sky-300 font-mono font-bold">64.4%</span> Compute Capacity (<span id="ai-banner-conf" class="text-emerald-400 font-mono">95.8%</span> confidence)
                             </p>
@@ -318,6 +426,7 @@
                     </span>
                 </div>
 
+                <!-- 4 Predictive Metrics -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="vision-card p-4">
                         <p class="label text-xs">Allocated Compute Budget</p>
@@ -327,6 +436,7 @@
                     <div class="vision-card p-4">
                         <div class="flex items-center justify-between">
                             <p class="label text-xs">Operation Efficiency</p>
+                            <!-- High Operation flag: triggers if efficiency exceeds 95% for peak freight -->
                             <span id="high-op-flag" class="hidden px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⚡ >95% PEAK</span>
                         </div>
                         <p id="model-usage-display" class="num text-[22px] font-semibold text-sky-400 mt-1">72.0%</p>
@@ -345,12 +455,13 @@
                 </div>
             </div>
 
-            <!-- Intercepted Logistics JSON Payload -->
+            <!-- Intercepted Logistics JSON Payload: Demonstrates live telemetry integration -->
             <div class="vision-glass p-7 space-y-4">
                 <div class="flex items-center justify-between">
                     <h3 class="text-[17px] font-semibold text-white">Intercepted logistics telemetry</h3>
                     <span class="text-xs font-mono text-neutral-400">WebSocket ➔ FinOps Engine</span>
                 </div>
+                <!-- Formatted code snippet updating in real time with parameters from the handheld remote -->
                 <pre id="step2-json-preview" class="font-mono text-[13px] leading-relaxed text-neutral-300 p-5 rounded-2xl bg-black/60 border border-white/[0.08] overflow-x-auto">{
   <span class="text-emerald-400">"event"</span>: <span class="text-sky-300">"LOGISTICS_LEAD_TIME_EXTENSION"</span>,
   <span class="text-emerald-400">"batchId"</span>: <span class="text-amber-300">"AceArt-402"</span>,
@@ -377,7 +488,13 @@
             </div>
         </section>
 
-        <!-- STEP 3: AGENT -->
+        <!-- 
+          =====================================================================================
+          STEP 3: AGENT REASONING & POLICY GUARDRAILS — The Intelligence
+          =====================================================================================
+          Shows how the Linka Agent connects the supply chain event directly to the cloud servers 
+          and validates enterprise safety policies before any server is turned off.
+        -->
         <section id="step-3-content" class="tab-content hidden space-y-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
@@ -385,24 +502,31 @@
                     <h2 class="text-4xl font-semibold apple-heading mt-2">Linka connects the dots.</h2>
                     <p class="text-[17px] text-neutral-300 mt-3">The fine art consignment delay is matched to tagged Akamai Linode instances, and a safe action is proposed.</p>
                 </div>
+                <!-- Advance to Step 4 to execute the protection -->
                 <button onclick="switchStep(4)" class="vision-btn-emerald px-6 py-3 text-[16px] flex items-center gap-2 shrink-0">
                     Review action <i class="fa-solid fa-arrow-right text-[14px]"></i>
                 </button>
             </div>
 
+            <!-- Flow Diagram: Event ➔ Agent Correlation ➔ Safe Action -->
             <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
+                <!-- 1. The Logistics Event -->
                 <div class="vision-glass p-6 h-full">
                     <div class="h-9 w-9 rounded-xl bg-flex/20 text-emerald-400 flex items-center justify-center mb-4"><i class="fa-solid fa-palette text-sm"></i></div>
                     <h4 class="text-[17px] font-semibold text-white">Flex event</h4>
                     <p id="step3-flex-event" class="text-[15px] text-neutral-300 mt-1">PO #402 delayed 18 days.</p>
                 </div>
                 <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
+
+                <!-- 2. The Linka FinOps Agent Analysis -->
                 <div class="vision-glass p-6 h-full border-emerald-400/30 shadow-[0_0_40px_rgba(67,126,91,0.25)]">
                     <div class="h-9 w-9 rounded-xl bg-flex/30 text-emerald-300 flex items-center justify-center mb-4"><i class="fa-solid fa-brain text-sm"></i></div>
                     <h4 class="text-[17px] font-semibold text-emerald-300">Linka agent</h4>
                     <p id="step3-agent-text" class="text-[15px] text-neutral-300 mt-1">Matches the <code class="font-mono">AceArt-402</code> tag and computes $3,780 at risk.</p>
                 </div>
                 <i class="fa-solid fa-chevron-right text-neutral-600 hidden md:block"></i>
+
+                <!-- 3. The Akamai Cloud Automated Remediation -->
                 <div class="vision-glass p-6 h-full">
                     <div class="h-9 w-9 rounded-xl bg-sky-500/15 text-sky-400 flex items-center justify-center mb-4"><i class="fa-solid fa-power-off text-sm"></i></div>
                     <h4 class="text-[17px] font-semibold text-white">Akamai action</h4>
@@ -410,12 +534,15 @@
                 </div>
             </div>
 
+            <!-- Enterprise Safety Policy Guardrails -->
             <div class="vision-glass p-7 space-y-3">
                 <h3 class="text-[17px] font-semibold text-white mb-1">Policy checks</h3>
+                <!-- Policy 1: Verify delay is meaningful and servers are actually idle -->
                 <div class="vision-card p-4 flex items-center justify-between text-[15px]">
                     <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Logistics delay over 3 days and render GPU/CPU idle under 10%</span>
                     <span class="text-emerald-400">Passed</span>
                 </div>
+                <!-- Policy 2: Verify banking escrow permissions -->
                 <div class="vision-card p-4 flex items-center justify-between text-[15px]">
                     <span class="text-neutral-300"><i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>Flex API Capital Shield escrow lock active, protect $3,780 treasury liquidity</span>
                     <span class="text-emerald-400">Passed</span>
@@ -423,7 +550,15 @@
             </div>
         </section>
 
-        <!-- STEP 4: PROTECT -->
+        <!-- 
+          =====================================================================================
+          STEP 4: PROTECT CAPITAL — The Grand Payoff
+          =====================================================================================
+          The user executes the action. 
+          1. Linodes hibernate on Akamai Connected Cloud.
+          2. The $3,780 in saved cash is locked into Flex treasury escrow.
+          3. The interactive chart shows the company's financial runway staying strong.
+        -->
         <section id="step-4-content" class="tab-content hidden space-y-8">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div class="max-w-2xl">
@@ -431,37 +566,46 @@
                     <h2 id="step4-headline" class="text-4xl font-semibold apple-heading mt-2">One click. $3,780 saved.</h2>
                     <p class="text-[17px] text-neutral-300 mt-3">Hibernate the tagged Akamai Linodes and preserve working capital in Ace Art's Flex account.</p>
                 </div>
-                <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0">
+                <!-- The Primary Action Button: Triggers server shutdown and escrow lock -->
+                <button id="execute-now-btn" onclick="executeProtectionNow()" class="vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0 shadow-lg hover:shadow-emerald-500/25 transition">
                     <i class="fa-solid fa-shield-halved"></i> Protect capital
                 </button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Working Capital 30-Day Runway Chart (Chart.js canvas) -->
                 <div class="lg:col-span-2 vision-glass p-7 space-y-5">
                     <div class="flex items-center justify-between">
                         <h3 class="text-[17px] font-semibold text-white">Working capital, next 30 days</h3>
+                        <!-- Status Badge: switches from red "Unprotected" to green "Protected by Linka" -->
                         <span id="chart-status-badge" class="text-[14px] text-red-400">Unprotected</span>
                     </div>
+                    <!-- Chart canvas rendered by app.js -->
                     <div class="h-64"><canvas id="cashFlowChart"></canvas></div>
                 </div>
 
+                <!-- Financial Results Card & Demo Reset -->
                 <div class="vision-glass p-7 flex flex-col justify-between gap-6">
                     <div class="space-y-5">
                         <div>
                             <p class="label">Capital preserved</p>
+                            <!-- Counts up from $0 to $3,780 when protected -->
                             <p id="saved-amount-display" class="num text-[38px] font-semibold text-neutral-400 mt-1">$0</p>
                         </div>
                         <div class="hairline"></div>
                         <div class="flex justify-between text-[16px]">
                             <span class="text-neutral-300">Akamai burn rate</span>
+                            <!-- Shifts from $210/day (red) to $0/day (green) -->
                             <span id="cloud-burn-display" class="num font-medium text-red-400">$210/day</span>
                         </div>
                         <div class="flex justify-between text-[16px]">
                             <span class="text-neutral-300">Linode cluster</span>
+                            <!-- Shifts from Running (green) to Hibernated (sky) -->
                             <span id="cloud-cluster-status" class="font-medium text-emerald-400">Running</span>
                         </div>
                     </div>
-                    <button onclick="resetWholeDemo()" class="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-white/10 text-neutral-300 text-[15px] transition border border-white/10">
+                    <!-- Demo Reset Button: Quickly restores Step 1 for the next judge -->
+                    <button onclick="resetWholeDemo()" class="w-full py-2.5 rounded-full bg-white/[0.06] hover:bg-white/10 text-neutral-300 text-[15px] transition border border-white/10 flex items-center justify-center">
                         <i class="fa-solid fa-rotate-right mr-1.5"></i>Reset demo
                     </button>
                 </div>
@@ -469,13 +613,19 @@
         </section>
     </main>
 
+    <!-- 
+      =========================================================================================
+      FOOTER — Hackathon Metadata & Keyboard Navigation Hints
+      =========================================================================================
+    -->
     <footer class="px-6 pb-6">
         <div class="max-w-6xl mx-auto flex justify-between text-[14px] text-neutral-400">
             <span>Linka · Hack Midwest 2026</span>
-            <span class="hidden sm:inline">Use ← → to navigate steps</span>
+            <span class="hidden sm:inline">Use ← → arrow keys to navigate steps</span>
         </div>
     </footer>
 
+    <!-- App JavaScript: Orchestrates frontend state, charts, and WebSocket listeners -->
     <script src="app.js"></script>
 </body>
 </html>

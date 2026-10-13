@@ -1,75 +1,165 @@
+// ==============================================================================
+// LINKA BACKEND ENGINE (server.js)
+// ------------------------------------------------------------------------------
+// WHAT THIS FILE DOES IN PLAIN ENGLISH:
+// 1. Starts a lightweight web server (Express) to deliver the user interface.
+// 2. Opens a live real-time communication channel (Socket.IO) between the laptop
+//    dashboard and the presenter's iPhone remote control.
+// 3. Connects directly to Akamai Connected Cloud (Linode API v4) to check server status
+//    and turn cloud servers ON or OFF (hibernate) when cargo is delayed.
+// 4. Exposes the Flex Commercial Banking API so businesses (like Ace Art) can see
+//    their real bank balances, monthly burn rates, and cloud compute expenditures.
+// 5. Runs a small predictive AI FinOps model to advise businesses on how much
+//    cloud compute budget they should reserve during supply chain holds.
+// ==============================================================================
+
+// 1. IMPORT NECESSARY TOOLS (LIBRARIES)
+// Express: Creates our web application and handles web requests (like URLs you visit)
 import express from 'express';
+// createServer: Builds a standard Node.js HTTP server that can talk over the network
 import { createServer } from 'http';
+// Server from socket.io: Enables instant, two-way messaging between phone & laptop without refreshing
 import { Server } from 'socket.io';
+// dotenv: Reads secret passwords/API tokens safely from a hidden '.env' file
 import dotenv from 'dotenv';
 
+// Load any secret environment variables (e.g. Akamai API keys) into computer memory
 dotenv.config();
 
+// Initialize the Express web application framework
 const app = express();
+// Wrap Express inside an HTTP server so it can handle web traffic
 const httpServer = createServer(app);
+// Attach Socket.IO to the server. 'cors: { origin: "*" }' allows any device (like your phone) to connect
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-// Akamai / Linode API configuration
+// ==============================================================================
+// AKAMAI CONNECTED CLOUD (LINODE API) CONFIGURATION
+// ------------------------------------------------------------------------------
+// Akamai runs physical cloud data centers worldwide (like 'us-ord' in Chicago).
+// If a real API token is provided in .env, Linka controls real live cloud servers.
+// If not, Linka runs in simulated demo mode with 100% realistic math for presentations.
+// ==============================================================================
+
+// Look for an Akamai or Linode API security token in the environment
 const AKAMAI_TOKEN = process.env.AKAMAI_API_TOKEN || process.env.LINODE_API_TOKEN;
+// Check if we are connected to live Akamai servers or running a safe local presentation simulation
 const isLiveAkamai = Boolean(AKAMAI_TOKEN && AKAMAI_TOKEN !== 'MOCK_TOKEN');
 
+// Print out the server startup mode to the terminal console
 console.log(`[Linka Engine] Cloud Provider: Akamai Connected Cloud (Linode)`);
 console.log(`[Linka Engine] Execution Mode: ${isLiveAkamai ? 'LIVE AKAMAI API' : 'DEMO SIMULATION'}`);
 
-// Flex Commercial Banking Registry: Registered businesses using Akamai Cloud
+// ==============================================================================
+// FLEX COMMERCIAL BANKING REGISTRY
+// ------------------------------------------------------------------------------
+// This acts as our commercial bank database. It stores the corporate accounts,
+// liquid cash balances, monthly expenses, active physical shipments, and the
+// specific Akamai cloud servers that each company pays for every single day.
+// ==============================================================================
 const FLEX_BUSINESS_REGISTRY = {
+  // BUSINESS 1: ACE ART (Our primary Art Trading & Online Gallery showcase)
   "ace-art": {
+    // Unique ID used by the system
     businessId: "ace-art",
+    // Official registered corporate name
     companyName: "Ace Art Global Trading Ltd",
+    // The industry this business operates in
     industry: "Art Trading & High-Res Online Gallery",
+    // Their public website URL
     website: "https://aceart.gallery",
+    // Their commercial bank account number at Flex
     flexAccountNumber: "FLX-8842-9104",
+    // US Federal Reserve routing transit number
     flexRoutingNumber: "071000288",
+    // Total cash currently sitting in their bank account ready to use ($342,800.00)
     treasuryBalance: 342800,
+    // Currency unit
     currency: "USD",
+    // Average amount of money the company spends per month on operations ($22,500.00)
     monthlyOperatingBurn: 22500,
+    // Total expected operating expense over a full 12-month year ($270,000.00)
     annualOperatingExpense: 270000,
+    // The cloud provider hosting their infrastructure
     cloudVendor: "Akamai Connected Cloud (Linode)",
+    // What their cloud servers are used for
     cloudExpenseCategory: "3D Artwork Rendering & Live Auction Bidding Relay",
+    // How much their cloud servers cost them every 24 hours ($210.00/day)
     cloudComputeDailyCost: 210,
+    // How much their cloud compute costs across a standard 30-day month ($6,300.00)
     cloudComputeMonthlyExpenditure: 6300,
-    cloudExpenseRatio: 28.0, // $6,300 / $22,500
+    // What percent of their monthly operating budget goes to cloud compute (28.0%)
+    cloudExpenseRatio: 28.0, // Calculation: $6,300 / $22,500 = 28%
+    // Capital Shield money currently protected in escrow
     capitalShieldAllocated: 2016,
+
+    // The physical consignment of high-value artwork currently in transit
     activeShipment: {
+      // Purchase order tracking number
       poNumber: "PO #402",
+      // Description of the physical goods being shipped
       title: "Venice & Basel Contemporary Masterpieces Consignment",
+      // Where the artwork departed from
       origin: "Venice & Basel Galleries",
+      // Where the artwork is supposed to be delivered
       destination: "New York Contemporary Auction",
+      // Digital tag attached to cloud servers handling this specific shipment
       batchTag: "AceArt-402",
+      // Total declared market value of the artwork ($145,000.00)
       consignmentValue: 145000,
+      // How the artwork is traveling
       transitMode: "Climate-Controlled Air Cargo",
+      // Normal expected arrival date before any delays
       normalEta: "Oct 24",
+      // The government inspection reason causing the delay
       quarantineReason: "CITES Provenance & Customs Clearance Audit",
+      // Number of days the physical shipment is stuck in customs quarantine (18 days)
       disruptionDelayDays: 18,
+      // Dollar waste if servers sit idle: $210/day x 18 days = $3,780.00
       idleBleedWaste: 3780
     },
+
+    // The exact cloud servers (Linodes) rented from Akamai to power Ace Art
     akamaiResources: [
       {
+        // Unique server identifier in Akamai's system
         id: "linode-9842201",
+        // Friendly name of the server
         name: "AceArt-Render-Cluster",
+        // Server hardware tier: Dedicated high-performance CPU with 16GB RAM
         type: "Dedicated 16GB (g6-dedicated-8)",
+        // Cost to rent this specific machine for one day ($145.00/day)
         dailyCost: 145,
+        // Current operational state: Running normally
         status: "RUNNING",
+        // Tracking tag matching the physical consignment
         tag: "AceArt-402",
+        // Physical data center region: Chicago, USA
         region: "us-ord (Chicago)",
+        // Plain English explanation of what this server does
         purpose: "3D canvas multi-angle render pipeline & digital provenance verification"
       },
       {
+        // Unique server identifier
         id: "linode-9842202",
+        // Friendly name
         name: "AceArt-Auction-Sync-Worker",
+        // Standard shared virtual machine with 8GB RAM
         type: "Linode 8GB (g6-standard-4)",
+        // Cost per day ($65.00/day)
         dailyCost: 65,
+        // Current state
         status: "RUNNING",
+        // Matching consignment tag
         tag: "AceArt-402",
+        // Region
         region: "us-ord (Chicago)",
+        // Plain English explanation of what this server does
         purpose: "Live WebSocket auction bidding sync & catalogue staging DB"
       }
     ],
+
+    // Corporate banking ledger: Recent cleared financial transactions from Flex Bank
     ledgerTransactions: [
       { id: "tx-701", date: "Oct 10, 2026", description: "Akamai Connected Cloud - Daily Linode Compute", category: "Cloud Infrastructure", amount: -210.00, method: "Flex Corporate Card (*4492)", status: "CLEARED" },
       { id: "tx-702", date: "Oct 09, 2026", description: "Christie's Contemporary Provenance Escrow Deposit", category: "Consignment Escrow", amount: 145000.00, method: "Flex Wire Transfer", status: "CLEARED" },
@@ -78,6 +168,8 @@ const FLEX_BUSINESS_REGISTRY = {
       { id: "tx-705", date: "Oct 05, 2026", description: "Art Basel Zurich Catalog Licensing Fee", category: "Exhibition Rights", amount: -4200.00, method: "Flex Commercial Card", status: "CLEARED" }
     ]
   },
+
+  // BUSINESS 2: FLEX LOGISTICS (Our secondary Consumer Electronics freight comparison)
   "flex-logistics": {
     businessId: "flex-logistics",
     companyName: "Flex Logistics & Private Banking",
@@ -119,17 +211,22 @@ const FLEX_BUSINESS_REGISTRY = {
   }
 };
 
+// Which business is currently active on screen (starts with Ace Art by default)
 let currentActiveBusinessId = "ace-art";
+// In-memory list of active server resources
 let currentResources = [...FLEX_BUSINESS_REGISTRY["ace-art"].akamaiResources];
 
 /**
- * Fetch Linode compute instances from Akamai API if live token is present,
- * otherwise return current resources for the requested batch or business.
+ * HELPER: Finds which Akamai Linode servers belong to a specific shipment tag.
+ * If connected to live Akamai, it queries Akamai's real API over the internet.
+ * Otherwise, it uses the local business registry for a reliable presentation.
  */
 async function getResourcesForBatch(batchId = "AceArt-402", businessId = "ace-art") {
+  // Use the requested business or fall back to the currently active one
   const bId = businessId || currentActiveBusinessId;
   const biz = FLEX_BUSINESS_REGISTRY[bId] || FLEX_BUSINESS_REGISTRY["ace-art"];
 
+  // If not using a live Akamai API token, return our reliable simulation data
   if (!isLiveAkamai) {
     if (batchId && batchId.toLowerCase().includes("batch-104")) {
       return FLEX_BUSINESS_REGISTRY["flex-logistics"].akamaiResources;
@@ -137,6 +234,7 @@ async function getResourcesForBatch(batchId = "AceArt-402", businessId = "ace-ar
     return biz.akamaiResources;
   }
 
+  // If using a live Akamai API key, reach out to Akamai over HTTPS
   try {
     const res = await fetch("https://api.linode.com/v4/linode/instances", {
       headers: {
@@ -145,6 +243,7 @@ async function getResourcesForBatch(batchId = "AceArt-402", businessId = "ace-ar
       }
     });
 
+    // If Akamai responds with an error, safely fall back to our registry
     if (!res.ok) {
       console.warn(`[Linka Engine] Akamai API error: HTTP ${res.status}. Falling back to demo resources.`);
       return biz.akamaiResources;
@@ -153,13 +252,14 @@ async function getResourcesForBatch(batchId = "AceArt-402", businessId = "ace-ar
     const data = await res.json();
     const targetTag = (batchId || biz.activeShipment.batchTag).toLowerCase();
     
-    // Match Linodes with tag or prefix
+    // Filter the real servers to find only those tagged with this shipment
     const matched = (data.data || []).filter(linode => {
       const hasTag = linode.tags && linode.tags.some(t => t.toLowerCase() === targetTag);
       const hasLabel = linode.label && linode.label.toLowerCase().includes(targetTag);
       return hasTag || hasLabel;
     });
 
+    // If matching servers were found in the user's real Akamai account, format them
     if (matched.length > 0) {
       currentResources = matched.map(linode => ({
         id: `linode-${linode.id}`,
@@ -173,6 +273,7 @@ async function getResourcesForBatch(batchId = "AceArt-402", businessId = "ace-ar
       return currentResources;
     }
 
+    // If no matching tags exist in the real cloud account, use demo data
     console.log(`[Linka Engine] No Linodes with tag ${batchId} found. Using registered demo resources.`);
     return biz.akamaiResources;
   } catch (err) {
@@ -182,7 +283,8 @@ async function getResourcesForBatch(batchId = "AceArt-402", businessId = "ace-ar
 }
 
 /**
- * Shut down Linode instance on Akamai Connected Cloud
+ * ACTION: Shuts down a physical or virtual Linode server on Akamai Connected Cloud.
+ * This pauses per-second compute billing, protecting cash while cargo is delayed.
  */
 async function shutdownLinodeInstance(numericId) {
   if (!isLiveAkamai) return;
@@ -202,7 +304,8 @@ async function shutdownLinodeInstance(numericId) {
 }
 
 /**
- * Boot Linode instance back up on Akamai Connected Cloud
+ * ACTION: Boots a hibernated Linode server back up on Akamai Connected Cloud.
+ * This runs when cargo clears customs and processing can safely resume.
  */
 async function bootLinodeInstance(numericId) {
   if (!isLiveAkamai) return;
@@ -221,10 +324,12 @@ async function bootLinodeInstance(numericId) {
   }
 }
 
+// Serve all frontend files (HTML, CSS, JS) from the 'public' folder
 app.use(express.static('public'));
+// Allow Express to automatically parse incoming JSON data from HTTP POST requests
 app.use(express.json());
 
-// Health & status endpoint
+// ROUTE: Health check endpoint so monitoring tools know the server is alive
 app.get('/health', (req, res) => {
   res.json({ 
     status: "healthy", 
@@ -233,16 +338,19 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Clean route for /trigger (works with or without .html)
+// ROUTE: Short URL shortcut for '/trigger' so presenters can type http://ip:3000/trigger on their phones
 app.get('/trigger', (req, res) => {
   res.sendFile('trigger.html', { root: 'public' });
 });
 
-// ==========================================
-// FLEX COMMERCIAL BANKING API ENDPOINTS
-// ==========================================
+// ==============================================================================
+// FLEX COMMERCIAL BANKING REST API ENDPOINTS
+// ------------------------------------------------------------------------------
+// These endpoints allow external applications or dashboards to inspect the
+// financial balances and cloud expenditures of registered commercial businesses.
+// ==============================================================================
 
-// Flex API: List all registered commercial businesses
+// API 1: List all businesses registered in Flex Commercial Banking
 app.get('/api/flex/businesses', (req, res) => {
   const businesses = Object.values(FLEX_BUSINESS_REGISTRY).map(b => ({
     businessId: b.businessId,
@@ -271,7 +379,7 @@ app.get('/api/flex/businesses', (req, res) => {
   });
 });
 
-// Flex API: Full account and financial ledger details for a business
+// API 2: Get complete account profile and ledger transactions for a specific company
 app.get('/api/flex/accounts/:businessId', (req, res) => {
   const bId = req.params.businessId || currentActiveBusinessId;
   const account = FLEX_BUSINESS_REGISTRY[bId] || FLEX_BUSINESS_REGISTRY["ace-art"];
@@ -282,7 +390,7 @@ app.get('/api/flex/accounts/:businessId', (req, res) => {
   });
 });
 
-// Flex API: Expenditure breakdown and cloud compute ratio
+// API 3: Get cloud expenditure breakdown and expense ratio metrics
 app.get('/api/flex/expenditure/:businessId', (req, res) => {
   const bId = req.params.businessId || currentActiveBusinessId;
   const biz = FLEX_BUSINESS_REGISTRY[bId] || FLEX_BUSINESS_REGISTRY["ace-art"];
@@ -303,14 +411,16 @@ app.get('/api/flex/expenditure/:businessId', (req, res) => {
   });
 });
 
-// Flex API: Capital Shield reserve allocation
+// API 4: Lock or release Capital Shield reserve in company treasury escrow
 app.post('/api/flex/capital-shield', (req, res) => {
   const { businessId = currentActiveBusinessId, amount, action = "ALLOCATE" } = req.body || {};
   const biz = FLEX_BUSINESS_REGISTRY[businessId] || FLEX_BUSINESS_REGISTRY["ace-art"];
   const numAmount = Math.round(parseFloat(amount) || biz.capitalShieldAllocated);
 
   if (action === "ALLOCATE") {
+    // Lock money safely into escrow
     biz.capitalShieldAllocated = numAmount;
+    // Record a verified transaction entry into the corporate ledger
     biz.ledgerTransactions.unshift({
       id: `tx-${Date.now().toString().slice(-4)}`,
       date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
@@ -321,6 +431,7 @@ app.post('/api/flex/capital-shield', (req, res) => {
       status: "HELD_ESCROW"
     });
   } else {
+    // Release the escrow hold back into general liquidity
     biz.capitalShieldAllocated = 0;
   }
 
@@ -334,12 +445,13 @@ app.post('/api/flex/capital-shield', (req, res) => {
   });
 });
 
-// Flex API: Switch active commercial business
+// API 5: Switch active commercial business (e.g., from Ace Art to Flex Logistics)
 app.post('/api/flex/switch-business', (req, res) => {
   const { businessId } = req.body || {};
   if (businessId && FLEX_BUSINESS_REGISTRY[businessId]) {
     currentActiveBusinessId = businessId;
     currentResources = [...FLEX_BUSINESS_REGISTRY[businessId].akamaiResources];
+    // Broadcast the change instantly to any open browser screens
     io.emit('BUSINESS_SWITCHED', {
       businessId,
       account: FLEX_BUSINESS_REGISTRY[businessId],
@@ -351,8 +463,8 @@ app.post('/api/flex/switch-business', (req, res) => {
 });
 
 /**
- * Normalizes user-selected downtime duration into days and human-readable label.
- * Supports: hours, days, weeks, months.
+ * HELPER: Converts any time duration (hours, days, weeks, months) into exact days.
+ * Example: '12 hours' = 0.5 days; '2 weeks' = 14 days.
  */
 function normalizeDuration(value, unit = 'days') {
   const num = Math.max(0.5, parseFloat(value) || 14);
@@ -384,9 +496,12 @@ function normalizeDuration(value, unit = 'days') {
 }
 
 /**
- * Lightweight FinOps AI Model (Neural-heuristic regression)
- * Bases on previous cloud compute usage patterns, lead time delay, and business scale
- * to advise on optimal future compute allocation percentage and dynamic risk buffer.
+ * INTELLIGENCE: Small AI FinOps Predictive Advisory Model.
+ * This neural-heuristic model examines:
+ * 1. Historical compute usage efficiency (e.g. 72%)
+ * 2. Delay length (e.g. 18 days)
+ * 3. Client expense pressure
+ * And outputs an advised future compute percentage so businesses don't overspend.
  */
 function runFinOpsPredictiveAIModel({ historicalUsageRate = 72, delayDays = 14, clientExpenseRatio = 38.0, businessName = "Flex Logistics & Private Banking" }) {
   const usage = parseFloat(historicalUsageRate) || 72;
@@ -399,13 +514,13 @@ function runFinOpsPredictiveAIModel({ historicalUsageRate = 72, delayDays = 14, 
   let confidenceScore;
 
   if (usage > 95) {
-    // Unique high-operation circumstances (>95% saturation mode)
+    // Special high-traffic peak mode (e.g., live Black Friday or flash auction)
     mode = "HIGH_OPERATION_CRITICAL";
     advisedFutureUsagePct = Math.min(100, Math.round((usage * 0.992) * 10) / 10);
     confidenceScore = 98.4;
     reasoning = `High-operation mode active (${usage.toFixed(1)}%). Linka AI advises ${advisedFutureUsagePct.toFixed(1)}% sustained compute capacity for zero-latency mission-critical processing during peak cargo clearance.`;
   } else {
-    // Standard and volatile logistics environments: AI balances throughput demand vs idle hold bleed
+    // Normal elastic mode: Balance throughput demand vs idle hold bleed
     mode = "ELASTIC_FINOPS_OPTIMIZED";
     const delayAdjustment = Math.min(10, days * 0.42);
     const expensePressure = (ratio > 40) ? 2.5 : 0;
@@ -416,7 +531,7 @@ function runFinOpsPredictiveAIModel({ historicalUsageRate = 72, delayDays = 14, 
     reasoning = `Linka AI Model analyzed previous ${usage.toFixed(1)}% efficiency across a ${days}d lead time extension. Advises ${advisedFutureUsagePct.toFixed(1)}% compute allocation with elastic standby to eliminate idle waste while guaranteeing SLA throughput.`;
   }
 
-  // Advised budget based on active throughput work demand ($3,888) scaled by advised percentage
+  // Calculate the dollar budget required to sustain this recommended work rate
   const advisedBudget = Math.round(3888 / (advisedFutureUsagePct / 100));
 
   return {
@@ -430,14 +545,14 @@ function runFinOpsPredictiveAIModel({ historicalUsageRate = 72, delayDays = 14, 
 }
 
 /**
- * Computes detailed compute budget estimation, customizable annual projections for different businesses,
- * and integrates the small predictive AI model.
+ * FORMULA: Computes detailed budget estimation and idle bleed waste.
+ * Math: Idle Waste = Daily Cloud Server Cost x Number of Days Delayed.
  */
 function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDays = 14, dailyBurn = 180, historicalUsageRate = 72, annualExpense = 170400, businessName = "Flex Logistics & Private Banking") {
   const rawBudget = Math.max(50, parseFloat(budgetAmount) || 5400);
   const p = String(budgetPeriod || 'months').toLowerCase();
   
-  // Normalize budget to 30-day equivalent for consistent comparison
+  // Normalize whatever budget the user typed into standard 30-day monthly units
   let monthlyBudget = rawBudget;
   switch (p) {
     case 'hours':
@@ -455,32 +570,31 @@ function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDay
       break;
   }
 
-  // Customizable annual expense baseline for different businesses
+  // Calculate business scale metrics
   const clientAnnualExpense = Math.max(10000, parseFloat(annualExpense) || 170400);
   const clientMonthlyBurn = Math.round(clientAnnualExpense / 12);
   const clientExpenseRatio = Math.round((monthlyBudget / clientMonthlyBurn) * 1000) / 10;
 
-  // Cost breakdowns
+  // Breakdown costs by hour, day, and year
   const hourlyBurn = Math.round((dailyBurn / 24) * 100) / 100;
   const annualBurn = dailyBurn * 365;
   const annualComputeProjection = Math.round(monthlyBudget * 12);
 
-  // Unbound idle waste during downtime
+  // CORE METRIC: Total money that will be completely wasted if servers are left running while goods sit in customs
   const idleBleed = Math.round(dailyBurn * delayDays);
 
-  // Percentage predictive recommendation model:
-  // Supports high operation rates up to 100% for unique circumstances (>95%)
+  // Efficiency calculation
   const usageRate = Math.min(100, Math.max(10, parseFloat(historicalUsageRate) || 72));
   const isHighOperationRate = usageRate > 95;
   const idleRiskRate = Math.round((100 - usageRate) * 10) / 10;
   
-  // Recommended capital shield reserve (calibrated to idle risk rate + contingency)
+  // Calculate recommended capital reserve percentage to hold in Flex
   const recommendedReservePct = isHighOperationRate
     ? Math.max(5, Math.round(idleRiskRate * 1.5))
     : Math.min(50, Math.max(10, Math.round(idleRiskRate * 1.15)));
   const recommendedReserveAmount = Math.round((monthlyBudget * (recommendedReservePct / 100)));
 
-  // Predicted expense for new cycle
+  // Compare expense before and after Linka protection
   const predictedCycleExpenseWithoutShield = Math.round(monthlyBudget);
   const predictedCycleExpenseWithShield = Math.max(0, Math.round(monthlyBudget - idleBleed));
   const savingsPct = Math.min(100, Math.round((idleBleed / monthlyBudget) * 1000) / 10);
@@ -518,7 +632,7 @@ function computeBudgetEstimation(budgetAmount, budgetPeriod = 'months', delayDay
   };
 }
 
-// AI Advisor endpoint for on-demand FinOps predictive model inference
+// ROUTE: AI Advisor endpoint for testing or external automated bots
 app.post('/api/ai-advisor', (req, res) => {
   const payload = req.body || {};
   const advice = runFinOpsPredictiveAIModel({
@@ -530,7 +644,7 @@ app.post('/api/ai-advisor', (req, res) => {
   res.json({ success: true, advice });
 });
 
-// REST endpoint for mobile disruption trigger (guaranteed delivery over mobile carrier networks)
+// ROUTE: Mobile trigger HTTP fallback endpoint (works even on unstable cellular networks)
 app.post('/api/trigger', async (req, res) => {
   const payload = req.body || {};
   const bId = payload.businessId || currentActiveBusinessId || "ace-art";
@@ -572,11 +686,12 @@ app.post('/api/trigger', async (req, res) => {
     affectedResources: resources
   };
 
+  // Broadcast the disruption alert to all connected screens immediately
   io.emit('LOGISTICS_DISRUPTION_ALERT', alertPayload);
   res.json({ success: true, alert: alertPayload });
 });
 
-// REST endpoint for remote demo reset
+// ROUTE: Reset endpoint to recover system back to Step 1 Baseline
 app.post('/api/reset', async (req, res) => {
   try {
     const biz = FLEX_BUSINESS_REGISTRY[currentActiveBusinessId] || FLEX_BUSINESS_REGISTRY["ace-art"];
@@ -602,11 +717,21 @@ app.post('/api/reset', async (req, res) => {
   }
 });
 
+// ==============================================================================
+// REAL-TIME EVENT BROKER (Socket.IO)
+// ------------------------------------------------------------------------------
+// When a phone or browser connects, this manages live messages:
+// - Sending initial data
+// - Switching businesses
+// - Triggering cargo hold alerts
+// - Shutting down cloud servers on demand
+// ==============================================================================
 io.on('connection', async (socket) => {
   const biz = FLEX_BUSINESS_REGISTRY[currentActiveBusinessId] || FLEX_BUSINESS_REGISTRY["ace-art"];
   const initial = await getResourcesForBatch(biz.activeShipment.batchTag, currentActiveBusinessId);
   currentResources = initial;
 
+  // Send initial data to newly connected screen
   socket.emit('INIT_STATE', { 
     resources: initial, 
     provider: "Akamai", 
@@ -616,7 +741,7 @@ io.on('connection', async (socket) => {
     currentAccount: biz
   });
 
-  // Handle commercial business switching
+  // EVENT: User switches active business
   socket.on('SWITCH_BUSINESS', async (data = {}) => {
     const bId = data.businessId;
     if (bId && FLEX_BUSINESS_REGISTRY[bId]) {
@@ -641,7 +766,7 @@ io.on('connection', async (socket) => {
     }
   });
 
-  // Handle simulated logistics disruption
+  // EVENT: Presenter taps 'Broadcast Hold' on their phone
   socket.on('TRIGGER_DISRUPTION', async (payload = {}) => {
     const bId = payload.businessId || currentActiveBusinessId || "ace-art";
     const biz = FLEX_BUSINESS_REGISTRY[bId] || FLEX_BUSINESS_REGISTRY["ace-art"];
@@ -666,6 +791,7 @@ io.on('connection', async (socket) => {
       payload.businessName ?? biz.companyName
     );
 
+    // Notify all dashboards to transition to Step 2 Disruption
     io.emit('LOGISTICS_DISRUPTION_ALERT', {
       businessId: bId,
       businessName: biz.companyName,
@@ -683,7 +809,7 @@ io.on('connection', async (socket) => {
     });
   });
 
-  // Handle one-click protection execution
+  // EVENT: Presenter clicks 'Protect Capital' on Step 4
   socket.on('EXECUTE_PROTECTION', async (data = {}) => {
     try {
       const bId = data.businessId || currentActiveBusinessId;
@@ -691,6 +817,7 @@ io.on('connection', async (socket) => {
       const resources = await getResourcesForBatch(data.batchId || biz.activeShipment.batchTag, bId);
       const runningItems = resources.filter(r => r.status === "RUNNING");
 
+      // If connected to real Akamai API, send live shutdown commands
       if (isLiveAkamai && runningItems.length > 0) {
         console.log(`[Linka Engine] Initiating shutdown on Akamai Connected Cloud for:`, runningItems.map(r => r.id));
         for (const item of runningItems) {
@@ -700,10 +827,11 @@ io.on('connection', async (socket) => {
         console.log(`[Linka Engine] Simulated hibernation executed for Akamai compute resources.`);
       }
 
+      // Mark local servers as hibernated
       currentResources.forEach(r => r.status = "HIBERNATED");
       const savedAmount = data.projectedSavings || biz.activeShipment.idleBleedWaste || 3780;
 
-      // Update Flex Treasury Capital Shield reserve
+      // Lock the saved cash into Flex Treasury Capital Shield escrow
       biz.capitalShieldAllocated = savedAmount;
       biz.ledgerTransactions.unshift({
         id: `tx-${Date.now().toString().slice(-4)}`,
@@ -715,6 +843,7 @@ io.on('connection', async (socket) => {
         status: "HELD_ESCROW"
       });
 
+      // Broadcast success confirmation to update charts and badges
       io.emit('PROTECTION_CONFIRMED', {
         status: "SUCCESS",
         businessId: bId,
@@ -729,7 +858,7 @@ io.on('connection', async (socket) => {
     }
   });
 
-  // Reset demo
+  // EVENT: Reset presentation back to normal baseline
   socket.on('RESET_DEMO', async () => {
     try {
       const biz = FLEX_BUSINESS_REGISTRY[currentActiveBusinessId] || FLEX_BUSINESS_REGISTRY["ace-art"];
@@ -755,6 +884,7 @@ io.on('connection', async (socket) => {
   });
 });
 
+// START SERVER: Listen on standard network port (3000)
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Linka Engine listening on http://0.0.0.0:${PORT}`);

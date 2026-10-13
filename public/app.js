@@ -1,51 +1,94 @@
-// Linka Dashboard Logic: Flex Commercial Banking API Integration,
-// Step Navigation, Dynamic Disruption Models, and Live Socket Sync.
+// ==============================================================================
+// LINKA PRESENTATION DASHBOARD LOGIC (public/app.js)
+// ------------------------------------------------------------------------------
+// WHAT THIS JAVASCRIPT FILE DOES IN PLAIN ENGLISH:
+// 1. Manages what judges see on the laptop or projector screen during the pitch.
+// 2. Connects to the backend server via WebSockets for instant, live updates.
+// 3. Handles tab navigation between the 4 steps of the presentation:
+//      Step 1: Baseline (Everything operating in sync)
+//      Step 2: Disruption (CITES customs audit delays art consignment PO #402)
+//      Step 3: Agent (Linka detects the server tags & calculates $3,780 at risk)
+//      Step 4: Protect (One click hibernates Linode servers and locks cash in escrow)
+// 4. Draws and updates the interactive 30-day cash flow forecast chart (Chart.js),
+//    showing the red dashed line (cash bleed) vs the green solid line (capital saved).
+// 5. Connects with the Flex Commercial Banking API to render live bank balances,
+//    monthly operating burns, and corporate ledger transactions.
+// ==============================================================================
+
+// 1. INITIALIZE NETWORK & DOM SHORTCUTS
+// Connect this web browser page to the Socket.IO real-time server
 const socket = io();
+// Shortcut helper: $(id) gets an HTML element by its ID (like document.getElementById)
 const $ = (id) => document.getElementById(id);
+// Helper: Finds the first valid element from a list of possible IDs
 const getEl = (...ids) => ids.map(id => $(id)).find(Boolean);
 
+// Total number of presentation slides/tabs (1: Baseline, 2: Disruption, 3: Agent, 4: Protect)
 const TOTAL_STEPS = 4;
+// Current active step on screen (starts at Step 1)
 let currentStep = 1;
+// Flag to track whether the user has clicked "Protect Capital" yet
 let isExecuted = false;
+// Global variable holding the interactive Chart.js line chart instance
 let chart = null;
 
-// Active Business State (Default: Ace Art Global Trading Ltd)
+// ==============================================================================
+// BUSINESS STATE & FINANCIAL BASELINE
+// ------------------------------------------------------------------------------
+// Tracks the active business profile (defaults to Ace Art Global Trading Ltd).
+// ==============================================================================
 let activeBusinessId = "ace-art";
+// Holds the full account object returned by the Flex Commercial Banking API
 let activeAccountData = null;
 
-// Dynamic model state (customizable via remote controller or Flex API)
+// Dynamic model numbers (updated live when the phone remote triggers a disruption)
+// Total dollar amount Linka will save ($3,780 for Ace Art by default)
 let currentSavings = 3780;
+// Number of days physical shipment is delayed (18 days for Ace Art CITES audit)
 let currentDelayDays = 18;
+// Formatted label for display (e.g. "18 days")
 let currentDelayLabel = "18 days";
+// Cost of running cloud servers per day ($210/day for Ace Art)
 let activeDailyCost = 210;
+// Initial treasury working capital in the company's Flex bank account ($342,800)
 let activeBaseCapital = 342800;
 
+// The current FinOps predictive calculation model
 let activeBudgetModel = {
-    monthlyBudget: 6300,
-    historicalUsageRate: 72.0,
-    idleRiskRate: 28.0,
-    recommendedReservePct: 32,
-    recommendedReserveAmount: 2016,
-    predictedCycleExpenseWithShield: 3528,
-    savingsPct: 44.0,
-    clientAnnualExpense: 270000,
-    clientMonthlyBurn: 22500,
-    clientExpenseRatio: 28.0,
+    monthlyBudget: 6300,              // 30-day cloud compute budget ($6,300)
+    historicalUsageRate: 72.0,        // Past server capacity efficiency (72%)
+    idleRiskRate: 28.0,               // Idle capacity risk (100% - 72% = 28%)
+    recommendedReservePct: 32,        // Recommended capital shield percentage (32%)
+    recommendedReserveAmount: 2016,   // Recommended dollar buffer to hold in escrow ($2,016)
+    predictedCycleExpenseWithShield: 3528, // Expense when protected by Linka ($3,528)
+    savingsPct: 44.0,                 // Percentage of budget preserved
+    clientAnnualExpense: 270000,      // Company's annual operating expense ($270,000/yr)
+    clientMonthlyBurn: 22500,         // Company's monthly cash burn ($22,500/mo)
+    clientExpenseRatio: 28.0,         // Cloud spend as % of monthly burn ($6,300 / $22,500 = 28%)
     businessName: "Ace Art Global Trading Ltd",
+    // Small AI FinOps predictive advisor recommendation
     aiAdvisor: {
-        advisedFutureUsagePct: 64.4,
-        confidenceScore: 95.8,
+        advisedFutureUsagePct: 64.4,  // AI advised future compute allocation (64.4%)
+        confidenceScore: 95.8,        // Statistical model confidence (95.8%)
         reasoning: "AI calibrated against Ace Art's 3D render workloads and 18-day CITES provenance quarantine.",
-        mode: "ELASTIC_FINOPS"
+        mode: "ELASTIC_FINOPS"        // Optimization mode
     }
 };
 
+// Default styling and text for the main "Protect Capital" button before it is clicked
 const EXECUTE_BTN_DEFAULT = {
     className: 'vision-btn-emerald px-7 py-3.5 text-[16px] flex items-center gap-2 shrink-0',
     html: '<i class="fa-solid fa-shield-halved"></i> Protect capital'
 };
 
-// Header status presets
+// ==============================================================================
+// HEADER STATUS INDICATORS
+// ------------------------------------------------------------------------------
+// Updates the small status badge in the top-right corner of the VisionOS header:
+// - Green: Operating normally ($210/day)
+// - Red: Customs hold detected (Idle burn)
+// - Blue: Capital protected (Linodes hibernated, $0/day)
+// ==============================================================================
 function getHeaderStates() {
     const dailyStr = `$${activeDailyCost}/day`;
     return {
@@ -55,6 +98,7 @@ function getHeaderStates() {
     };
 }
 
+// Function to visually switch the header status pill
 function setState(name) {
     const states = getHeaderStates();
     const s = states[name] || states.normal;
@@ -70,8 +114,14 @@ function setState(name) {
     }
 }
 
+// ==============================================================================
+// STEP NAVIGATION (Step 1 -> 2 -> 3 -> 4)
+// ------------------------------------------------------------------------------
+// Switches tabs so only the active presentation step is visible to the audience.
+// ==============================================================================
 function switchStep(step) {
     currentStep = step;
+    // Loop through all 4 steps: hide inactive steps, show the chosen one
     for (let i = 1; i <= TOTAL_STEPS; i++) {
         const content = $(`step-${i}-content`);
         const btn = $(`step-btn-${i}`);
@@ -81,18 +131,24 @@ function switchStep(step) {
             btn.setAttribute('aria-selected', i === step);
         }
     }
+    // If the presenter moves to Step 2 (Disruption) or beyond, turn header red (alert)
     if (step >= 2 && !isExecuted) setState('alert');
 }
 
-/**
- * Update Chart curves dynamically calibrated to active business working capital & daily burn
- */
+// ==============================================================================
+// INTERACTIVE CASH RUNWAY CHART (Chart.js)
+// ------------------------------------------------------------------------------
+// Draws the 30-day financial forecast.
+// - Red dashed curve: Shows the cash account steadily bleeding down if servers run idle.
+// - Green solid curve: Shows the cash account flatlining once Linka hibernates servers,
+//   saving $3,780 for Ace Art.
+// ==============================================================================
 function updateChartCurves(savedAmount = currentSavings, delayDays = currentDelayDays) {
     if (!chart) return;
     const baseCapital = activeBaseCapital || 342800;
     const dailyLoss = activeDailyCost || 210;
 
-    // Dataset 0: Unprotected bleed
+    // Line 1: Without Linka (Continuous bleed over 30 days)
     chart.data.datasets[0].data = [
         baseCapital,
         Math.round(baseCapital - (dailyLoss * 4)),
@@ -103,20 +159,22 @@ function updateChartCurves(savedAmount = currentSavings, delayDays = currentDela
         Math.round(baseCapital - Math.min(savedAmount + (dailyLoss * 10), dailyLoss * 30))
     ];
 
-    // Dataset 1: Protected with Linka shield
+    // Line 2: With Linka Shield (Cash stops bleeding when protection executes!)
     chart.data.datasets[1].data = [
         baseCapital,
         Math.round(baseCapital - (dailyLoss * 4)),
         Math.round(baseCapital - (dailyLoss * 7)),
-        Math.round(baseCapital - (dailyLoss * 7)), // Shielded point: flatline!
+        Math.round(baseCapital - (dailyLoss * 7)), // SHIELD POINT: Cash line flatlines!
         Math.round(baseCapital - (dailyLoss * 7.4)),
         Math.round(baseCapital - (dailyLoss * 7.8)),
         Math.round(baseCapital - (dailyLoss * 8.0))
     ];
 
+    // Re-render the chart smoothly with new numbers
     chart.update();
 }
 
+// Builds the Chart.js line chart canvas when the web page first loads
 function initChart() {
     const chartEl = $('cashFlowChart');
     if (!chartEl) return;
@@ -142,7 +200,7 @@ function initChart() {
                         baseCapital - (dailyLoss * 25),
                         baseCapital - (dailyLoss * 30)
                     ],
-                    borderColor: '#ff453a',
+                    borderColor: '#ff453a', // Red dashed line
                     borderDash: [5, 5],
                     borderWidth: 2,
                     pointRadius: 0,
@@ -159,13 +217,13 @@ function initChart() {
                         baseCapital - (dailyLoss * 7.8),
                         baseCapital - (dailyLoss * 8.0)
                     ],
-                    borderColor: '#34c759',
+                    borderColor: '#34c759', // Green solid line
                     backgroundColor: 'rgba(52, 199, 89, 0.08)',
                     borderWidth: 3,
                     pointRadius: 0,
                     tension: 0.35,
                     fill: true,
-                    hidden: true // revealed after protection executes
+                    hidden: true // Stays hidden until user clicks "Protect Capital" on Step 4!
                 }
             ]
         },
@@ -193,15 +251,20 @@ function initChart() {
     });
 }
 
-/**
- * Execute capital protection:
- * Hibernates Akamai Linodes and locks Capital Shield escrow reserve via Flex API
- */
+// ==============================================================================
+// STEP 4 ACTION: EXECUTE CAPITAL PROTECTION
+// ------------------------------------------------------------------------------
+// When the presenter clicks "Protect Capital":
+// 1. Sends an API request to Flex Commercial Bank to lock cash into escrow.
+// 2. Turns off (hibernates) the Akamai Linode servers.
+// 3. Drops the daily burn to $0/day.
+// 4. Reveals the green protected cash flow curve on the chart.
+// ==============================================================================
 async function executeProtectionNow() {
     if (isExecuted) return;
     isExecuted = true;
 
-    // Call Flex Commercial Banking API to allocate Capital Shield reserve
+    // Call Flex Commercial Banking API to allocate Capital Shield reserve in company escrow
     try {
         await fetch('/api/flex/capital-shield', {
             method: 'POST',
@@ -216,42 +279,51 @@ async function executeProtectionNow() {
         console.warn('Flex capital shield API call:', err);
     }
 
+    // Update the "Capital preserved" counter on screen (e.g. $3,780)
     const savedEl = $('saved-amount-display');
     if (savedEl) {
         savedEl.textContent = `$${currentSavings.toLocaleString()}`;
         savedEl.className = 'num text-[38px] font-semibold text-emerald-400 mt-1';
     }
 
+    // Drop cloud burn rate to $0/day
     const burnEl = getEl('cloud-burn-display', 'akamai-burn-display');
     if (burnEl) {
         burnEl.textContent = '$0/day';
         burnEl.className = 'num font-medium text-emerald-400';
     }
 
+    // Change server cluster badge to "Hibernated"
     const clusterEl = getEl('cloud-cluster-status', 'akamai-cluster-status');
     if (clusterEl) {
         clusterEl.textContent = 'Hibernated';
         clusterEl.className = 'font-medium text-sky-400';
     }
 
+    // Update chart status badge
     const badgeEl = $('chart-status-badge');
     if (badgeEl) {
         badgeEl.textContent = `Protected · $${currentSavings.toLocaleString()} preserved`;
         badgeEl.className = 'text-[14px] text-emerald-400';
     }
 
+    // Update the button to show checked status
     const btn = $('execute-now-btn');
     if (btn) {
         btn.className = 'px-7 py-3.5 rounded-full bg-white/10 border border-emerald-400/30 text-emerald-400 text-[16px] flex items-center gap-2 shrink-0 cursor-default';
         btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Capital protected in Flex account';
     }
 
+    // Reveal the green line on the Chart.js graph
     if (chart && chart.data.datasets[1]) {
         chart.data.datasets[1].hidden = false;
         chart.update();
     }
 
+    // Set header badge to "Capital protected"
     setState('protected');
+
+    // Notify backend server over WebSockets
     socket.emit('EXECUTE_PROTECTION', {
         projectedSavings: currentSavings,
         batchId: activeAccountData?.activeShipment?.batchTag || (activeBusinessId === 'ace-art' ? "AceArt-402" : "Batch-104"),
@@ -259,13 +331,15 @@ async function executeProtectionNow() {
     });
 }
 
-/**
- * Resets the demo state back to normal baseline
- */
+// ==============================================================================
+// RESET DEMO BACK TO STEP 1 BASELINE
+// ------------------------------------------------------------------------------
+// Recovers the demonstration so the user can pitch again for the next judge.
+// ==============================================================================
 function resetWholeDemo(emitEvent = true) {
     isExecuted = false;
 
-    // Default savings and delay calibrated to active business
+    // Reset default parameters based on which business is active
     if (activeBusinessId === 'ace-art') {
         currentSavings = 3780;
         currentDelayDays = 18;
@@ -280,37 +354,42 @@ function resetWholeDemo(emitEvent = true) {
         activeBaseCapital = 248500;
     }
 
+    // Reset saved amount to $0
     const savedEl = $('saved-amount-display');
     if (savedEl) {
         savedEl.textContent = '$0';
         savedEl.className = 'num text-[38px] font-semibold text-neutral-400 mt-1';
     }
 
+    // Reset burn rate back to standard baseline ($210/day)
     const burnEl = getEl('cloud-burn-display', 'akamai-burn-display');
     if (burnEl) {
         burnEl.textContent = `$${activeDailyCost}/day`;
         burnEl.className = 'num font-medium text-red-400';
     }
 
+    // Reset cluster state back to "Running"
     const clusterEl = getEl('cloud-cluster-status', 'akamai-cluster-status');
     if (clusterEl) {
         clusterEl.textContent = 'Running';
         clusterEl.className = 'font-medium text-emerald-400';
     }
 
+    // Reset chart badge
     const badgeEl = $('chart-status-badge');
     if (badgeEl) {
         badgeEl.textContent = 'Unprotected';
         badgeEl.className = 'text-[14px] text-red-400';
     }
 
+    // Reset execution button
     const btn = $('execute-now-btn');
     if (btn) {
         btn.className = EXECUTE_BTN_DEFAULT.className;
         btn.innerHTML = EXECUTE_BTN_DEFAULT.html;
     }
 
-    // Refresh Step 2 metrics for active business
+    // Reset Step 2 cards
     const idleWasteEl = $('step2-idle-waste');
     if (idleWasteEl) idleWasteEl.textContent = `$${currentSavings.toLocaleString()}`;
     const wasteMathEl = $('step2-waste-math');
@@ -320,25 +399,32 @@ function resetWholeDemo(emitEvent = true) {
     const narrativeDaysEl = $('step2-narrative-days');
     if (narrativeDaysEl) narrativeDaysEl.textContent = currentDelayLabel;
 
+    // Refresh business data view
     if (activeAccountData) {
         renderBusinessData(activeAccountData);
     }
 
+    // Hide green line on chart
     if (chart && chart.data.datasets[1]) {
         chart.data.datasets[1].hidden = true;
         updateChartCurves(currentSavings, currentDelayDays);
     }
 
+    // Return header to normal and return to Step 1
     setState('normal');
     switchStep(1);
+
+    // Notify backend over WebSockets if required
     if (emitEvent && socket && socket.connected) {
         socket.emit('RESET_DEMO');
     }
 }
 
-/**
- * Renders verified business details directly from the Flex API
- */
+// ==============================================================================
+// RENDER BUSINESS DATA (FLEX API INTEGRATION)
+// ------------------------------------------------------------------------------
+// Fills the screen with verified numbers directly from Flex Commercial Banking.
+// ==============================================================================
 function renderBusinessData(account) {
     if (!account) return;
     activeAccountData = account;
@@ -351,7 +437,7 @@ function renderBusinessData(account) {
         cloudEl.textContent = `Running · $${activeDailyCost}/day`;
     }
 
-    // Switcher buttons state
+    // Update directory switcher button styles
     const btnAce = $('biz-btn-ace');
     const btnLogistics = $('biz-btn-logistics');
     if (btnAce && btnLogistics) {
@@ -377,7 +463,7 @@ function renderBusinessData(account) {
         }
     }
 
-    // Flex Commercial Banking card
+    // Fill Flex Commercial Banking card
     const nameEl = $('flex-biz-name');
     if (nameEl) nameEl.textContent = account.companyName;
 
@@ -396,7 +482,7 @@ function renderBusinessData(account) {
     const annSubEl = $('flex-annual-exp-sub');
     if (annSubEl) annSubEl.textContent = `$${account.annualOperatingExpense.toLocaleString()}/yr total budget`;
 
-    // Active Shipment / Consignment Card
+    // Fill active shipment or consignment card
     if (account.activeShipment) {
         const s = account.activeShipment;
         const poRouteEl = $('shipment-po-route');
@@ -415,7 +501,7 @@ function renderBusinessData(account) {
         if (sEtaEl) sEtaEl.textContent = s.normalEta;
     }
 
-    // Flex Corporate Ledger Transaction Feed (from Flex API)
+    // Fill Flex Corporate Financial Ledger table
     const ledgerContainer = $('flex-ledger-list');
     if (ledgerContainer && account.ledgerTransactions && account.ledgerTransactions.length > 0) {
         ledgerContainer.innerHTML = account.ledgerTransactions.slice(0, 4).map(tx => {
@@ -443,7 +529,7 @@ function renderBusinessData(account) {
         }).join('');
     }
 
-    // Akamai Connected Cloud Compute Instances (Linodes)
+    // Fill Akamai Connected Cloud Linode server cards
     const tagEl = $('akamai-tag-label');
     if (tagEl) {
         tagEl.innerHTML = `Linodes tagged <code class="font-mono text-neutral-300">${account.activeShipment?.batchTag || 'AceArt-402'}</code>`;
@@ -477,7 +563,7 @@ function renderBusinessData(account) {
     const ratioTotalEl = $('akamai-ratio-total');
     if (ratioTotalEl) ratioTotalEl.textContent = `${account.cloudExpenseRatio.toFixed(1)}%`;
 
-    // Step 2 Headlines & Narrative
+    // Fill Step 2 Disruption Headlines & Narrative
     const s2Heading = $('step2-heading');
     if (s2Heading) {
         s2Heading.textContent = account.businessId === 'ace-art' 
@@ -494,7 +580,7 @@ function renderBusinessData(account) {
         }
     }
 
-    // Step 2 Models
+    // Step 2 Predictive Models
     const modelBadge = $('model-business-badge');
     if (modelBadge) modelBadge.textContent = account.companyName;
 
@@ -510,7 +596,7 @@ function renderBusinessData(account) {
     const modelAnnualProj = $('model-annual-proj');
     if (modelAnnualProj) modelAnnualProj.textContent = `$${((account.cloudComputeMonthlyExpenditure * 12) / 1000).toFixed(1)}k/yr`;
 
-    // Step 3 Agent
+    // Step 3 Agent narrative
     const s3FlexEvent = $('step3-flex-event');
     if (s3FlexEvent) {
         s3FlexEvent.textContent = account.businessId === 'ace-art' ? "PO #402 delayed 18 days." : "Batch #104 delayed 14 days.";
@@ -530,12 +616,15 @@ function renderBusinessData(account) {
         s4Headline.textContent = `One click. $${waste.toLocaleString()} saved.`;
     }
 
+    // Recalibrate Chart curves to active business capital baseline
     updateChartCurves(account.activeShipment?.idleBleedWaste || currentSavings, account.activeShipment?.disruptionDelayDays || currentDelayDays);
 }
 
-/**
- * Switch active commercial business via Flex API
- */
+// ==============================================================================
+// BUSINESS SWITCHER (Ace Art vs. Flex Logistics)
+// ------------------------------------------------------------------------------
+// Invoked when user clicks the directory switcher pills at the top of the app.
+// ==============================================================================
 async function selectBusiness(businessId) {
     if (!businessId || businessId === activeBusinessId) return;
     activeBusinessId = businessId;
@@ -559,9 +648,7 @@ async function selectBusiness(businessId) {
     }
 }
 
-/**
- * Fetch initial business profile from Flex API on page load
- */
+// Fetch initial business profile from Flex API on page load
 async function loadFlexBusinessProfile(businessId = "ace-art") {
     try {
         const res = await fetch(`/api/flex/accounts/${businessId}`);
@@ -574,13 +661,19 @@ async function loadFlexBusinessProfile(businessId = "ace-art") {
     }
 }
 
-// Arrow keys navigation
+// Keyboard arrow navigation (Left/Right arrows change steps for seamless live pitching)
 document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' && currentStep < TOTAL_STEPS) switchStep(currentStep + 1);
     if (e.key === 'ArrowLeft' && currentStep > 1) switchStep(currentStep - 1);
 });
 
-// Live Socket.IO Events
+// ==============================================================================
+// WEBSOCKET REAL-TIME LISTENERS
+// ------------------------------------------------------------------------------
+// Listens for live messages sent from the presenter's mobile phone remote.
+// ==============================================================================
+
+// Event: Another device switched the business
 socket.on('BUSINESS_SWITCHED', (data) => {
     if (data && data.account) {
         activeBusinessId = data.businessId;
@@ -588,6 +681,7 @@ socket.on('BUSINESS_SWITCHED', (data) => {
     }
 });
 
+// Event: Presenter pressed 'Broadcast Hold' on their phone
 socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
     if (data) {
         if (data.businessId && data.businessId !== activeBusinessId) {
@@ -601,7 +695,7 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
         activeDailyCost = data.dailyCost || 210;
         activeBudgetModel = data.budgetModel || null;
 
-        // Update Step 2 metrics
+        // Update Step 2 metrics on screen
         const idleWasteEl = $('step2-idle-waste');
         if (idleWasteEl) idleWasteEl.textContent = `$${currentSavings.toLocaleString()}`;
 
@@ -721,14 +815,19 @@ socket.on('LOGISTICS_DISRUPTION_ALERT', (data) => {
             }
         }
 
+        // Recalculate and re-draw the chart lines
         updateChartCurves(currentSavings, currentDelayDays);
     }
+    // Automatically jump presentation view to Step 2!
     switchStep(2);
 });
 
+// Event: Protection was confirmed
 socket.on('PROTECTION_CONFIRMED', () => { if (!isExecuted) executeProtectionNow(); });
+// Event: Remote trigger reset the demo
 socket.on('RESET_DEMO_BROADCAST', () => resetWholeDemo(false));
 
+// Event: Server sent initial startup state
 socket.on('INIT_STATE', (data) => {
     if (data) {
         if (data.currentAccount) {
@@ -741,6 +840,7 @@ socket.on('INIT_STATE', (data) => {
     }
 });
 
+// STARTUP: Initialize chart and load Ace Art profile when page is ready
 document.addEventListener('DOMContentLoaded', () => {
     initChart();
     loadFlexBusinessProfile("ace-art");

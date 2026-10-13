@@ -1,25 +1,77 @@
 <!DOCTYPE html>
+<!-- 
+  =============================================================================================
+  LINKA MOBILE REMOTE CONTROLLER // PUBLIC / TRIGGER.HTML
+  =============================================================================================
+  What this file is:
+  This is the handheld interactive "Remote Control" designed for judges or presenters to hold 
+  on their smartphone (especially iPhones via Safari "Add to Home Screen" PWA mode).
+
+  Why it exists:
+  Instead of clicking around a standard dashboard on a laptop, a presenter or hackathon judge 
+  can hold their phone in their hand, adjust parameters (like changing a shipping delay from 
+  18 days to 3 weeks, or adjusting the company's operating budget), and tap a big glowing button.
+  Instantaneously, the big executive dashboard across the room reacts over WebSockets.
+
+  Key Capabilities:
+  1. Business Customizer: Switch between Ace Art (art trading), Flex Logistics, E-Commerce, 
+     and Supply SaaS, or type in a custom annual operating budget.
+  2. Duration Customizer: Choose disruption length in Hours, Days, Weeks, or Months.
+  3. Budget Allocation: Fine-tune the cloud budget in sync with corporate burn rates.
+  4. Small AI Advisory Model: Uses a predictive regression formula to analyze previous usage 
+     and advise the exact compute percentage needed to eliminate waste while protecting SLAs.
+  5. High-Operation Rate (>95%): Supports unique circumstances for mission-critical freight.
+  6. Real Haptic Feedback: Triggers phone vibration pulses when actions are tapped.
+  =============================================================================================
+-->
 <html lang="en" class="dark">
 <head>
+    <!-- Character encoding for standard text and emoji glyphs -->
     <meta charset="UTF-8">
+
+    <!-- Mobile-optimized viewport: Prevents unwanted zooming, fits edge-to-edge on iPhone screens -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- 
+      Apple iOS Web Clip (PWA) Meta Tags:
+      When a judge taps "Add to Home Screen" on an iPhone, these tags tell Safari to run Linka 
+      as a native fullscreen application, hiding the Safari URL bar and navigation buttons!
+    -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Linka Remote">
     <meta name="theme-color" content="#000000">
+
     <title>Linka Remote Controller // FinOps Customizer & AI Advisor</title>
+
+    <!-- Tailwind CSS CDN for modern mobile layout styles -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome icons for remote symbols (warning triangles, sliders, brains, clouds) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Socket.IO client library for ultra-low latency bi-directional WebSocket messaging -->
     <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Apple SF Pro Display typography -->
     <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
+
+    <!-- Shared VisionOS glassmorphism theme -->
     <link rel="stylesheet" href="styles.css">
+
     <style>
+        /* Disable the gray tap highlight flash on iOS Safari when tapping buttons */
         * { -webkit-tap-highlight-color: transparent; }
+
+        /* Optimize touch response by disabling double-tap-to-zoom delays */
         body { touch-action: manipulation; }
+
+        /* Accent color for HTML5 range sliders */
         input[type="range"] {
             accent-color: #38bdf8;
         }
-        /* Custom styled number input without arrows */
+
+        /* Clean up HTML5 number inputs: removes ugly browser spinner up/down arrows */
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
@@ -30,50 +82,70 @@
         }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-6 vision-bg text-white selection:bg-white/20 pb-12">
 
-    <!-- Top Connection Bar -->
+    <!-- 
+      =========================================================================================
+      TOP CONNECTION STATUS BAR
+      =========================================================================================
+      Shows the remote's connection status. Green = Connected via WebSocket; Red = HTTP mode.
+    -->
     <header class="w-full max-w-md flex items-center justify-between pt-1 mb-3">
         <div class="flex items-center gap-2.5">
+            <!-- Glowing emerald Linka badge -->
             <div class="h-8 w-8 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-400 border border-white/20 flex items-center justify-center text-white font-bold text-xs shadow-md">L</div>
             <div>
                 <h1 class="text-sm font-semibold tracking-wide leading-tight">Linka FinOps Remote</h1>
                 <p class="text-[11px] text-neutral-400">Customizer & AI Advisor</p>
             </div>
         </div>
+        <!-- Live connection indicator pill -->
         <div id="conn-pill" class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/10 text-xs">
             <span id="conn-dot" class="dot dot-green"></span>
             <span id="conn-text" class="text-neutral-300">Live</span>
         </div>
     </header>
 
-    <!-- Main Controller Stack -->
+    <!-- Main Vertical Controller Stack -->
     <main class="w-full max-w-md space-y-3.5">
 
-        <!-- 0. BUSINESS PROFILE & ANNUAL EXPENSE PROJECTION -->
+        <!-- 
+          =====================================================================================
+          SECTION 0: BUSINESS PROFILE & ANNUAL EXPENSE PROJECTION
+          =====================================================================================
+          Allows the user to select which business they are tuning, or customize their annual 
+          operating expense. Also includes the Auto-Sync toggle.
+        -->
         <section class="vision-glass p-4 rounded-3xl border border-white/10 shadow-xl space-y-3 bg-black/40">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">Business Profile & Expense</span>
                 </div>
+                <!-- Dynamic badge showing what percentage of total operational burn goes to cloud compute -->
                 <span id="client-ratio-pill" class="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                     28.0% Expense Ratio
                 </span>
             </div>
 
-            <!-- Business Profile Selector Pills -->
+            <!-- Business Profile Selection Buttons -->
             <div class="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-black/50 border border-white/[0.08] text-[10px] font-mono">
+                <!-- 1. Ace Art: High-res online art gallery & auction trading -->
                 <button type="button" onclick="selectBusinessProfile('ace')" id="bprof-ace" class="py-1.5 px-1 rounded-xl font-semibold transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate">🎨 Ace Art</button>
+                <!-- 2. Flex Logistics: Electronics freight -->
                 <button type="button" onclick="selectBusinessProfile('flex')" id="bprof-flex" class="py-1.5 px-1 rounded-xl font-medium transition text-neutral-400 hover:text-white truncate">Flex Logistics</button>
+                <!-- 3. Mid-Market E-Commerce -->
                 <button type="button" onclick="selectBusinessProfile('ecomm')" id="bprof-ecomm" class="py-1.5 px-1 rounded-xl font-medium transition text-neutral-400 hover:text-white truncate">E-Commerce</button>
+                <!-- 4. Enterprise B2B Supply Chain SaaS -->
                 <button type="button" onclick="selectBusinessProfile('saas')" id="bprof-saas" class="py-1.5 px-1 rounded-xl font-medium transition text-neutral-400 hover:text-white truncate">Supply SaaS</button>
             </div>
 
-            <!-- Annual Expense Projection Input -->
+            <!-- Annual Expense Projection Input: Allows testing small businesses vs giant enterprises -->
             <div class="space-y-1">
                 <div class="flex items-center justify-between text-xs text-neutral-300">
                     <span class="text-neutral-400">Annual Operating Expense:</span>
+                    <!-- Monthly burn computed automatically as Annual / 12 -->
                     <span id="monthly-burn-display" class="font-mono text-white font-semibold">$22,500/mo burn</span>
                 </div>
                 <div class="relative">
@@ -82,7 +154,12 @@
                 </div>
             </div>
 
-            <!-- Auto-Sync Toggle Switch -->
+            <!-- 
+              Auto-Sync Toggle Switch:
+              When ON: Moving the efficiency slider automatically recalculates the budget, 
+              and changing the budget automatically recalculates the required efficiency!
+              When OFF: The user has decoupled manual control over every slider.
+            -->
             <div class="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.04] border border-white/[0.08]">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-arrows-rotate text-sky-400 text-xs"></i>
@@ -98,17 +175,24 @@
             </div>
         </section>
 
-        <!-- 1. DOWNTIME DURATION CUSTOMIZER -->
+        <!-- 
+          =====================================================================================
+          SECTION 1: DOWNTIME DURATION CUSTOMIZER
+          =====================================================================================
+          Allows the user to select the length of the supply chain disruption across 
+          Hours, Days, Weeks, or Months.
+        -->
         <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>
                     <span class="text-xs uppercase tracking-wider font-semibold text-red-300 font-mono">1. Downtime Duration</span>
                 </div>
+                <!-- Prominent readout of selected delay -->
                 <span id="duration-readout" class="num font-bold text-sm text-red-400 px-2 py-0.5 rounded-lg bg-red-500/10 border border-red-500/20">18 Days</span>
             </div>
 
-            <!-- Time Unit Selector Pills -->
+            <!-- Time Unit Selector (Hours vs Days vs Weeks vs Months) -->
             <div class="grid grid-cols-4 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/[0.08] mb-3.5">
                 <button type="button" onclick="setDurationUnit('hours')" id="unit-hours" class="py-1.5 rounded-xl text-xs font-medium transition text-neutral-400 hover:text-white">Hours</button>
                 <button type="button" onclick="setDurationUnit('days')" id="unit-days" class="py-1.5 rounded-xl text-xs font-semibold transition bg-red-500/20 text-red-300 border border-red-500/30">Days</button>
@@ -116,7 +200,7 @@
                 <button type="button" onclick="setDurationUnit('months')" id="unit-months" class="py-1.5 rounded-xl text-xs font-medium transition text-neutral-400 hover:text-white">Months</button>
             </div>
 
-            <!-- Duration Slider & Stepper -->
+            <!-- Dynamic Slider: Its min/max limits adapt according to the selected time unit -->
             <div class="space-y-2 mb-3">
                 <div class="flex items-center justify-between text-xs text-neutral-300">
                     <span>Length of Downtime:</span>
@@ -125,17 +209,24 @@
                 <input type="range" id="duration-slider" min="1" max="60" value="18" step="1" oninput="onDurationSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
             </div>
 
-            <!-- Quick Presets -->
+            <!-- Quick Presets for Rapid Demonstration to Judges -->
             <div class="flex items-center justify-between gap-1.5 pt-1 text-[11px] font-mono">
                 <button type="button" onclick="applyPreset(12, 'hours')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">12h</button>
                 <button type="button" onclick="applyPreset(3, 'days')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">3d</button>
                 <button type="button" onclick="applyPreset(14, 'days')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">14d</button>
+                <!-- Default pitch scenario: 18 days for Ace Art customs audit -->
                 <button type="button" onclick="applyPreset(18, 'days')" class="px-2 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 font-semibold">18d ★</button>
                 <button type="button" onclick="applyPreset(3, 'weeks')" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">3w</button>
             </div>
         </section>
 
-        <!-- 2. COMPUTE BUDGET ALLOCATION & MANUAL ADJUSTMENT -->
+        <!-- 
+          =====================================================================================
+          SECTION 2: COMPUTE BUDGET ALLOCATION & MANUAL ADJUSTMENT
+          =====================================================================================
+          Lets the user customize the monthly cloud compute budget either manually 
+          (typing in dollars or dragging the slider) or reading it from financial ratios.
+        -->
         <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl space-y-3.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -147,7 +238,7 @@
                 </span>
             </div>
 
-            <!-- Manual Numeric Entry & Readout -->
+            <!-- Direct Manual Numeric Input: Type any exact budget amount -->
             <div class="space-y-1">
                 <label class="text-[11px] text-neutral-400 uppercase tracking-wider font-mono block">Direct Manual Input ($ USD):</label>
                 <div class="flex items-center gap-2">
@@ -155,11 +246,12 @@
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-mono text-sm font-semibold">$</span>
                         <input type="number" id="budget-input" min="300" max="150000" step="50" value="6300" oninput="onBudgetInputChange(this.value)" class="w-full bg-black/60 border border-white/20 focus:border-sky-400 rounded-xl pl-7 pr-3 py-2 text-white font-mono font-bold text-base outline-none transition shadow-inner">
                     </div>
+                    <!-- Formatted currency readout -->
                     <span id="budget-readout" class="num font-bold text-sm text-sky-300 px-3 py-2 rounded-xl bg-sky-500/10 border border-sky-500/20 whitespace-nowrap">$6,300</span>
                 </div>
             </div>
 
-            <!-- Budget Cycle Period Selector -->
+            <!-- Budget Cycle Period Selector: Customize the budget estimation timeline -->
             <div class="grid grid-cols-4 gap-1.5 p-1 rounded-2xl bg-black/40 border border-white/[0.08]">
                 <button type="button" onclick="setBudgetPeriod('hours')" id="bperiod-hours" class="py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white">Hours</button>
                 <button type="button" onclick="setBudgetPeriod('days')" id="bperiod-days" class="py-1 rounded-xl text-[11px] font-medium transition text-neutral-400 hover:text-white">Days</button>
@@ -185,26 +277,36 @@
                 <button type="button" onclick="applyBudgetPreset(22500)" class="px-2 py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-neutral-300">$22.5k</button>
             </div>
 
-            <!-- Detailed Breakdown Grid -->
+            <!-- Financial Run-Rate Statistics -->
             <div class="grid grid-cols-2 gap-2 text-[11px] font-mono">
                 <div class="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
                     <span class="text-neutral-400 block text-[10px]">Hourly Run Rate</span>
+                    <!-- Daily cost divided by 24 hours -->
                     <span id="stat-hourly-rate" class="text-white font-semibold text-xs">$8.75/hr</span>
                 </div>
                 <div class="p-2.5 rounded-xl bg-black/30 border border-white/[0.06]">
                     <span class="text-neutral-400 block text-[10px]">Annual Compute Projection</span>
+                    <!-- Monthly budget multiplied by 12 months -->
                     <span id="stat-annual-rate" class="text-white font-semibold text-xs">$75,600/yr</span>
                 </div>
             </div>
         </section>
 
-        <!-- 3. PREDICTIVE EFFICIENCY & SMALL AI ADVISORY MODEL -->
+        <!-- 
+          =====================================================================================
+          SECTION 3: PREDICTIVE EFFICIENCY & SMALL AI ADVISORY MODEL
+          =====================================================================================
+          Features the lightweight AI predictive model that evaluates previous usage rate and 
+          shipping delay to advise future compute capacity needed. Also handles the >95% peak 
+          operation rate option for unique mission-critical freight circumstances.
+        -->
         <section class="vision-glass p-5 rounded-3xl border border-white/10 shadow-2xl space-y-3.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span class="text-xs uppercase tracking-wider font-semibold text-emerald-300 font-mono">3. Operation Rate & AI Model</span>
                 </div>
+                <!-- Real-time readout of active workload efficiency -->
                 <span id="usage-readout" class="num font-bold text-sm text-emerald-300 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">72% Active</span>
             </div>
 
@@ -216,13 +318,17 @@
                         <span>Linka FinOps AI Advisor</span>
                     </span>
                     <div class="flex items-center gap-1.5">
+                        <!-- Mode badge: 'ELASTIC' for standard delays or 'PEAK_CRITICAL' for high ops -->
                         <span id="ai-mode-tag" class="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-500/20 text-sky-300 border border-sky-500/30 font-semibold">ELASTIC</span>
+                        <!-- AI confidence percentage -->
                         <span id="ai-confidence" class="font-mono text-emerald-400 font-bold text-[11px]">95.4%</span>
                     </div>
                 </div>
+                <!-- Plain-English reasoning generated dynamically by the AI algorithm -->
                 <p id="ai-reasoning" class="text-[11px] text-neutral-300 leading-snug">
                     AI evaluated previous 72% compute efficiency against a 14d lead time extension. Advises 68% allocation to eliminate $2,520 idle waste.
                 </p>
+                <!-- 1-Tap button to immediately apply what the AI recommended -->
                 <button type="button" onclick="applyAiRecommendation()" class="w-full py-1.5 px-3 rounded-xl bg-gradient-to-r from-sky-600/30 to-indigo-600/30 hover:from-sky-600/40 hover:to-indigo-600/40 active:scale-98 border border-sky-400/40 text-sky-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
                     <i class="fa-solid fa-wand-magic-sparkles text-amber-300 text-[11px]"></i>
                     <span>Apply AI Recommendation (<span id="ai-apply-pct">68.0%</span> · <span id="ai-apply-amt">$5,718</span>)</span>
@@ -233,6 +339,7 @@
             <div class="space-y-1.5">
                 <div class="flex items-center justify-between text-xs text-neutral-300">
                     <span>Operation Efficiency Rate:</span>
+                    <!-- Idle risk = (100% - Active Efficiency%) -->
                     <span id="idle-risk-readout" class="font-mono text-amber-300">28% idle risk</span>
                 </div>
                 <input type="range" id="usage-slider" min="30" max="100" value="72" step="0.5" oninput="onUsageSliderChange(this.value)" class="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer">
@@ -243,7 +350,7 @@
                 </div>
             </div>
 
-            <!-- Unique Circumstances High-Operation Banner (>95%) -->
+            <!-- Unique Circumstances High-Operation Banner (Appears only when >95% is selected) -->
             <div id="high-op-badge" class="hidden p-2.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5 animate-pulse">
                 <i class="fa-solid fa-bolt-lightning text-amber-400 text-sm shrink-0"></i>
                 <div class="text-left">
@@ -252,7 +359,7 @@
                 </div>
             </div>
 
-            <!-- Quick Operation Rate Presets (Including >95% Unique Circumstances) -->
+            <!-- Quick Efficiency Presets (Includes 96%, 98%, and 99.5% for unique circumstances) -->
             <div class="grid grid-cols-6 gap-1 text-[10px] font-mono">
                 <button type="button" onclick="applyEfficiencyPreset(50)" class="py-1 rounded-lg bg-white/[0.05] hover:bg-white/10 border border-white/[0.08] text-amber-300">50%</button>
                 <button type="button" onclick="applyEfficiencyPreset(72)" class="py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-300 font-semibold">72% ★</button>
@@ -284,28 +391,38 @@
             </div>
         </section>
 
-        <!-- 4. BROADCAST ACTION BUTTONS -->
+        <!-- 
+          =====================================================================================
+          SECTION 4: BROADCAST ACTION BUTTONS
+          =====================================================================================
+          The big tactile buttons that actually transmit the signals to the executive dashboard.
+        -->
         <section class="space-y-3 pt-1">
-            <!-- Dynamic Big Red Trigger Button -->
+            <!-- 
+              Big Red Trigger Button:
+              Tapping this emits the disruption event over WebSockets to move the dashboard 
+              instantly to Step 2, updates the idle burn numbers, and triggers phone vibration!
+            -->
             <button id="trigger-btn" onclick="fireDisruption()" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-red-600 via-rose-600 to-red-500 hover:from-red-500 hover:to-rose-400 active:scale-95 text-white font-bold text-[14px] uppercase tracking-wider shadow-[0_10px_25px_rgba(220,38,38,0.45)] transition-all flex items-center justify-center gap-2.5 border border-white/20">
                 <i class="fa-solid fa-triangle-exclamation"></i>
+                <!-- Dynamic label that displays the exact delay and calculated dollar risk -->
                 <span id="btn-text">Broadcast Hold (+18d • $3,780 at risk)</span>
             </button>
 
-            <!-- Reset to Baseline Button -->
+            <!-- Reset Button: Instantly resets the main dashboard back to Step 1 Baseline -->
             <button id="reset-btn" onclick="recoverBaseline()" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-bold text-[13px] uppercase tracking-wider shadow-[0_8px_20px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 border border-white/20">
                 <i class="fa-solid fa-rotate-left"></i>
                 <span id="reset-btn-text">Reset Broadcast to Normal Baseline</span>
             </button>
 
-            <!-- Status Notification Toast -->
+            <!-- Status Notification Toast: Confirms successful transmission -->
             <div id="status-box" class="p-3.5 rounded-2xl bg-white/[0.08] backdrop-blur-md border border-white/15 text-center text-xs font-mono font-medium hidden transition-all">
                 <span id="status-icon" class="mr-1.5"></span>
                 <span id="status-msg"></span>
             </div>
         </section>
 
-        <!-- Quick Switch to Dashboard -->
+        <!-- Link back to Dashboard for single-device testing -->
         <div class="pt-1 text-center">
             <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.05] hover:bg-white/10 text-neutral-300 text-xs font-medium border border-white/10 transition">
                 <i class="fa-solid fa-desktop text-neutral-400"></i>
@@ -319,62 +436,80 @@
         <span>Akamai Connected Cloud · Flex Challenge</span>
     </footer>
 
+    <!-- 
+      =========================================================================================
+      REMOTE CONTROLLER JAVASCRIPT LOGIC
+      =========================================================================================
+      Handles state management, FinOps mathematical equations, the predictive AI model, 
+      WebSocket emissions, and mobile haptic vibration.
+    -->
     <script>
+        // DOM selector shortcut function: $(id) replaces document.getElementById(id)
         const $ = (id) => document.getElementById(id);
+
+        // Initialize Socket.IO connection to server.js with fallback to HTTP polling if needed
         const socket = typeof io === 'function' ? io({ transports: ['websocket', 'polling'], timeout: 5000 }) : null;
 
-        // Preconfigured Business Profiles (Registered on Flex API)
+        /**
+         * Preconfigured Enterprise Business Profiles
+         * Each profile represents a real business registered with Flex Commercial Banking.
+         * Contains their industry, operating burn, cloud costs, and default disruption reasons.
+         */
         const BUSINESS_PROFILES = {
+            // Profile 1: Ace Art (Art Trading & High-Res Online Gallery)
             ace: {
                 id: "ace-art",
                 name: "Ace Art Global Trading Ltd",
                 industry: "Art Trading & High-Res Online Gallery",
-                annualExpense: 270000,
-                monthlyBurn: 22500,
-                baseBudget: 6300,
-                dailyCost: 210,
-                defaultEfficiency: 72,
+                annualExpense: 270000,    // $270k/yr operating burn
+                monthlyBurn: 22500,       // $22,500/mo operating burn ($270k / 12)
+                baseBudget: 6300,         // $6,300/mo cloud compute budget (28.0% ratio)
+                dailyCost: 210,           // $210/day Akamai Linode cluster cost
+                defaultEfficiency: 72,    // 72% typical active compute utilization
                 batchTag: "AceArt-402",
                 reason: "CITES Provenance & Customs Clearance Audit",
-                defaultDuration: 18,
+                defaultDuration: 18,      // 18 days delay
                 defaultUnit: "days"
             },
+            // Profile 2: Flex Logistics & Private Banking (Electronics Freight)
             flex: {
                 id: "flex-logistics",
                 name: "Flex Logistics & Private Banking",
                 industry: "Consumer Electronics & Procurement",
-                annualExpense: 170400,
-                monthlyBurn: 14200,
-                baseBudget: 5400,
-                dailyCost: 180,
+                annualExpense: 170400,    // $170.4k/yr operating burn
+                monthlyBurn: 14200,       // $14,200/mo
+                baseBudget: 5400,         // $5,400/mo cloud compute budget
+                dailyCost: 180,           // $180/day Linode cost
                 defaultEfficiency: 72,
                 batchTag: "Batch-104",
                 reason: "Section 301 Tariff Compliance Review",
-                defaultDuration: 14,
+                defaultDuration: 14,      // 14 days delay
                 defaultUnit: "days"
             },
+            // Profile 3: Mid-Market Global E-Commerce
             ecomm: {
                 id: "ecomm",
                 name: "Mid-Market Global E-Commerce",
                 industry: "Global Retail Logistics",
-                annualExpense: 540000,
-                monthlyBurn: 45000,
-                baseBudget: 12500,
-                dailyCost: 415,
+                annualExpense: 540000,    // $540k/yr operating burn
+                monthlyBurn: 45000,       // $45,000/mo
+                baseBudget: 12500,        // $12,500/mo cloud budget
+                dailyCost: 415,           // $415/day Linode cost
                 defaultEfficiency: 78,
                 batchTag: "Ecomm-Batch-88",
                 reason: "Port Congestion & Customs Hold",
                 defaultDuration: 10,
                 defaultUnit: "days"
             },
+            // Profile 4: Enterprise B2B Supply Chain SaaS
             saas: {
                 id: "saas",
                 name: "High-Speed Supply SaaS",
                 industry: "B2B Freight Telematics",
-                annualExpense: 1440000,
-                monthlyBurn: 120000,
-                baseBudget: 32000,
-                dailyCost: 1050,
+                annualExpense: 1440000,   // $1.44M/yr operating burn
+                monthlyBurn: 120000,      // $120,000/mo
+                baseBudget: 32000,        // $32,000/mo cloud budget
+                dailyCost: 1050,          // $1,050/day Linode cluster cost
                 defaultEfficiency: 85,
                 batchTag: "SaaS-Sync-99",
                 reason: "Regulatory Compliance Hold",
@@ -383,7 +518,10 @@
             }
         };
 
-        // State Machine
+        /**
+         * State Machine:
+         * Holds all the live parameters currently set on the handheld remote.
+         */
         let state = {
             businessId: 'ace',
             businessName: 'Ace Art Global Trading Ltd',
@@ -394,17 +532,21 @@
             budgetPeriod: 'months',
             usageRate: 72,
             dailyCost: 210,
-            autoSync: true
+            autoSync: true // When true, budget and efficiency dynamically adjust together
         };
 
+        /**
+         * Unit Limits Dictionary:
+         * Defines minimums, maximums, and steps for each selectable time unit.
+         */
         const UNIT_LIMITS = {
-            hours:  { min: 1, max: 72,  step: 1, label: '1 to 72 hours' },
-            days:   { min: 1, max: 60,  step: 1, label: '1 to 60 days' },
-            weeks:  { min: 1, max: 12,  step: 1, label: '1 to 12 weeks' },
+            hours:  { min: 1, max: 72,  step: 1,   label: '1 to 72 hours' },
+            days:   { min: 1, max: 60,  step: 1,   label: '1 to 60 days' },
+            weeks:  { min: 1, max: 12,  step: 1,   label: '1 to 12 weeks' },
             months: { min: 1, max: 6,   step: 0.5, label: '1 to 6 months' }
         };
 
-        // Socket connectivity
+        // Listen for Socket.IO connection status changes to update the top pill
         if (socket) {
             socket.on('connect', () => {
                 $('conn-dot').className = 'dot dot-green';
@@ -420,6 +562,10 @@
             });
         }
 
+        /**
+         * Normalizes any time unit (hours, weeks, months) into standard calendar days.
+         * Used to accurately compute daily cloud costs.
+         */
         function calculateNormalizedDays() {
             switch (state.durationUnit) {
                 case 'hours':  return state.durationValue / 24;
@@ -430,18 +576,30 @@
             }
         }
 
+        /**
+         * Calculates monthly operating burn: Annual Expense / 12 months.
+         */
         function getMonthlyBurn() {
             return Math.max(100, Math.round(state.annualExpense / 12));
         }
 
+        /**
+         * Calculates what percentage of the company's operating burn goes to cloud compute.
+         */
         function getExpenseRatio(budget = state.budgetAmount) {
             const burn = getMonthlyBurn();
             return ((budget / burn) * 100).toFixed(1);
         }
 
         /**
-         * Client-side execution of the Small AI FinOps Model
+         * Client-side execution of the Small AI FinOps Model:
          * Evaluates previous usage, lead time delay, and business scale to advise on future compute %.
+         * 
+         * Algorithm:
+         * 1. If usage > 95%: Switches to 'PEAK_CRITICAL' mode. Advises keeping 99% capacity 
+         *    to prevent packet drops or latency spikes during mission-critical cargo movement.
+         * 2. If usage <= 95%: Switches to 'ELASTIC_FINOPS' mode. Calculates a delay-reduction 
+         *    factor and advises throttling compute to match actual cargo progress, eliminating waste.
          */
         function computeFinOpsAiAdvice() {
             const usage = state.usageRate;
@@ -454,11 +612,13 @@
             let conf;
 
             if (usage > 95) {
+                // Peak Operation Mode for Unique Circumstances
                 mode = "PEAK_CRITICAL";
                 advisedPct = Math.min(100, Math.round(usage * 0.992 * 10) / 10);
                 conf = 98.4;
                 reasoning = `High-operation mode detected (${usage.toFixed(1)}%). Linka AI advises ${advisedPct.toFixed(1)}% sustained compute capacity for zero-latency mission-critical processing during peak cargo clearance.`;
             } else {
+                // Elastic FinOps Mode for Standard Cargo Delays
                 mode = "ELASTIC_FINOPS";
                 const delayAdjustment = Math.min(10, days * 0.42);
                 const expensePressure = (ratio > 40) ? 2.5 : 0;
@@ -468,6 +628,7 @@
                 reasoning = `Linka AI Model analyzed previous ${usage.toFixed(1)}% efficiency across a ${Math.round(days)}d delay. Advises ${advisedPct.toFixed(1)}% compute allocation to eliminate idle waste while guaranteeing SLA throughput.`;
             }
 
+            // Derive recommended budget amount from the advised compute percentage
             const baseWorkDemand = Math.round(state.budgetAmount * (usage / 100));
             const advisedBudget = Math.round(baseWorkDemand / (advisedPct / 100));
 
@@ -480,22 +641,28 @@
             };
         }
 
+        /**
+         * Master UI Refresh Function:
+         * Re-evaluates all math formulas and synchronizes every number, label, 
+         * and slider on the screen.
+         */
         function updateCalculations() {
             const days = calculateNormalizedDays();
+            // Idle waste formula: dailyCost * days of disruption
             const idleWaste = Math.round(state.dailyCost * days);
             const monthlyBurn = getMonthlyBurn();
             const expenseRatio = getExpenseRatio();
             const isHighOp = state.usageRate > 95;
 
-            // 0. Business & Annual Projection
+            // 0. Update Business & Annual Projection readouts
             $('monthly-burn-display').textContent = `$${monthlyBurn.toLocaleString()}/mo burn`;
             $('client-ratio-pill').textContent = `${expenseRatio}% Expense Ratio`;
             $('budget-ratio-badge').textContent = `${expenseRatio}% of Burn`;
 
-            // 1. Duration readout
+            // 1. Update Duration readout
             $('duration-readout').textContent = `${state.durationValue} ${state.durationUnit.charAt(0).toUpperCase() + state.durationUnit.slice(1)}`;
             
-            // 2. Budget elements
+            // 2. Update Budget elements
             $('budget-readout').textContent = `$${Number(state.budgetAmount).toLocaleString()}`;
             if ($('budget-input') && document.activeElement !== $('budget-input')) {
                 $('budget-input').value = Math.round(state.budgetAmount);
@@ -504,12 +671,13 @@
                 $('budget-slider').value = Math.min(35000, Math.max(500, Math.round(state.budgetAmount)));
             }
 
+            // Run-rate conversions
             const hourlyRate = (state.dailyCost / 24).toFixed(2);
             $('stat-hourly-rate').textContent = `$${hourlyRate}/hr`;
             const annualCompute = Math.round(state.budgetAmount * 12);
             $('stat-annual-rate').textContent = `$${annualCompute.toLocaleString()}/yr`;
 
-            // 3. Efficiency & High Operation Handling (>95%)
+            // 3. Update Efficiency & High Operation Handling (>95%)
             const idleRisk = Math.round((100 - state.usageRate) * 10) / 10;
             $('usage-readout').textContent = `${state.usageRate}% Active`;
             $('idle-risk-readout').textContent = `${idleRisk}% idle risk`;
@@ -517,13 +685,13 @@
                 $('usage-slider').value = state.usageRate;
             }
 
-            // High operation banner toggle
+            // High operation banner toggle (>95%)
             const highOpBadge = $('high-op-badge');
             if (highOpBadge) {
                 highOpBadge.classList.toggle('hidden', !isHighOp);
             }
 
-            // Capital shield reserve
+            // Calculate Capital Shield reserve allocation
             const reservePct = isHighOp
                 ? Math.max(5, Math.round(idleRisk * 1.5))
                 : Math.min(50, Math.max(10, Math.round(idleRisk * 1.15)));
@@ -543,12 +711,14 @@
             $('ai-reasoning') && ($('ai-reasoning').textContent = ai.reasoning);
             $('ai-mode-tag') && ($('ai-mode-tag').textContent = ai.mode);
 
-            // Update main trigger button label
+            // Update the main broadcast trigger button label
             let unitShort = state.durationUnit === 'hours' ? 'h' : state.durationUnit === 'days' ? 'd' : state.durationUnit === 'weeks' ? 'w' : 'mo';
             $('btn-text').textContent = `Broadcast Hold (+${state.durationValue}${unitShort} • $${idleWaste.toLocaleString()} at risk)`;
         }
 
-        // Business Profile Selection
+        /**
+         * Switches the active business profile when the user taps one of the 4 profile pills.
+         */
         function selectBusinessProfile(id) {
             const profile = BUSINESS_PROFILES[id];
             if (!profile) return;
@@ -563,6 +733,7 @@
             }
             $('annual-expense-input').value = profile.annualExpense;
 
+            // Highlight the active button pill
             ['ace', 'flex', 'ecomm', 'saas'].forEach(p => {
                 const btn = $(`bprof-${p}`);
                 if (btn) {
@@ -574,7 +745,7 @@
                 }
             });
 
-            // Adjust budget baseline to business scale
+            // Adjust budget baseline to the business's real corporate scale
             state.budgetAmount = profile.baseBudget;
             state.usageRate = profile.defaultEfficiency;
             $('budget-input').value = profile.baseBudget;
@@ -586,6 +757,9 @@
             showStatus(`Selected ${profile.name}: $${(profile.annualExpense / 1000).toFixed(0)}k annual projection applied.`, true);
         }
 
+        /**
+         * Handles manual typing in the Annual Operating Expense input box.
+         */
         function onAnnualExpenseChange(val) {
             const parsed = parseFloat(val);
             if (!isNaN(parsed) && parsed > 0) {
@@ -593,15 +767,19 @@
                 state.businessId = 'custom';
                 ['flex', 'ecomm', 'saas', 'custom'].forEach(p => {
                     const btn = $(`bprof-${p}`);
-                    btn.className = (p === 'custom')
-                        ? "py-1.5 px-1 rounded-xl font-semibold transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate"
-                        : "py-1.5 px-1 rounded-xl font-medium transition text-neutral-400 hover:text-white truncate";
+                    if (btn) {
+                        btn.className = (p === 'custom')
+                            ? "py-1.5 px-1 rounded-xl font-semibold transition bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 truncate"
+                            : "py-1.5 px-1 rounded-xl font-medium transition text-neutral-400 hover:text-white truncate";
+                    }
                 });
                 updateCalculations();
             }
         }
 
-        // Auto-Sync Toggle Control
+        /**
+         * Toggles the Auto-Sync mode between locked synchronization and decoupled manual control.
+         */
         function toggleAutoSync(enabled) {
             state.autoSync = Boolean(enabled);
             const desc = $('sync-mode-desc');
@@ -620,8 +798,12 @@
             }
         }
 
-        // Apply Small AI Model Advice
+        /**
+         * Applies the recommendation generated by the Small AI Model.
+         * Vibrates the phone slightly to confirm tactile execution.
+         */
         function applyAiRecommendation() {
+            // Haptic feedback pulse on mobile devices
             if (navigator.vibrate) { try { navigator.vibrate([20, 40]); } catch (e) {} }
             const ai = computeFinOpsAiAdvice();
             state.usageRate = ai.advisedPct;
@@ -633,15 +815,21 @@
             showStatus(`Applied Linka AI recommendation: ${ai.advisedPct.toFixed(1)}% compute allocation ($${ai.advisedBudget.toLocaleString()} budget).`, true);
         }
 
-        // Bi-directional Synchronization Mathematics
+        /**
+         * Bi-directional Synchronization Mathematics:
+         * Calculates required budget based on efficiency percentage.
+         */
         function syncBudgetFromEfficiency() {
             if (!state.autoSync) return;
-            // Base active throughput demand derived from baseline
             const baseDemand = 3888;
             const calculatedBudget = Math.round(baseDemand / (state.usageRate / 100));
             state.budgetAmount = Math.max(500, Math.min(35000, calculatedBudget));
         }
 
+        /**
+         * Bi-directional Synchronization Mathematics:
+         * Calculates required efficiency based on dollar budget amount.
+         */
         function syncEfficiencyFromBudget() {
             if (!state.autoSync) return;
             const baseDemand = 3888;
@@ -697,6 +885,9 @@
             updateCalculations();
         }
 
+        /**
+         * Changes the duration time unit (hours, days, weeks, months) and updates slider boundaries.
+         */
         function setDurationUnit(unit) {
             state.durationUnit = unit;
             ['hours', 'days', 'weeks', 'months'].forEach(u => {
@@ -715,6 +906,7 @@
             slider.step = limits.step;
             $('slider-min-max').textContent = limits.label;
 
+            // Sensible defaults when switching units
             if (unit === 'hours') state.durationValue = 24;
             else if (unit === 'days') state.durationValue = 14;
             else if (unit === 'weeks') state.durationValue = 2;
@@ -749,6 +941,9 @@
             updateCalculations();
         }
 
+        /**
+         * Displays a temporary visual confirmation toast message at the bottom of the remote.
+         */
         function showStatus(message, isSuccess = true) {
             const box = $('status-box');
             const icon = $('status-icon');
@@ -768,10 +963,17 @@
             }, 4500);
         }
 
+        /**
+         * TRANSMITS DISRUPTION TO DASHBOARD:
+         * 1. Vibrates the phone (triple haptic pulse: 40ms buzz, 60ms pause, 40ms buzz).
+         * 2. Emits 'TRIGGER_DISRUPTION' over WebSocket.
+         * 3. Sends dual-channel HTTP POST to '/api/trigger' for zero-failure reliability.
+         */
         async function fireDisruption() {
             const btn = $('trigger-btn');
             const btnText = $('btn-text');
 
+            // Haptic vibration
             if (navigator.vibrate) {
                 try { navigator.vibrate([40, 60, 40]); } catch (e) {}
             }
@@ -796,12 +998,12 @@
                 dailyCost: state.dailyCost
             };
 
-            // 1. WebSocket Broadcast
+            // Channel 1: Real-time WebSocket emission
             if (socket && socket.connected) {
                 socket.emit('TRIGGER_DISRUPTION', payload);
             }
 
-            // 2. Dual-channel HTTP REST Fallback
+            // Channel 2: HTTP REST fallback
             try {
                 await fetch('/api/trigger', {
                     method: 'POST',
@@ -822,10 +1024,15 @@
             }, 2000);
         }
 
+        /**
+         * TRANSMITS RESET SIGNAL TO DASHBOARD:
+         * Restores the whole presentation to Step 1 Baseline.
+         */
         async function recoverBaseline() {
             const btn = $('reset-btn');
             const btnText = $('reset-btn-text');
 
+            // Haptic pulse
             if (navigator.vibrate) {
                 try { navigator.vibrate(50); } catch (e) {}
             }
@@ -834,12 +1041,12 @@
             btn.classList.add('opacity-75');
             btnText.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Recovering...';
 
-            // 1. WebSocket Broadcast
+            // Channel 1: WebSocket
             if (socket && socket.connected) {
                 socket.emit('RESET_DEMO');
             }
 
-            // 2. Dual-channel HTTP REST Fallback
+            // Channel 2: HTTP REST fallback
             try {
                 await fetch('/api/reset', { method: 'POST' });
             } catch (err) {
@@ -855,7 +1062,7 @@
             }, 1800);
         }
 
-        // Initialize display
+        // Initialize display once DOM is ready
         document.addEventListener('DOMContentLoaded', updateCalculations);
     </script>
 </body>
