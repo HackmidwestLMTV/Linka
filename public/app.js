@@ -179,7 +179,7 @@ function initChart() {
     const chartEl = $('cashFlowChart');
     if (!chartEl) return;
 
-    const muted = '#c7c7cc';
+    const muted = '#6e6e73'; // Graphite grey labels for the light glass theme
     const chartFont = { family: '-apple-system, BlinkMacSystemFont, Inter, sans-serif', size: 14 };
     const baseCapital = activeBaseCapital || 342800;
     const dailyLoss = activeDailyCost || 210;
@@ -234,9 +234,11 @@ function initChart() {
             plugins: {
                 legend: { labels: { color: muted, usePointStyle: true, boxWidth: 8, padding: 16, font: chartFont } },
                 tooltip: {
-                    backgroundColor: 'rgba(28, 28, 30, 0.9)',
-                    borderColor: 'rgba(255,255,255,0.1)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)', // Frosted white tooltip
+                    borderColor: 'rgba(15,23,42,0.1)',
                     borderWidth: 1,
+                    titleColor: '#1d1d1f',
+                    bodyColor: '#3a3a3c',
                     padding: 12,
                     titleFont: chartFont,
                     bodyFont: chartFont,
@@ -245,7 +247,7 @@ function initChart() {
             },
             scales: {
                 x: { grid: { display: false }, ticks: { color: muted, font: chartFont } },
-                y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: muted, font: chartFont, callback: (v) => `$${(v / 1000).toFixed(0)}k` } }
+                y: { grid: { color: 'rgba(15,23,42,0.06)' }, ticks: { color: muted, font: chartFont, callback: (v) => `$${(v / 1000).toFixed(0)}k` } }
             }
         }
     });

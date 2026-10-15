@@ -1,19 +1,64 @@
+/* =============================================================================================
+   LINKA SHARED THEME — PUBLIC / STYLES.CSS  (LIGHT VISIONOS GLASS EDITION)
+   =============================================================================================
+   What this file does:
+   Gives every Linka screen (the big dashboard and the iPhone remote) the same Apple Vision Pro
+   "frosted glass" look — now in a bright, airy light palette: pearl-white ambient background,
+   translucent milky glass panels, soft depth shadows, and crisp graphite typography.
+
+   How it is organised:
+   1. Design tokens (colours, blur, shadows) in :root
+   2. Base typography + utilities
+   3. VisionOS glass components (panels, cards, stepper, buttons)
+   4. LIGHT-MODE OVERRIDE LAYER — the HTML was written with dark Tailwind utility classes
+      (text-white, bg-black/40, border-white/10 ...). Rather than rewriting hundreds of class
+      names, the rules at the bottom (scoped to <html class="theme-light">) re-map those classes
+      to light-friendly equivalents. Removing "theme-light" from <html> reverts to dark text
+      classes, so the switch is a one-word change.
+   ============================================================================================= */
+
 @import url('https://fonts.cdnfonts.com/css/sf-pro-display');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
+/* ---------------------------------------------------------------------------------------------
+   1. DESIGN TOKENS
+   --------------------------------------------------------------------------------------------- */
 :root {
-    --vision-glass-bg: rgba(255, 255, 255, 0.04);
-    --vision-glass-border: rgba(255, 255, 255, 0.12);
-    --vision-glass-blur: blur(40px) saturate(190%);
+    /* Core ink colours (Apple light-mode graphite scale) */
+    --ink-1: #1d1d1f;   /* Primary text / headings */
+    --ink-2: #3a3a3c;   /* Secondary text */
+    --ink-3: #6e6e73;   /* Muted labels */
+    --ink-4: #8e8e93;   /* Tertiary / captions */
+    --ink-5: #aeaeb2;   /* Disabled */
+
+    /* Accent inks — deeper versions of the brand hues so they stay readable on white glass */
+    --accent-emerald: #0b8a5a;
+    --accent-emerald-strong: #047857;
+    --accent-sky: #0071e3;
+    --accent-sky-soft: #0a84c6;
+    --accent-red: #d70015;
+    --accent-amber: #b25000;
+    --accent-rose: #c2185b;
+    --accent-purple: #7e3bd0;
+
+    /* Frosted glass recipe */
+    --vision-glass-bg: rgba(255, 255, 255, 0.58);
+    --vision-glass-border: rgba(255, 255, 255, 0.85);
+    --vision-glass-blur: blur(40px) saturate(180%);
+    --vision-hairline: rgba(15, 23, 42, 0.08);
+    --vision-shadow: 0 24px 60px -18px rgba(30, 41, 80, 0.18), 0 2px 6px rgba(30, 41, 80, 0.05);
 }
 
+/* ---------------------------------------------------------------------------------------------
+   2. BASE TYPOGRAPHY & UTILITIES
+   --------------------------------------------------------------------------------------------- */
 body {
     /* Native SF on Apple devices (auto-switches to SF Pro Text at small sizes), Inter elsewhere */
     font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     font-size: 17px;
     line-height: 1.55;
-    background-color: #000000;
-    color: #f5f5f7;
+    background-color: #f5f5f7;
+    color: var(--ink-1);
     margin: 0;
     overflow-x: hidden;
     letter-spacing: 0;
@@ -29,13 +74,13 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Clean Apple-style utilities */
 .num { font-variant-numeric: tabular-nums; letter-spacing: 0; }
-.label { font-size: 15px; font-weight: 500; color: #c7c7cc; }
+.label { font-size: 15px; font-weight: 500; color: var(--ink-3); }
 .eyebrow { font-size: 14px; font-weight: 600; letter-spacing: 0.01em; }
-.hairline { height: 1px; background: rgba(255, 255, 255, 0.08); }
+.hairline { height: 1px; background: var(--vision-hairline); }
 
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 9999px; }
-.dot-green { background: #34c759; box-shadow: 0 0 8px rgba(52, 199, 89, 0.7); }
-.dot-red { background: #ff453a; box-shadow: 0 0 10px rgba(255, 69, 58, 0.8); animation: dotPulse 1.2s ease-in-out infinite; }
+.dot-green { background: #30b350; box-shadow: 0 0 0 3px rgba(48, 179, 80, 0.18); }
+.dot-red { background: #ff3b30; box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2); animation: dotPulse 1.2s ease-in-out infinite; }
 @keyframes dotPulse { 50% { opacity: 0.35; } }
 
 /* Each step fades up when shown */
@@ -51,88 +96,94 @@ h1, h2, h3, h4, h5, h6 {
     font-feature-settings: "tnum" on, "zero" on;
 }
 
-/* VisionOS Ambient Spatial Background */
+/* ---------------------------------------------------------------------------------------------
+   3. VISIONOS GLASS COMPONENTS
+   --------------------------------------------------------------------------------------------- */
+
+/* VisionOS Ambient Spatial Background — soft pastel light "room" behind the glass */
 .vision-bg {
-    background-color: #000000;
-    background-image: 
-        radial-gradient(circle at 18% 25%, rgba(67, 126, 91, 0.18), transparent 45%),
-        radial-gradient(circle at 82% 35%, rgba(0, 153, 255, 0.16), transparent 45%),
-        radial-gradient(circle at 50% 85%, rgba(120, 119, 198, 0.15), transparent 55%),
-        radial-gradient(circle at 65% 15%, rgba(56, 189, 248, 0.12), transparent 40%);
+    background-color: #f2f4f8;
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(110, 231, 183, 0.35), transparent 45%),
+        radial-gradient(circle at 85% 25%, rgba(125, 211, 252, 0.40), transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(196, 181, 253, 0.35), transparent 55%),
+        radial-gradient(circle at 70% 60%, rgba(254, 215, 170, 0.25), transparent 45%),
+        linear-gradient(180deg, #fbfbfd 0%, #eef1f6 100%);
     background-attachment: fixed;
     background-size: 100% 100%;
 }
 
-/* VisionOS Spatial Glass Panel */
+/* VisionOS Spatial Glass Panel — milky translucent sheet with a bright specular rim */
 .vision-glass {
     background: var(--vision-glass-bg);
     backdrop-filter: var(--vision-glass-blur);
     -webkit-backdrop-filter: var(--vision-glass-blur);
     border: 1px solid var(--vision-glass-border);
-    box-shadow: 
-        0 30px 60px -12px rgba(0, 0, 0, 0.6),
-        inset 0 1px 1px 0 rgba(255, 255, 255, 0.2),
-        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5);
+    box-shadow:
+        var(--vision-shadow),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 0 rgba(15, 23, 42, 0.04);
     border-radius: 28px;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vision-glass:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    box-shadow: 
-        0 35px 70px -10px rgba(0, 0, 0, 0.7),
-        inset 0 1px 1px 0 rgba(255, 255, 255, 0.3),
-        inset 0 -1px 1px 0 rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 1);
+    box-shadow:
+        0 30px 70px -18px rgba(30, 41, 80, 0.24), 0 2px 8px rgba(30, 41, 80, 0.06),
+        inset 0 1px 0 0 rgba(255, 255, 255, 1),
+        inset 0 -1px 0 0 rgba(15, 23, 42, 0.05);
 }
 
+/* Disruption alert panel — rosy glass that gently pulses red */
 .vision-glass-alert {
-    background: rgba(30, 10, 15, 0.65);
+    background: rgba(255, 241, 242, 0.75);
     backdrop-filter: var(--vision-glass-blur);
     -webkit-backdrop-filter: var(--vision-glass-blur);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    box-shadow: 
-        0 30px 60px -12px rgba(239, 68, 68, 0.25),
-        inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 59, 48, 0.35);
+    box-shadow:
+        0 24px 60px -16px rgba(255, 59, 48, 0.25),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
     border-radius: 28px;
     animation: vision-alert-pulse 2.5s infinite alternate ease-in-out;
 }
 
 @keyframes vision-alert-pulse {
     0% {
-        border-color: rgba(239, 68, 68, 0.35);
-        box-shadow: 0 0 25px rgba(239, 68, 68, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 59, 48, 0.25);
+        box-shadow: 0 0 20px rgba(255, 59, 48, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
     100% {
-        border-color: rgba(239, 68, 68, 0.8);
-        box-shadow: 0 0 45px rgba(239, 68, 68, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+        border-color: rgba(255, 59, 48, 0.65);
+        box-shadow: 0 0 40px rgba(255, 59, 48, 0.28), inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 }
 
-/* VisionOS Inner Card */
+/* VisionOS Inner Card — a brighter glass tile that floats inside a panel */
 .vision-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 14px rgba(30, 41, 80, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1);
     border-radius: 20px;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vision-card:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 1);
     transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    box-shadow: 0 14px 30px rgba(30, 41, 80, 0.12), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
 /* VisionOS Capsule Stepper */
 .vision-stepper {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(30px) saturate(190%);
-    -webkit-backdrop-filter: blur(30px) saturate(190%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 16px 40px -12px rgba(30, 41, 80, 0.18), inset 0 1px 0 rgba(255, 255, 255, 1);
     border-radius: 9999px;
     padding: 6px;
 }
@@ -143,7 +194,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 15px;
     font-weight: 500;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    color: #d1d1d6;
+    color: var(--ink-3);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -151,34 +202,34 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .vision-step-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--ink-1);
+    background: rgba(15, 23, 42, 0.05);
 }
 
 .vision-step-active {
-    background: rgba(255, 255, 255, 0.16) !important;
-    color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+    background: #ffffff !important;
+    color: var(--ink-1) !important;
+    border: 1px solid rgba(255, 255, 255, 1) !important;
+    box-shadow: 0 6px 18px rgba(30, 41, 80, 0.14), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
 }
 
-/* Apple-style White Specular Action Button */
+/* Apple-style primary action — graphite capsule (light-mode equivalent of the white pill) */
 .vision-btn-primary {
-    background: linear-gradient(180deg, #FFFFFF 0%, #E5E5EA 100%);
-    color: #000000;
+    background: linear-gradient(180deg, #2c2c2e 0%, #1d1d1f 100%);
+    color: #ffffff;
     font-weight: 600;
     border-radius: 9999px;
-    box-shadow: 
-        0 10px 25px rgba(255, 255, 255, 0.25),
-        inset 0 1px 0 #FFFFFF;
+    box-shadow:
+        0 10px 24px rgba(29, 29, 31, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vision-btn-primary:hover {
     transform: scale(1.02) translateY(-1px);
-    box-shadow: 
-        0 15px 35px rgba(255, 255, 255, 0.35),
-        inset 0 1px 0 #FFFFFF;
+    box-shadow:
+        0 15px 32px rgba(29, 29, 31, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .vision-btn-emerald {
@@ -186,23 +237,24 @@ h1, h2, h3, h4, h5, h6 {
     color: #ffffff;
     font-weight: 600;
     border-radius: 9999px;
-    box-shadow: 
+    box-shadow:
         0 10px 25px rgba(16, 185, 129, 0.3),
-        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+        inset 0 1px 1px rgba(255, 255, 255, 0.35);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vision-btn-emerald:hover {
     transform: scale(1.02) translateY(-1px);
-    box-shadow: 
-        0 15px 35px rgba(16, 185, 129, 0.45),
-        inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    box-shadow:
+        0 15px 35px rgba(16, 185, 129, 0.42),
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
 }
 
-/* Gradient Apple Heading */
+/* Gradient Apple Heading — graphite-to-slate ink */
 .apple-heading {
-    background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.75) 100%);
+    background: linear-gradient(180deg, #1d1d1f 0%, #4a4a50 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.025em;
 }
@@ -216,9 +268,100 @@ h1, h2, h3, h4, h5, h6 {
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(15, 23, 42, 0.15);
     border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(15, 23, 42, 0.3);
 }
+
+/* =============================================================================================
+   4. LIGHT-MODE OVERRIDE LAYER
+   ---------------------------------------------------------------------------------------------
+   Tailwind's CDN injects its own <style> tag at runtime. Every selector below starts with
+   ".theme-light" so it is MORE specific than Tailwind's single-class rules and wins cleanly.
+   [class~="..."] matches one exact class token, which avoids escaping slashes and brackets.
+   ============================================================================================= */
+
+/* ---- Text: neutral greys & white → graphite ink scale ---- */
+.theme-light .text-white,
+.theme-light [class~="hover:text-white"]:hover { color: var(--ink-1); }
+.theme-light .text-neutral-200 { color: #2c2c2e; }
+.theme-light .text-neutral-300 { color: var(--ink-2); }
+.theme-light .text-neutral-400 { color: var(--ink-3); }
+.theme-light .text-neutral-500 { color: var(--ink-4); }
+.theme-light .text-neutral-600 { color: var(--ink-5); }
+
+/* Keep white text on solid, saturated buttons / logo badges */
+.theme-light [class*="bg-gradient"][class~="text-white"],
+.theme-light [class~="bg-red-500"][class~="text-white"],
+.theme-light .vision-btn-primary,
+.theme-light .vision-btn-emerald,
+.theme-light .vision-btn-primary .text-white,
+.theme-light .vision-btn-emerald .text-white { color: #ffffff; }
+
+/* ---- Text: accent hues → deeper, readable-on-white tones ---- */
+.theme-light .text-emerald-300 { color: var(--accent-emerald); }
+.theme-light .text-emerald-400 { color: var(--accent-emerald-strong); }
+.theme-light .text-sky-200,
+.theme-light .text-sky-300 { color: var(--accent-sky-soft); }
+.theme-light .text-sky-400 { color: var(--accent-sky); }
+.theme-light .text-red-100,
+.theme-light .text-red-300,
+.theme-light .text-red-400 { color: var(--accent-red); }
+.theme-light .text-amber-200,
+.theme-light .text-amber-300,
+.theme-light .text-amber-400 { color: var(--accent-amber); }
+.theme-light .text-rose-300 { color: var(--accent-rose); }
+.theme-light .text-purple-400 { color: var(--accent-purple); }
+
+/* ---- Surfaces: translucent white overlays → milky glass / soft graphite tints ---- */
+.theme-light [class~="bg-white/[0.04]"],
+.theme-light [class~="bg-white/[0.05]"],
+.theme-light [class~="bg-white/[0.06]"],
+.theme-light [class~="bg-white/[0.08]"] {
+    background-color: rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+.theme-light [class~="bg-white/10"] { background-color: rgba(15, 23, 42, 0.06); }
+.theme-light [class~="bg-white/20"] { background-color: rgba(15, 23, 42, 0.10); }
+.theme-light [class~="hover:bg-white/10"]:hover { background-color: rgba(15, 23, 42, 0.06); }
+
+/* ---- Surfaces: dark smoked glass → bright frosted glass ---- */
+.theme-light [class~="bg-black/30"] { background-color: rgba(255, 255, 255, 0.45); }
+.theme-light [class~="bg-black/40"] { background-color: rgba(255, 255, 255, 0.55); }
+.theme-light [class~="bg-black/50"] { background-color: rgba(255, 255, 255, 0.6); }
+.theme-light [class~="bg-black/60"] { background-color: rgba(255, 255, 255, 0.7); }
+
+/* Glass panels that also carry bg-black/40 should keep the vision-glass recipe */
+.theme-light .vision-glass[class~="bg-black/40"] { background-color: var(--vision-glass-bg); }
+
+/* ---- Borders: white hairlines → soft graphite hairlines ---- */
+.theme-light [class~="border-white/[0.06]"] { border-color: rgba(15, 23, 42, 0.06); }
+.theme-light [class~="border-white/[0.08]"] { border-color: rgba(15, 23, 42, 0.08); }
+.theme-light [class~="border-white/10"] { border-color: rgba(15, 23, 42, 0.09); }
+.theme-light [class~="border-white/15"] { border-color: rgba(15, 23, 42, 0.11); }
+.theme-light [class~="border-white/20"] { border-color: rgba(15, 23, 42, 0.13); }
+.theme-light .vision-glass[class~="border-white/10"] { border-color: var(--vision-glass-border); }
+.theme-light .border-gray-300 { border-color: rgba(15, 23, 42, 0.15); }
+
+/* Solid coloured buttons keep a bright specular rim instead of a dark hairline */
+.theme-light [class*="bg-gradient"][class~="border-white/20"] { border-color: rgba(255, 255, 255, 0.45); }
+
+/* ---- Dark tinted gradient banners → pastel glass gradients ---- */
+.theme-light [class~="from-sky-950/60"],
+.theme-light [class~="from-sky-950/40"] {
+    background-image: linear-gradient(135deg, rgba(224, 242, 254, 0.9) 0%, rgba(237, 233, 254, 0.75) 55%, rgba(255, 255, 255, 0.65) 100%);
+}
+.theme-light [class~="from-emerald-950/40"] {
+    background-image: linear-gradient(135deg, rgba(209, 250, 229, 0.9) 0%, rgba(255, 255, 255, 0.65) 100%);
+}
+
+/* ---- Form controls ---- */
+.theme-light input[type="number"],
+.theme-light input[type="text"],
+.theme-light select {
+    color: var(--ink-1);
+}
+.theme-light input::placeholder { color: var(--ink-4); }
+.theme-light ::selection { background: rgba(0, 113, 227, 0.18); }
